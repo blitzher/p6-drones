@@ -1,0 +1,34 @@
+
+* {
+    color: ghostwhite;
+}
+
+p {
+    font-size: larger;
+}
+
+html {
+    background-color: 101020;
+}
+
+body {
+    width: 100vw;
+    display:block;
+    align-items: center;
+}
+
+body>div {
+    margin: 50px auto;
+    width: min-content;
+}
+
+canvas, video {
+    background-color: white;
+    margin: 10px;
+    width: 560px;
+    height: 315px;
+}
+
+#canvases {
+    display: flex
+}

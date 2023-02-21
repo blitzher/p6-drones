@@ -3,12 +3,10 @@ const h264 = require("h264decoder");
 const fs = require("fs");
 const path = require("path");
 const ffmpeg = require("ffmpeg");
-const { time } = require("console");
 
 async function start_stream() {
 
     console.log(`Starting stream...`);
-    const decoder = new h264.H264Decoder();
 
     const rawOutputStream = fs.createWriteStream('raw.h264');
 

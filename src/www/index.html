@@ -1,0 +1,57 @@
+<script>w=new WebSocket("ws:localhost:7788");w.addEventListener("message",(e)=>{if(e.data=="refresh")location.reload();});</script>
+<style>
+
+* {
+    color: ghostwhite;
+}
+
+p {
+    font-size: larger;
+}
+
+html {
+    background-color: 101020;
+}
+
+body {
+    width: 100vw;
+    display:block;
+    align-items: center;
+}
+
+body>div {
+    margin: 50px auto;
+    width: min-content;
+}
+
+canvas, video {
+    background-color: white;
+    margin: 10px;
+    width: 560px;
+    height: 315px;
+}
+
+#canvases {
+    display: flex
+}
+
+</style>
+
+<!-- Include JMuxer -->
+<script type="text/javascript" src="libs/jmuxer.min.js"></script>
+
+<div>
+
+<h1 id="hello-there">Hello there</h1>
+<p>This is my <em>very cool</em> website, very nice</p>
+<div id=canvases>
+<div><video id="camera"></video></div>
+<div><canvas id="map"></canvas></div>
+</div>
+
+<p>This is other text</p>
+</div>
+
+<!-- Include local JavaScrip files -->
+<script type="text/javascript" src="script.js"></script>
+

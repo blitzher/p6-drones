@@ -1,6 +1,18 @@
 {
+  "name": "p6-drones",
+  "license": "mit",
+  "scripts": {
+    "start": "yarn build && node build/index.js",
+    "build": "tsc",
+    "dev": "nodemon -w \"./src\" -e yarn start"
+  },
   "dependencies": {
+    "@types/express": "^4.17.17",
+    "@types/express-ws": "^3.0.1",
     "@types/node": "^18.13.0",
+    "@types/ws": "^8.5.4",
+    "express": "^4.18.2",
+    "express-ws": "^5.0.2",
     "ffmpeg": "^0.0.4",
     "h264decoder": "^1.0.0",
     "image-decode": "^1.2.2",
@@ -8,6 +20,11 @@
     "jsqr": "^1.4.0",
     "sharp": "0.26.0",
     "tellojs": "^0.1.144",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "uuid": "^9.0.0",
+    "ws": "^8.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
   }
 }
