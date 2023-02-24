@@ -1,4 +1,3 @@
-const { default: jsQR } = require("jsqr");
 
 const $ = (q) => document.querySelector(q);
 const videoElem = $("#camera");
@@ -157,24 +156,101 @@ setInterval(extractImgData,1000);
 
 /* 
 {
-    "pitch": -1, "roll": 1, "yaw": 4,
-    "speed": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-    },
-    "temperature": {
-        "low": 62,
-        "high": 63
-    },
-    "tof": 10,
-    "heigh": 0,
-    "battery": 85,
-    "barometer": 179.3,
-    "time": 0,
-    "acceleration": {
-        "x": -16,
-        "y": -38,
-        "z": -999
+    "binaryData": [
+        104,
+        116,
+        116,
+        112,
+        58,
+        47,
+        47,
+        101,
+        110,
+        46,
+        109,
+        46,
+        119,
+        105,
+        107,
+        105,
+        112,
+        101,
+        100,
+        105,
+        97,
+        46,
+        111,
+        114,
+        103
+    ],
+    "data": "http://en.m.wikipedia.org",
+    "chunks": [
+        {
+            "type": "byte",
+            "bytes": [
+                104,
+                116,
+                116,
+                112,
+                58,
+                47,
+                47,
+                101,
+                110,
+                46,
+                109,
+                46,
+                119,
+                105,
+                107,
+                105,
+                112,
+                101,
+                100,
+                105,
+                97,
+                46,
+                111,
+                114,
+                103
+            ],
+            "text": "http://en.m.wikipedia.org"
+        }
+    ],
+    "version": 3,
+    "location": {
+        "topRightCorner": {
+            "x": 310.6693295346836,
+            "y": 120.27539302951396
+        },
+        "topLeftCorner": {
+            "x": 163.35582979854328,
+            "y": 139.27441323323546
+        },
+        "bottomRightCorner": {
+            "x": 317.98339604704904,
+            "y": 253.7291313877667
+        },
+        "bottomLeftCorner": {
+            "x": 183.301795191882,
+            "y": 268.7608605275987
+        },
+        "topRightFinderPattern": {
+            "x": 293.75,
+            "y": 140
+        },
+        "topLeftFinderPattern": {
+            "x": 183.25,
+            "y": 154
+        },
+        "bottomLeftFinderPattern": {
+            "x": 197.25,
+            "y": 252.5
+        },
+        "bottomRightAlignmentPattern": {
+            "x": 285.25,
+            "y": 229.5
+        }
     }
 } */
+
