@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -68,23 +68,16 @@ app.use(express_1.default.json());
 app.use(express_1.default.static("./src/www"));
 /* Setup helper functions for back-front-communication */
 var com = {
-    video: function (ws, buffer) {
-        var dataArray = Array.from(buffer);
-        ws.send(JSON.stringify({
-            type: "stream",
-            data: dataArray
-        }));
-    }
-};
-/* Setup drone connection */
-var drone = {
-    connected: false,
-    videoData: function (data) {
+    video: function (buffer) {
         var e_1, _a;
+        var dataArray = Array.from(buffer);
         try {
             for (var clients_1 = __values(clients), clients_1_1 = clients_1.next(); !clients_1_1.done; clients_1_1 = clients_1.next()) {
                 var client = clients_1_1.value.client;
-                com.video(client, data);
+                client.send(JSON.stringify({
+                    type: "stream",
+                    data: dataArray,
+                }));
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -95,6 +88,29 @@ var drone = {
             finally { if (e_1) throw e_1.error; }
         }
     },
+    state: function (state) {
+        var e_2, _a;
+        try {
+            for (var clients_2 = __values(clients), clients_2_1 = clients_2.next(); !clients_2_1.done; clients_2_1 = clients_2.next()) {
+                var client = clients_2_1.value.client;
+                client.send(JSON.stringify({
+                    type: "state",
+                    data: state,
+                }));
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (clients_2_1 && !clients_2_1.done && (_a = clients_2.return)) _a.call(clients_2);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+    },
+};
+/* Setup drone connection */
+var drone = {
+    connected: false,
     keepAlive: function () {
         console.log("Keeping drone alive");
         setInterval(function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
@@ -103,11 +119,11 @@ var drone = {
                 case 1: return [2 /*return*/, _a.sent()];
             }
         }); }); }, 5000);
-    }
+    },
 };
 function droneControl() {
     return __awaiter(this, void 0, void 0, function () {
-        var e_2, videoEmitter, isFirst, segmenter, stateEmitter;
+        var e_3, videoEmitter, isFirst, segmenter, stateEmitter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -117,7 +133,7 @@ function droneControl() {
                     _a.sent();
                     return [3 /*break*/, 3];
                 case 2:
-                    e_2 = _a.sent();
+                    e_3 = _a.sent();
                     console.log("Could not connect to drone. Retrying...");
                     return [2 /*return*/];
                 case 3:
@@ -128,7 +144,7 @@ function droneControl() {
                 case 4:
                     videoEmitter = _a.sent();
                     isFirst = true;
-                    videoEmitter.on('message', function (res) {
+                    videoEmitter.on("message", function (res) {
                         /* If its the first segment, initialise a new segmenter */
                         if (isFirst) {
                             segmenter = new h264_segmenter_1.H264Segmenter(res);
@@ -139,24 +155,23 @@ function droneControl() {
                         /* If the segmenter.feed method returns an object,
                          * dispatch the segment to clients */
                         if (segment)
-                            drone.videoData(segment);
+                            com.video(segment);
                     });
                     stateEmitter = sdk.receiver.state.bind();
-                    stateEmitter.on('message', function (res) {
-                        console.log(res);
+                    stateEmitter.on("message", function (res) {
+                        com.state(res);
                     });
                     return [2 /*return*/];
             }
         });
     });
 }
-;
 app.ws("/", function (ws) {
     var myUuid = (0, uuid_1.v4)();
     clients.push({ client: ws, uuid: myUuid });
     console.log("New client!");
     ws.onmessage = function (msg) {
-        console.log("Received: " + msg.data);
+        console.log("Received: ".concat(msg.data));
     };
     ws.onclose = function () {
         console.log("Client closed!");
@@ -173,7 +188,7 @@ app.listen(PORT, function () { return __awaiter(void 0, void 0, void 0, function
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                console.log("Listening on " + PORT + "...");
+                console.log("Listening on ".concat(PORT, "..."));
                 console.log("Connecting to drone...");
                 _a.label = 1;
             case 1:

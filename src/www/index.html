@@ -36,11 +36,27 @@ canvas, video {
 }
 
 .hovering {
+    z-index: 9;
     position: absolute;
-    margin-left: 100px;
-    margin-top: 100px;
-    width: 100px;
+    top: 100px;
+    left: 100px;
+    width: fit-content;
     height: fit-content;
+    margin: 0;
+    background-color: brown;
+    border: 2px solid #7F2020;
+    border-radius: 10px;
+}
+
+span {
+    display: flex;
+}
+span > * {
+    margin: 10px;
+}
+
+.move-hover {
+    user-select: none;
 }
 
 </style>
@@ -60,7 +76,9 @@ canvas, video {
 <p>This is other text</p>
 </div>
 
-<div class="hovering" id="stateinfo">
+<div class="hovering" id="stateinfo-window">
+<div class="move-hover">++++++++</div>
+<span id="stateinfo-data">No state data yet</span>
 </div>
 
 <!-- Include local JavaScrip files -->

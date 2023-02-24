@@ -23,7 +23,9 @@ This is other text
 
 </div>
 
-<div class="hovering" id="stateinfo">
+<div class="hovering" id="stateinfo-window">
+<div class="move-hover">++++++++</div>
+<span id="stateinfo-data">No state data</span>
 </div>
 
 <!-- Include local JavaScrip files -->
