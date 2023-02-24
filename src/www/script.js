@@ -1,13 +1,11 @@
-const $ = (q) => document.querySelector(q);
+const { default: jsQR } = require("jsqr");
 
+const $ = (q) => document.querySelector(q);
+const videoElem = $("#camera");
 window.addEventListener("load", (doc, ev) => {
 
 })
 
-const videoElem = $("#camera");
-videoElem.addEventListener('timeupdate', () => {
-    
-})
 
 const wsUrl = `ws:${window.location.host}`
 const ws = new WebSocket(wsUrl)
@@ -39,7 +37,7 @@ function handle(package) {
 
 const stateinfodata = $("#stateinfo-data")
 function updateState(state) {
-    const formattedData = ```
+    const formattedData = `
     Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}
     Battery: ${state.battery}%
     Speed:
@@ -57,7 +55,7 @@ function updateState(state) {
         x: ${state.acceleration.x}
         y: ${state.acceleration.y}
         z: ${state.acceleration.z}
-    ```;
+    `;
 
     stateinfodata.innerText = formattedData;
     
@@ -113,10 +111,47 @@ moveElem.addEventListener("mousedown", (ev) => {
 const jmuxer = new JMuxer({
     node: videoElem,
     mode: 'video', /* available values are: both, audio and video */
-    fps: 30,
+    fps: 25,
     noAudio: true,
     
 });
+//Create canvas for extracting video data
+
+let canvas = document.createElement('canvas');
+
+
+canvas.width = 420;
+canvas.height = 315;
+
+//Draw video data on canvas for extraction
+let ctx = canvas.getContext('2d');
+
+function extractImgData(){
+
+    ctx.drawImage(videoElem,0,0,canvas.width,canvas.height);
+    
+    let imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    QRReader(imgData);
+
+    
+}
+
+/**
+ * 
+ * @param {ImageData} imgData 
+ * @param {any} options 
+ */
+function QRReader(imgData)
+{
+    const QRcode = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts:"dontInvert"});
+    if(QRcode)
+        console.log(QRcode);
+}
+
+
+setInterval(extractImgData,1000);
+
+
 
 /* Now feed media data using feed method. audio and video is buffer data and duration is in milliseconds */
 
