@@ -2,8 +2,9 @@
   "name": "p6-drones",
   "license": "mit",
   "scripts": {
-    "start": "yarn build && node build/index.js",
+    "start": "yarn build && yarn server",
     "build": "tsc",
+    "server": "node build/index.js",
     "dev": "nodemon -w \"./src\" -e yarn start"
   },
   "dependencies": {

@@ -1,0 +1,10 @@
+{
+    "opts": {
+        "src": "index.md",
+        "html": true,
+        "output": "./index.html",
+        "watch": true,
+        "allow-undefined": true
+
+    }
+}

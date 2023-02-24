@@ -4,12 +4,16 @@ import * as path from "path";
 
 /* Import npm packages */
 import express from "express";
-import sdk from "tellojs";
+import tellojs from "tellojs";
 import expressWs from "express-ws"
 import { v4 as uuidv4 } from 'uuid';
 import {WebSocket} from "ws";
 
+/* Import local packages and typedef */
+import { H264Segmenter } from "./h264-segmenter";
+import { SDK } from "./sdk";
 
+const sdk : SDK = tellojs;
 
 /* Global constant */
 const PORT = 42069;
@@ -45,24 +49,49 @@ const drone = {
         for (let {client} of clients) {
             com.video(client, data);
         }
+    },
+    keepAlive: () => {
+        console.log("Keeping drone alive");
+        
+        setInterval( async () => await sdk.read.battery(), 5000)
     }
 }
 async function droneControl() {
-    await sdk.control.connect();
+    try {await sdk.control.connect();} 
+    catch(e) {
+        console.log("Could not connect to drone. Retrying...");
+        return;
+    }
+    drone.keepAlive();
     drone.connected = true;
 
     console.log(`Drone connection established`);
     
-
     const videoEmitter = await sdk.receiver.video.bind();
     let isFirst = true;
+    let segmenter : H264Segmenter;
     videoEmitter.on('message', (res) => {
 
+        /* If its the first segment, initialise a new segmenter */
         if (isFirst)
-            {console.log();}
-            
-        drone.videoData(res);
+        {
+            segmenter = new H264Segmenter(res);
+            isFirst = false;
+        }
+        
+        /* Feed the segmenter segments as they come in */    
+        const segment = segmenter.feed(res);
+
+        /* If the segmenter.feed method returns an object,
+         * dispatch the segment to clients */
+        if (segment)
+            drone.videoData(segment);
     });
+
+    const stateEmitter = sdk.receiver.state.bind();
+    stateEmitter.on('message', (res) => {
+        console.log(res);
+    })
 };
 
 app.ws("/", (ws) => {
@@ -87,9 +116,11 @@ app.ws("/", (ws) => {
 })
 
 /* Launch server */
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Listening on ${PORT}...`);
-    console.log(`Connecting to drone...`);
-    droneControl();
     
+    console.log(`Connecting to drone...`);
+    while (!drone.connected) {
+        await droneControl();
+    }
 })

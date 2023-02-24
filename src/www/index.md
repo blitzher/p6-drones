@@ -3,7 +3,7 @@
 </style>
 
 <!-- Include JMuxer -->
-<script type="text/javascript" src="libs/jmuxer.min.js"></script>
+<script type="text/javascript" src="libs/jmuxer.js"></script>
 
 
 <div>
@@ -13,7 +13,7 @@
 This is my *very cool* website, very nice
 
 <div id=canvases>
-<div><video id="camera"></video></div>
+<div><video id="camera" autoplay muted></video></div>
 <div><canvas id="map"></canvas></div>
 </div>
 
@@ -21,6 +21,9 @@ This is other text
 
 
 
+</div>
+
+<div class="hovering" id="stateinfo">
 </div>
 
 <!-- Include local JavaScrip files -->

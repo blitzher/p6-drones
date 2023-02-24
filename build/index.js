@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+        while (_) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -35,6 +35,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -44,6 +55,9 @@ var express_1 = __importDefault(require("express"));
 var tellojs_1 = __importDefault(require("tellojs"));
 var express_ws_1 = __importDefault(require("express-ws"));
 var uuid_1 = require("uuid");
+/* Import local packages and typedef */
+var h264_segmenter_1 = require("./h264-segmenter");
+var sdk = tellojs_1.default;
 /* Global constant */
 var PORT = 42069;
 /* Initialise HTTP and websocket server */
@@ -66,27 +80,70 @@ var com = {
 var drone = {
     connected: false,
     videoData: function (data) {
-        for (var _i = 0, clients_1 = clients; _i < clients_1.length; _i++) {
-            var client = clients_1[_i].client;
-            com.video(client, data);
+        var e_1, _a;
+        try {
+            for (var clients_1 = __values(clients), clients_1_1 = clients_1.next(); !clients_1_1.done; clients_1_1 = clients_1.next()) {
+                var client = clients_1_1.value.client;
+                com.video(client, data);
+            }
         }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (clients_1_1 && !clients_1_1.done && (_a = clients_1.return)) _a.call(clients_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+    },
+    keepAlive: function () {
+        console.log("Keeping drone alive");
+        setInterval(function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, sdk.read.battery()];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        }); }); }, 5000);
     }
 };
 function droneControl() {
     return __awaiter(this, void 0, void 0, function () {
-        var videoEmitter;
+        var e_2, videoEmitter, isFirst, segmenter, stateEmitter;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, tellojs_1.default.control.connect()];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, sdk.control.connect()];
                 case 1:
                     _a.sent();
+                    return [3 /*break*/, 3];
+                case 2:
+                    e_2 = _a.sent();
+                    console.log("Could not connect to drone. Retrying...");
+                    return [2 /*return*/];
+                case 3:
+                    drone.keepAlive();
                     drone.connected = true;
                     console.log("Drone connection established");
-                    return [4 /*yield*/, tellojs_1.default.receiver.video.bind()];
-                case 2:
+                    return [4 /*yield*/, sdk.receiver.video.bind()];
+                case 4:
                     videoEmitter = _a.sent();
+                    isFirst = true;
                     videoEmitter.on('message', function (res) {
-                        drone.videoData(res);
+                        /* If its the first segment, initialise a new segmenter */
+                        if (isFirst) {
+                            segmenter = new h264_segmenter_1.H264Segmenter(res);
+                            isFirst = false;
+                        }
+                        /* Feed the segmenter segments as they come in */
+                        var segment = segmenter.feed(res);
+                        /* If the segmenter.feed method returns an object,
+                         * dispatch the segment to clients */
+                        if (segment)
+                            drone.videoData(segment);
+                    });
+                    stateEmitter = sdk.receiver.state.bind();
+                    stateEmitter.on('message', function (res) {
+                        console.log(res);
                     });
                     return [2 /*return*/];
             }
@@ -99,7 +156,7 @@ app.ws("/", function (ws) {
     clients.push({ client: ws, uuid: myUuid });
     console.log("New client!");
     ws.onmessage = function (msg) {
-        console.log("Received: ".concat(msg.data));
+        console.log("Received: " + msg.data);
     };
     ws.onclose = function () {
         console.log("Client closed!");
@@ -112,9 +169,21 @@ app.ws("/", function (ws) {
     };
 });
 /* Launch server */
-app.listen(PORT, function () {
-    console.log("Listening on ".concat(PORT, "..."));
-    console.log("Connecting to drone...");
-    droneControl();
-});
+app.listen(PORT, function () { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                console.log("Listening on " + PORT + "...");
+                console.log("Connecting to drone...");
+                _a.label = 1;
+            case 1:
+                if (!!drone.connected) return [3 /*break*/, 3];
+                return [4 /*yield*/, droneControl()];
+            case 2:
+                _a.sent();
+                return [3 /*break*/, 1];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 //# sourceMappingURL=index.js.map

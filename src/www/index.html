@@ -26,8 +26,8 @@ body>div {
 
 canvas, video {
     background-color: white;
-    margin: 10px;
-    width: 560px;
+    margin: 25px;
+    width: 420px;
     height: 315px;
 }
 
@@ -35,21 +35,32 @@ canvas, video {
     display: flex
 }
 
+.hovering {
+    position: absolute;
+    margin-left: 100px;
+    margin-top: 100px;
+    width: 100px;
+    height: fit-content;
+}
+
 </style>
 
 <!-- Include JMuxer -->
-<script type="text/javascript" src="libs/jmuxer.min.js"></script>
+<script type="text/javascript" src="libs/jmuxer.js"></script>
 
 <div>
 
 <h1 id="hello-there">Hello there</h1>
 <p>This is my <em>very cool</em> website, very nice</p>
 <div id=canvases>
-<div><video id="camera"></video></div>
+<div><video id="camera" autoplay muted></video></div>
 <div><canvas id="map"></canvas></div>
 </div>
 
 <p>This is other text</p>
+</div>
+
+<div class="hovering" id="stateinfo">
 </div>
 
 <!-- Include local JavaScrip files -->
