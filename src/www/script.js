@@ -1,13 +1,10 @@
-const $ = (q) => document.querySelector(q);
 
+const $ = (q) => document.querySelector(q);
+const videoElem = $("#camera");
 window.addEventListener("load", (doc, ev) => {
 
 })
 
-const videoElem = $("#camera");
-videoElem.addEventListener('timeupdate', () => {
-    
-})
 
 const wsUrl = `ws:${window.location.host}`
 const ws = new WebSocket(wsUrl)
@@ -39,7 +36,7 @@ function handle(package) {
 
 const stateinfodata = $("#stateinfo-data")
 function updateState(state) {
-    const formattedData = ```
+    const formattedData = `
     Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}
     Battery: ${state.battery}%
     Speed:
@@ -57,7 +54,7 @@ function updateState(state) {
         x: ${state.acceleration.x}
         y: ${state.acceleration.y}
         z: ${state.acceleration.z}
-    ```;
+    `;
 
     stateinfodata.innerText = formattedData;
     
@@ -113,33 +110,147 @@ moveElem.addEventListener("mousedown", (ev) => {
 const jmuxer = new JMuxer({
     node: videoElem,
     mode: 'video', /* available values are: both, audio and video */
-    fps: 30,
+    fps: 25,
     noAudio: true,
     
 });
+//Create canvas for extracting video data
+
+let canvas = document.createElement('canvas');
+
+
+canvas.width = 420;
+canvas.height = 315;
+
+//Draw video data on canvas for extraction
+let ctx = canvas.getContext('2d');
+
+function extractImgData(){
+
+    ctx.drawImage(videoElem,0,0,canvas.width,canvas.height);
+    
+    let imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+    QRReader(imgData);
+
+    
+}
+
+/**
+ * 
+ * @param {ImageData} imgData 
+ * @param {any} options 
+ */
+function QRReader(imgData)
+{
+    const QRcode = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts:"dontInvert"});
+    if(QRcode)
+        console.log(QRcode);
+}
+
+
+setInterval(extractImgData,1000);
+
+
 
 /* Now feed media data using feed method. audio and video is buffer data and duration is in milliseconds */
 
 /* 
 {
-    "pitch": -1, "roll": 1, "yaw": 4,
-    "speed": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-    },
-    "temperature": {
-        "low": 62,
-        "high": 63
-    },
-    "tof": 10,
-    "heigh": 0,
-    "battery": 85,
-    "barometer": 179.3,
-    "time": 0,
-    "acceleration": {
-        "x": -16,
-        "y": -38,
-        "z": -999
+    "binaryData": [
+        104,
+        116,
+        116,
+        112,
+        58,
+        47,
+        47,
+        101,
+        110,
+        46,
+        109,
+        46,
+        119,
+        105,
+        107,
+        105,
+        112,
+        101,
+        100,
+        105,
+        97,
+        46,
+        111,
+        114,
+        103
+    ],
+    "data": "http://en.m.wikipedia.org",
+    "chunks": [
+        {
+            "type": "byte",
+            "bytes": [
+                104,
+                116,
+                116,
+                112,
+                58,
+                47,
+                47,
+                101,
+                110,
+                46,
+                109,
+                46,
+                119,
+                105,
+                107,
+                105,
+                112,
+                101,
+                100,
+                105,
+                97,
+                46,
+                111,
+                114,
+                103
+            ],
+            "text": "http://en.m.wikipedia.org"
+        }
+    ],
+    "version": 3,
+    "location": {
+        "topRightCorner": {
+            "x": 310.6693295346836,
+            "y": 120.27539302951396
+        },
+        "topLeftCorner": {
+            "x": 163.35582979854328,
+            "y": 139.27441323323546
+        },
+        "bottomRightCorner": {
+            "x": 317.98339604704904,
+            "y": 253.7291313877667
+        },
+        "bottomLeftCorner": {
+            "x": 183.301795191882,
+            "y": 268.7608605275987
+        },
+        "topRightFinderPattern": {
+            "x": 293.75,
+            "y": 140
+        },
+        "topLeftFinderPattern": {
+            "x": 183.25,
+            "y": 154
+        },
+        "bottomLeftFinderPattern": {
+            "x": 197.25,
+            "y": 252.5
+        },
+        "bottomRightAlignmentPattern": {
+            "x": 285.25,
+            "y": 229.5
+        }
     }
 } */
+
