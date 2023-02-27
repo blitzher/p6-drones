@@ -40,26 +40,23 @@ function updateState(state) {
     Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}
     Battery: ${state.battery}%
     Speed:
-        x: ${state.speed.x}
-        y: ${state.speed.x}
-        z: ${state.speed.x}
+        \tx: ${state.speed.x}
+        \ty: ${state.speed.x}
+        \tz: ${state.speed.x}
     Temperature:
-        low: ${state.temperature.low}
-        high: ${state.temperature.high}
+        \tlow: ${state.temperature.low}
+        \thigh: ${state.temperature.high}
     Height: ${state.heigh}
     TOF: ${state.tof}
     Barometer: ${state.barometer}
     Flight time: ${state.time}
     Acceleration:
-        x: ${state.acceleration.x}
-        y: ${state.acceleration.y}
-        z: ${state.acceleration.z}
+        \tx: ${state.acceleration.x}
+        \ty: ${state.acceleration.y}
+        \tz: ${state.acceleration.z}
     `;
-
-    stateinfodata.innerText = formattedData;
     
-
-
+    stateinfodata.innerText = formattedData;
 }
 
 
@@ -105,6 +102,18 @@ moveElem.addEventListener("mousedown", (ev) => {
     moveElem.addEventListener("mouseup", mouseup);
     document.addEventListener("mousemove", mousemove);
 
+})
+
+const hideShowInfoElem = $("#hide-show-info");
+hideShowInfoElem.addEventListener("mousedown", (ev) => {
+    if (stateinfodata.style.display != "none") {        
+        stateinfodata.style.display = "none"
+        hideShowInfoElem.innerHTML = "&#8595;"
+    }
+    else {
+        stateinfodata.style.display = "block";
+        hideShowInfoElem.innerHTML = "&#8593;"
+    }
 })
 
 const jmuxer = new JMuxer({

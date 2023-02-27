@@ -1,3 +1,5 @@
 node_modules/*
 imgs/*
 bin/*
+
+# Ignore compiled html
