@@ -123,7 +123,7 @@ canvas.width = 420;
 canvas.height = 315;
 
 //Draw video data on canvas for extraction
-let ctx = canvas.getContext('2d');
+let ctx = canvas.getContext('2d',{ willReadFrequently: true });
 
 function extractImgData(){
 
@@ -148,7 +148,7 @@ function QRReader(imgData)
 }
 
 
-setInterval(extractImgData,1000);
+setInterval(extractImgData,100);
 
 
 
