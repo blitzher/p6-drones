@@ -3,3 +3,4 @@ imgs/*
 bin/*
 
 # Ignore compiled html
+src/www/index.html
