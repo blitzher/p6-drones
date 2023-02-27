@@ -67,3 +67,8 @@ span > * {
     width: fit-content;
     border-radius: 50%;
 }
+
+#stateinfo-data{
+    display: none;
+
+}

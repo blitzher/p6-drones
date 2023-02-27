@@ -12,7 +12,6 @@ const ws = new WebSocket(wsUrl)
 function handle(package) {
     switch (package.type) {
         case "stream":
-            console.log("Receiving stream data");
             const h264data = Uint8Array.from(package.data);
             jmuxer.feed({
                 video: h264data,
@@ -76,11 +75,6 @@ ws.addEventListener('message', (msg) => {
     handle(pkg);
 })
 
-ws.addEventListener('open', () => {
-    ws.send("Hello from the front!");
-})
-
-
 let attached = false;
 const moveElem = $(".move-hover")
 const stateinfowindow = $("#stateinfo-window")
@@ -106,13 +100,13 @@ moveElem.addEventListener("mousedown", (ev) => {
 
 const hideShowInfoElem = $("#hide-show-info");
 hideShowInfoElem.addEventListener("mousedown", (ev) => {
-    if (stateinfodata.style.display != "none") {        
-        stateinfodata.style.display = "none"
-        hideShowInfoElem.innerHTML = "&#8595;"
+    if (stateinfodata.style.display != "block") {        
+        stateinfodata.style.display = "block"
+        hideShowInfoElem.innerHTML = "&#8593;"
     }
     else {
-        stateinfodata.style.display = "block";
-        hideShowInfoElem.innerHTML = "&#8593;"
+        stateinfodata.style.display = "none";
+        hideShowInfoElem.innerHTML = "&#8595;"
     }
 })
 

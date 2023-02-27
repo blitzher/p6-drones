@@ -24,7 +24,7 @@ This is other text
 <div class="hovering" id="stateinfo-window">
 <div style="display:flex; width:100%;">
 <div class="move-hover">++++++++</div>
-<div class="hide-show" style="text-align: right; width: fit-content" id="hide-show-info">&uarr;</div> 
+<div class="hide-show" style="text-align: right; width: fit-content" id="hide-show-info">&darr;</div> 
 </div>
 <span id="stateinfo-data">No state data</span>
 </div>
