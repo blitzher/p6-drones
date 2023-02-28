@@ -113,7 +113,7 @@ hideShowInfoElem.addEventListener("mousedown", (ev) => {
 const jmuxer = new JMuxer({
     node: videoElem,
     mode: 'video', /* available values are: both, audio and video */
-    fps: 25,
+    fps: 30,
     noAudio: true,
 
 });
@@ -133,7 +133,7 @@ function extractImgData() {
     ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
     let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    QRReader(imgData);
+    ARReader(imgData);
 
 
 }
@@ -143,7 +143,7 @@ function extractImgData() {
  * @param {ImageData} imgData 
  * @param {any} options 
  */
-function QRReader(imgData) {
+function ARReader(imgData) {
     try {
         var markers = detector.detect(imgData);
     } catch (e) {
