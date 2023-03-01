@@ -1,3 +1,5 @@
+<head>
+
 <style>
 #mdinclude<style.css>
 </style>
@@ -7,6 +9,11 @@
 <script type="text/javascript" src="libs/jsQR.js"></script>
 <script type="text/javascript" src="libs/cv.js"></script>
 <script type="text/javascript" src="libs/aruco.js"></script>
+
+<script type="text/javascript" src="scripts/utilities.js"></script>
+<script type="module" src="scripts/main.js"></script>
+
+</head>
 
 <div>
 
@@ -30,6 +37,3 @@ This is other text
 </div>
 <span id="stateinfo-data">No state data</span>
 </div>
-
-<!-- Include local JavaScrip files -->
-<script type="text/javascript" src="script.js"></script>
