@@ -5,19 +5,19 @@ window.addEventListener("load", (doc, ev) => {
 
 })
 
-
+var detector = new AR.Detector();
 const wsUrl = `ws:${window.location.host}`
 const ws = new WebSocket(wsUrl)
 
-function handle(package) {
+function handle(package) {
     switch (package.type) {
         case "stream":
             const h264data = Uint8Array.from(package.data);
             jmuxer.feed({
                 video: h264data,
                 audio: false
-              });
-              // videoElem.play();
+            });
+            // videoElem.play();
             break;
         case "error":
             console.error(`Server error: ${package.data}`);
@@ -54,7 +54,7 @@ function updateState(state) {
         \ty: ${state.acceleration.y}
         \tz: ${state.acceleration.z}
     `;
-    
+
     stateinfodata.innerText = formattedData;
 }
 
@@ -64,7 +64,7 @@ ws.addEventListener('message', (msg) => {
     try {
         pkg = JSON.parse(msg.data);
     }
-    catch(e) {
+    catch (e) {
         ws.send(JSON.stringify({
             type: "error",
             data: "Invalid JSON received"
@@ -81,7 +81,7 @@ const stateinfowindow = $("#stateinfo-window")
 
 moveElem.addEventListener("mousedown", (ev) => {
     attached = true;
-    
+
     const mousemove = (ev) => {
 
         stateinfowindow.style.left = ev.clientX - 10
@@ -100,7 +100,7 @@ moveElem.addEventListener("mousedown", (ev) => {
 
 const hideShowInfoElem = $("#hide-show-info");
 hideShowInfoElem.addEventListener("mousedown", (ev) => {
-    if (stateinfodata.style.display != "block") {        
+    if (stateinfodata.style.display != "block") {
         stateinfodata.style.display = "block"
         hideShowInfoElem.innerHTML = "&#8593;"
     }
@@ -113,9 +113,9 @@ hideShowInfoElem.addEventListener("mousedown", (ev) => {
 const jmuxer = new JMuxer({
     node: videoElem,
     mode: 'video', /* available values are: both, audio and video */
-    fps: 25,
+    fps: 30,
     noAudio: true,
-    
+
 });
 //Create canvas for extracting video data
 
@@ -126,16 +126,16 @@ canvas.width = 420;
 canvas.height = 315;
 
 //Draw video data on canvas for extraction
-let ctx = canvas.getContext('2d',{ willReadFrequently: true });
+let ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-function extractImgData(){
+function extractImgData() {
 
-    ctx.drawImage(videoElem,0,0,canvas.width,canvas.height);
-    
-    let imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-    QRReader(imgData);
+    ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
 
-    
+    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ARReader(imgData);
+
+
 }
 
 /**
@@ -143,15 +143,19 @@ function extractImgData(){
  * @param {ImageData} imgData 
  * @param {any} options 
  */
-function QRReader(imgData)
-{
-    const QRcode = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts:"dontInvert"});
-    if(QRcode)
-        console.log(QRcode);
+function ARReader(imgData) {
+    try {
+        var markers = detector.detect(imgData);
+    } catch (e) {
+        console.log(e);
+    }
+    //const QRcode = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts:"dontInvert"});
+    if (markers)
+        console.log(markers);
 }
 
 
-setInterval(extractImgData,100);
+setInterval(extractImgData, 1000);
 
 
 
