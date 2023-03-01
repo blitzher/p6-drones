@@ -5,7 +5,7 @@
     "start": "yarn build && yarn server",
     "build": "tsc",
     "server": "node build/index.js",
-    "dev": "nodemon -w \"./src\" -e yarn start"
+    "dev": "nodemon -w \"./src/**/*\" -e .ts --exec \"yarn start\""
   },
   "dependencies": {
     "@types/express": "^4.17.17",
