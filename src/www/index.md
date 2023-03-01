@@ -5,8 +5,7 @@
 </style>
 
 <!-- Include JMuxer and jsQR -->
-<script type="text/javascript" src="libs/jmuxer.js"></script>
-<script type="text/javascript" src="libs/jsQR.js"></script>
+<script type="text/javascript" src="libs/jmuxer.min.js"></script>
 <script type="text/javascript" src="libs/cv.js"></script>
 <script type="text/javascript" src="libs/aruco.js"></script>
 
