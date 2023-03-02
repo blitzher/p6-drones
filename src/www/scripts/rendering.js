@@ -21,8 +21,8 @@ function init() {
 
 	/* Create canvas for extracting video data */
 	canvas = document.createElement('canvas');
-	canvas.width = 420;
-	canvas.height = 315;
+	canvas.width = 720;
+	canvas.height = 960;
 
 	/* Draw video data on canvas for extraction */
 	ctx = canvas.getContext('2d', { willReadFrequently: true });
