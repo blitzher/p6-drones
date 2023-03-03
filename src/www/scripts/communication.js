@@ -33,17 +33,17 @@ function init() {
 	})
 }
 
-const droneState = {
+export const droneState = {
 	position: {
 		x: 0,
 		y: 0,
 		z: 0
 
 	},
-	updatePosition: function(speed) {
+	updatePosition: function (speed) {
 		this.position.x += speed.x;
 		this.position.y += speed.y;
-		this.position.z += speed.z;	
+		this.position.z += speed.z;
 	}
 }
 
@@ -59,7 +59,7 @@ function handle(pkg) {
 		case "state":
 			rendering.updateState(pkg.data);
 			droneState.updatePosition(pkg.data.speed);
-			ws.send(JSON.stringify( {
+			ws.send(JSON.stringify({
 				type: "dronestate",
 				data: droneState
 			}));

@@ -1,3 +1,4 @@
+import { droneState } from "./communication";
 
 /* Declare global variables for use in component */
 let ctx, canvas, detector, jmuxer;
@@ -112,28 +113,52 @@ function estimateDistance(marker) {
 }
 
 class Marker3D {
+	x;
+	y;
+	z;
 
-x;
-y;
-z;
+	constructor({ x, y, z }) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
 
-constructor(X,Y,Z){
-	this.x=X;
-	this.y=Y;
-	this.z=Z;
-}
+	add({ x, y, z }) {
+		this.x += x;
+		this.y += y;
+		this.z += z;
+	}
 
+	scale(amount) {
+		this.x *= amount;
+		this.y *= amount;
+		this.z *= amount;
+	}
+
+	length() {
+		return Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
+	}
+
+	normalise() {
+		const l = this.length();
+		this.x = this.x / l;
+		this.y = this.y / l;
+		this.z = this.z / l;
+	}
 }
 function estimateMarkerPosition(marker) {
 	const dist = estimateDistance(marker);
-	
-	const markerPos3D = new Marker3D();
-	markerPos3D.x = (marker.corners[0].x * dist + marker.corners[1].x * dist + marker.corners[2].x * dist + marker.corners[3].x * dist)/4;
-	markerPos3D.y = (marker.corners[0].y * dist + marker.corners[1].y * dist + marker.corners[2].y * dist + marker.corners[3].y * dist)/4;
-	markerPos3D.z = ((((-markerPos3D.x)**2)/(dist**2))+(((-markerPos3D.y)**2)/(dist**2))+1)
 
-	return markerPos3D;
-	
+	let x = (marker.corners[0].x + dist + marker.corners[1].x + dist + marker.corners[2].x + dist + marker.corners[3].x + dist) / 4;
+	let y = (marker.corners[0].y + dist + marker.corners[1].y + dist + marker.corners[2].y + dist + marker.corners[3].y + dist) / 4;
+	let z = ((((x) ** 2) / (dist ** 2)) + (((y) ** 2) / (dist ** 2)) + 1)
+
+	const direction = new Marker3D({ x, y, z });
+	direction.normalise();
+
+	direction.scale(dist);
+
+	return direction.add(droneState.position);
 }
 
 
