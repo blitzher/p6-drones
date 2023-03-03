@@ -7,9 +7,16 @@ window.addEventListener("load", (doc, ev) => {
     
     setInterval(() => {
         const markers = rendering.findMarkers();
-
-        if (markers.length > 0)
+        let markerPos3D;
+    
+        if (markers.length > 0){
+            markers.forEach(element => {
+                markerPos3D = rendering.estimateMarkerPosition(element);
+            });
             console.log(markers);
+            console.log(markerPos3D);
+        }
+
     }, 1000)
 
 });

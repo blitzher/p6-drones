@@ -105,17 +105,35 @@ function ARReader(imgData) {
 function estimateDistance(marker) {
 	const FOCAL_LENGTH = 25;	 		/* mm */
 	const MARKER_HEIGHT = 100; 	 		/* mm */
-	const APPARENT_HEIGHT = (marker.corners[1].y + marker.corners[3].y - markers.corners[0] - markers.corners[2]) / 2; /* pixels */
+	const APPARENT_HEIGHT = (marker.corners[1].y + marker.corners[3].y - marker.corners[0].y - marker.corners[2].y) / 2; /* pixels */
 	const IMAGE_HEIGHT = canvas.height;	/* pixels */
 	const SENSOR_HEIGHT = 2.0775;		/* mm */
 	return (FOCAL_LENGTH * APPARENT_HEIGHT * IMAGE_HEIGHT) / (MARKER_HEIGHT * SENSOR_HEIGHT);
 }
 
+class Marker3D {
+
+x;
+y;
+z;
+
+constructor(X,Y,Z){
+	this.x=X;
+	this.y=Y;
+	this.z=Z;
+}
+
+}
 function estimateMarkerPosition(marker) {
 	const dist = estimateDistance(marker);
-
 	
+	const markerPos3D = new Marker3D();
+	markerPos3D.x = (marker.corners[0].x * dist + marker.corners[1].x * dist + marker.corners[2].x * dist + marker.corners[3].x * dist)/4;
+	markerPos3D.y = (marker.corners[0].y * dist + marker.corners[1].y * dist + marker.corners[2].y * dist + marker.corners[3].y * dist)/4;
+	markerPos3D.z = ((((-markerPos3D.x)**2)/(dist**2))+(((-markerPos3D.y)**2)/(dist**2))+1)
 
+	return markerPos3D;
+	
 }
 
 
@@ -171,5 +189,6 @@ export default {
 	initialise: init,
 	feed,
 	findMarkers,
-	updateState
+	updateState,
+	estimateMarkerPosition
 }
