@@ -6,6 +6,17 @@ let ctx, canvas, detector, jmuxer;
 const stateinfodata = $("#stateinfo-data")
 const videoElem = $("#camera");
 
+/**
+ * @typedef {{x:number, y:number}} 2DPos
+ * 
+ * @typedef {{
+*	id: number,
+* 	dist: number,
+* 	direction: number[],
+*  corners: 2DPos[]
+* }} Marker
+*/
+
 function init() {
 
 	/* Setup jmuxer on video element */
@@ -52,7 +63,6 @@ function initHoveringElement() {
 
 		moveElem.addEventListener("mouseup", mouseup);
 		document.addEventListener("mousemove", mousemove);
-
 	})
 
 	const hideShowInfoElem = $("#hide-show-info");
@@ -69,9 +79,7 @@ function initHoveringElement() {
 }
 
 function extractImgData() {
-
 	ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-
 	return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
@@ -89,6 +97,27 @@ function ARReader(imgData) {
 	return markers;
 }
 
+/**
+ * 
+ * @param {Marker} marker 
+ * @returns 
+ */
+function estimateDistance(marker) {
+	const FOCAL_LENGTH = 25;	 		/* mm */
+	const MARKER_HEIGHT = 100; 	 		/* mm */
+	const APPARENT_HEIGHT = (marker.corners[1].y + marker.corners[3].y - markers.corners[0] - markers.corners[2]) / 2; /* pixels */
+	const IMAGE_HEIGHT = canvas.height;	/* pixels */
+	const SENSOR_HEIGHT = 2.0775;		/* mm */
+	return (FOCAL_LENGTH * APPARENT_HEIGHT * IMAGE_HEIGHT) / (MARKER_HEIGHT * SENSOR_HEIGHT);
+}
+
+function estimateMarkerPosition(marker) {
+	const dist = estimateDistance(marker);
+
+	
+
+}
+
 
 /**
  * 
@@ -101,16 +130,12 @@ function feed(data) {
 	});
 }
 
-
-/**
- * @typedef {{id: number}} Marker
- */
-
 /**
  * 
  * @returns {Marker[]} markers
  */
 function findMarkers() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	const imgData = extractImgData();
 	const markers = ARReader(imgData);
 
@@ -120,26 +145,26 @@ function findMarkers() {
 
 function updateState(state) {
 	const formattedData = `
-    Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}
-    Battery: ${state.battery}%
-    Speed:
-        \tx: ${state.speed.x}
-        \ty: ${state.speed.x}
-        \tz: ${state.speed.x}
-    Temperature:
-        \tlow: ${state.temperature.low}
-        \thigh: ${state.temperature.high}
-    Height: ${state.heigh}
-    TOF: ${state.tof}
-    Barometer: ${state.barometer}
-    Flight time: ${state.time}
-    Acceleration:
-        \tx: ${state.acceleration.x}
-        \ty: ${state.acceleration.y}
-        \tz: ${state.acceleration.z}
+    Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}<br>
+    Battery: ${state.battery}%<br>
+    Speed:<br>
+	&nbsp;x: ${state.speed.x}<br>
+	&nbsp;y: ${state.speed.y}<br>
+	&nbsp;z: ${state.speed.z}<br>
+    Temperature:<br>
+	&nbsp;low: ${state.temperature.low}<br>
+	&nbsp;high: ${state.temperature.high}<br>
+    Height: ${state.heigh}<br>
+    TOF: ${state.tof}<br>
+    Barometer: ${state.barometer}<br>
+    Flight time: ${state.time}<br>
+    Acceleration:<br>
+	&nbsp;x: ${state.acceleration.x}<br>
+	&nbsp;y: ${state.acceleration.y}<br>
+	&nbsp;z: ${state.acceleration.z}<br>
     `;
 
-	stateinfodata.innerText = formattedData;
+	stateinfodata.innerHTML = formattedData;
 }
 
 export default {

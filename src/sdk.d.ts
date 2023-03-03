@@ -32,7 +32,8 @@ type SDK = {
                 right: () => Promise<void>
                 front: () => Promise<void>
                 back: () => Promise<void>
-            }
+            },
+            command: (cmd: string) => Promise<void>
         }
         read: {
             speed: () => Promise<string>
@@ -45,6 +46,7 @@ type SDK = {
             barometer: () => Promise<string>
             tof: () => Promise<string>
             acceleration: () => Promise<string>
+            sdk: () => Promise<string>
             
         }
         set: {

@@ -12,6 +12,7 @@ import { WebSocket } from "ws";
 /* Import local packages and typedef */
 import { H264Segmenter } from "./h264-segmenter";
 import { SDK } from "./sdk";
+import environment from "./environment";
 
 const sdk: SDK = tellojs;
 
@@ -21,6 +22,7 @@ const PORT = 42069;
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 type UWebSocket = { client: WebSocket; uuid: string };
+type Package = { type: string; data: any };
 const clients: UWebSocket[] = [];
 
 /* Setup web server */
@@ -55,9 +57,14 @@ const com = {
 const drone = {
   connected: false,
   keepAlive: () => {
+    if (!drone.connected) return;
     console.log("Keeping drone alive");
 
     setInterval(async () => await sdk.read.battery(), 5000);
+  },
+  command: (cmd: string) => {
+    if (!drone.connected) return;
+    sdk.control.command(cmd);
   },
 };
 async function droneControl() {
@@ -67,6 +74,10 @@ async function droneControl() {
     console.log("Could not connect to drone. Retrying...");
     return;
   }
+
+  const sdkVersion = await sdk.read.sdk();
+  console.log(`"Using SDK version: ${sdkVersion}`);
+
   drone.keepAlive();
   drone.connected = true;
 
@@ -102,7 +113,12 @@ app.ws("/", (ws) => {
   console.log("New client!");
 
   ws.onmessage = (msg) => {
-    console.log(`Received: ${msg.data}`);
+    try {
+      const pkg = JSON.parse(msg.data.toString());
+      handle(pkg);
+    } catch (e) {
+      console.log(`Invalid package ${msg}:${e}`);
+    }
   };
 
   ws.onclose = () => {
@@ -116,6 +132,17 @@ app.ws("/", (ws) => {
     }
   };
 });
+
+function handle(pkg: Package) {
+  switch (pkg.type) {
+    case "command":
+      drone.command(pkg.data);
+      break;
+    case "dronestate":
+      environment;
+      break;
+  }
+}
 
 /* Launch server */
 app.listen(PORT, async () => {

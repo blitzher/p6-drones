@@ -1,6 +1,9 @@
 import rendering from "./rendering.js";
 
 /* Declare global variables for use in component */
+/**
+ * @type {WebSocket}
+ */
 let ws;
 
 function init() {
@@ -22,8 +25,27 @@ function init() {
 
 		handle(pkg);
 	})
+
+	/* Add event listener to command input field */
+	$('form').addEventListener('submit', (ev) => {
+		const cmd = $('#input-command').value;
+		command(ws, cmd);
+	})
 }
 
+const droneState = {
+	position: {
+		x: 0,
+		y: 0,
+		z: 0
+
+	},
+	updatePosition: function(speed) {
+		this.position.x += speed.x;
+		this.position.y += speed.y;
+		this.position.z += speed.z;	
+	}
+}
 
 function handle(pkg) {
 	switch (pkg.type) {
@@ -36,6 +58,11 @@ function handle(pkg) {
 			break;
 		case "state":
 			rendering.updateState(pkg.data);
+			droneState.updatePosition(pkg.data.speed);
+			ws.send(JSON.stringify( {
+				type: "dronestate",
+				data: droneState
+			}));
 			break;
 		case "mapdata":
 			console.log("Map NYI");
@@ -46,8 +73,19 @@ function handle(pkg) {
 }
 
 
+/**
+ * Temporary function for sending raw command to the drone;
+ */
+function command(ws, cmd) {
+	ws.send(JSON.stringify({
+		type: "command",
+		data: cmd
+	}))
+}
+
+
 export default {
 	initialise: init,
-
+	droneState,
 }
 

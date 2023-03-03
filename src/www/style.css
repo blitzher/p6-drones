@@ -72,3 +72,8 @@ span > * {
     display: none;
 
 }
+
+input {
+    background-color: #303050;
+    border: solid 1px ghostwhite;
+}

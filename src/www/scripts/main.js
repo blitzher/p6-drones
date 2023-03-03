@@ -4,7 +4,7 @@ import rendering from "./rendering.js";
 window.addEventListener("load", (doc, ev) => {
     rendering.initialise();
     communication.initialise();
-
+    
     setInterval(() => {
         const markers = rendering.findMarkers();
 
