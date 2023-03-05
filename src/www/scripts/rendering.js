@@ -1,20 +1,24 @@
-import { droneState } from "./communication";
+import { droneState } from "./communication.js";
 
 /* Declare global variables for use in component */
-let ctx, canvas, detector, jmuxer;
+let ctx, canvas, detector, jmuxer, vcanvas
+/**
+ * @type {CanvasRenderingContext2D}
+ */
+let vctx;
 
 /* Find and set constant element references */
 const stateinfodata = $("#stateinfo-data")
 const videoElem = $("#camera");
 
 /**
- * @typedef {{x:number, y:number}} 2DPos
+ * @typedef {{x:number, y:number}} Pos2D
  * 
  * @typedef {{
-*	id: number,
-* 	dist: number,
-* 	direction: number[],
-*  corners: 2DPos[]
+*id: number,
+* dist: number,
+* direction: number[],
+* corners: Pos2D[]
 * }} Marker
 */
 
@@ -38,6 +42,12 @@ function init() {
 
 	/* Draw video data on canvas for extraction */
 	ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+	/* Setup visualisation canvas */
+	vcanvas = $("#vcanvas");
+	vcanvas.width = 420;
+	vcanvas.height = 315;
+	vctx = vcanvas.getContext('2d');
 
 	/* Attach event listeners to hovering element */
 	initHoveringElement();
@@ -149,8 +159,8 @@ class Marker3D {
 function estimateMarkerPosition(marker) {
 	const dist = estimateDistance(marker);
 
-	let x = (marker.corners[0].x + dist + marker.corners[1].x + dist + marker.corners[2].x + dist + marker.corners[3].x + dist) / 4;
-	let y = (marker.corners[0].y + dist + marker.corners[1].y + dist + marker.corners[2].y + dist + marker.corners[3].y + dist) / 4;
+	let x = (marker.corners[0].x + marker.corners[1].x + marker.corners[2].x + marker.corners[3].x) / 4;
+	let y = (marker.corners[0].y + marker.corners[1].y + marker.corners[2].y + marker.corners[3].y) / 4;
 	let z = ((((x) ** 2) / (dist ** 2)) + (((y) ** 2) / (dist ** 2)) + 1)
 
 	const direction = new Marker3D({ x, y, z });
@@ -182,8 +192,39 @@ function findMarkers() {
 	const imgData = extractImgData();
 	const markers = ARReader(imgData);
 
-	return markers;
+	if (markers.length == 0) {
+		let marker = {};
 
+		marker.corners = [
+			{ x: 100, y: 100 },
+			{ x: 140, y: 110 },
+			{ x: 140, y: 140 },
+			{ x: 100, y: 150 }];
+		marker.id = -1;
+
+		markers.push(marker);
+	}
+
+	return markers;
+}
+
+/**
+ * 
+ * @param {Marker[]} markers 
+ */
+function renderMarkers(markers) {
+	vctx.clearRect(0, 0, vcanvas.width, vcanvas.height);
+	vctx.beginPath();
+	for (let marker of markers) {
+
+		vctx.moveTo(marker.corners[0].x, marker.corners[0].y);
+
+		for (let corner of marker.corners) {
+			vctx.lineTo(corner.x, corner.y);
+		}
+		vctx.lineTo(marker.corners[0].x, marker.corners[0].y);
+	}
+	vctx.stroke();
 }
 
 function updateState(state) {
@@ -215,5 +256,6 @@ export default {
 	feed,
 	findMarkers,
 	updateState,
-	estimateMarkerPosition
+	estimateMarkerPosition,
+	renderMarkers
 }
