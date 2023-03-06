@@ -39,10 +39,16 @@ canvas, video {
 }
 
 #vcanvas {
-    position: fixed;
+    /* position: fixed; */
     grid-column: 1;
     grid-row: 1;
     z-index: 10;
+    background:transparent;
+}
+
+#camera {
+    grid-row: 1;
+    grid-column: 1;
 }
 
 .hovering {

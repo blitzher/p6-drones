@@ -11,13 +11,10 @@ window.addEventListener("load", (doc, ev) => {
 
         if (markers.length > 0) {
             rendering.renderMarkers(markers);
-            markers.forEach(element => {
+            markers.forEach((element) => {
                 markerPos3D = rendering.estimateMarkerPosition(element);
             });
-            console.log(markers);
             console.log(markerPos3D);
         }
-
-    }, 1000)
-
+    }, 1000);
 });
