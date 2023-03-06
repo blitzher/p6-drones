@@ -40,8 +40,8 @@ function init() {
 
     /* Create canvas for extracting video data */
     canvas = document.createElement("canvas");
-    canvas.width = 420;
-    canvas.height = 315;
+    canvas.width = 960;
+    canvas.height = 720;
 
     /* Draw video data on canvas for extraction */
     ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -116,53 +116,22 @@ function ARReader(imgData) {
  */
 function estimateDistance(marker) {
     const FOCAL_LENGTH = 25; /* mm */
-    const MARKER_HEIGHT = 100; /* mm */
+    const MARKER_HEIGHT = 140; /* mm */
     const APPARENT_HEIGHT =
-        (marker.corners[1].y +
-            marker.corners[3].y -
-            marker.corners[0].y -
-            marker.corners[2].y) /
+        (marker.corners[3].y -
+            marker.corners[0].y +
+            marker.corners[2].y -
+            marker.corners[1].y) /
         2; /* pixels */
     const IMAGE_HEIGHT = canvas.height; /* pixels */
     const SENSOR_HEIGHT = 2.0775; /* mm */
     return (
-        (FOCAL_LENGTH * APPARENT_HEIGHT * IMAGE_HEIGHT) /
-        (MARKER_HEIGHT * SENSOR_HEIGHT)
-    );
+        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) /
+            (APPARENT_HEIGHT * SENSOR_HEIGHT)) *
+        0.1
+    ); /* Divide by 10 because ¯\_(ツ)_/¯ */
 }
 
-class Marker3D {
-    x;
-    y;
-    z;
-
-    constructor({ x, y, z }) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    add({ x, y, z }) {
-        return new Marker3D({ x: this.x + x, y: this.y + y, z: +this.z + z });
-    }
-
-    scale(amount) {
-        return new Marker3D({
-            x: this.x * amount,
-            y: this.y * amount,
-            z: this.z * amount,
-        });
-    }
-
-    length() {
-        return Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
-    }
-
-    normalise() {
-        const l = this.length();
-        return new Marker3D({ x: this.x / l, y: this.y / l, z: this.z / l });
-    }
-}
 function estimateMarkerPosition(marker) {
     const dist = estimateDistance(marker);
 
@@ -180,9 +149,8 @@ function estimateMarkerPosition(marker) {
             marker.corners[3].y) /
         4;
 
-    const [tx, ty] = [canvas.width, canvas.height];
     /* Find the relative screen position of the marker */
-    const [mx, my] = [vcanvas.width / 2, vcanvas.height / 2];
+    const [mx, my] = [canvas.width / 2, canvas.height / 2];
     const [dx, dy] = [x - mx, y - my];
 
     /* Find the angle to the point on the screen,
@@ -190,15 +158,36 @@ function estimateMarkerPosition(marker) {
     const x0 = linInterp(dx, -mx, mx, -xFov / 2, xFov / 2);
     const y0 = -linInterp(dy, -my, my, -yFov / 2, yFov / 2);
 
+    const x1 = x0 * dist;
+    const y1 = y0 * dist;
+
     /* Extrapolate the z angle from based on the distance to the marker */
-    let z0 = x0 ** 2 / dist ** 2 + y0 ** 2 / dist ** 2 + 1;
+    let z0 = x1 ** 2 / dist ** 2 + y1 ** 2 / dist ** 2 + 1;
+    let z1 = z0 * dist;
 
     /* Construct the vector from the direction,
      * length and position of the drone  */
-    const direction = new Marker3D({ x: x0, y: y0, z: z0 });
-    const norm = direction.normalise();
-    const scaled = norm.scale(dist);
-    const position = scaled.add(droneState.position);
+    //const direction = new Marker3D({ x: x0, y: y0, z: z0 });
+    //const norm = direction.normalise();
+    //const scaled = norm.scale(dist);
+
+    const markerRelativePosition = new Vector3({ x: x1, y: y1, z: z1 });
+
+    /* Adjust for camera tilt, estimated 15degrees */
+    const cameraAdjusted = rotateVectorAroundXAxis(
+        markerRelativePosition,
+        /*Degrees recalculated to radians*/
+        (15 * Math.PI) / 180 - droneState.rotation.pitch
+    );
+
+    /* Adjust for rotation of drone */
+    const adjustedPosition = rotateVectorAroundYAxis(
+        cameraAdjusted,
+        droneState.rotation.yaw
+    );
+
+    /* Actual in-environment position of marker, relative to the starting position of the drone */
+    const position = adjustedPosition.add(droneState.position);
 
     return position;
 }
@@ -227,14 +216,14 @@ function findMarkers() {
         let marker = {};
 
         marker.corners = [
-            { x: 100, y: 100 },
-            { x: 140, y: 110 },
-            { x: 140, y: 140 },
-            { x: 100, y: 150 },
+            { x: 125, y: 45 },
+            { x: 269, y: 39 },
+            { x: 282, y: 180 },
+            { x: 125, y: 187 },
         ];
         marker.id = -1;
 
-        markers.push(marker);
+        //markers.push(marker);
     }
 
     return markers;
@@ -250,12 +239,14 @@ function renderMarkers(markers) {
     vctx.lineWidth = 2;
     vctx.beginPath();
     for (let marker of markers) {
-        vctx.moveTo(marker.corners[0].x, marker.corners[0].y);
+        const start = linInterpCanvas(marker.corners[0], canvas, vcanvas);
+        vctx.moveTo(start.x, start.y);
 
         for (let corner of marker.corners) {
-            vctx.lineTo(corner.x, corner.y);
+            const c = linInterpCanvas(corner, canvas, vcanvas);
+            vctx.lineTo(c.x, c.y);
         }
-        vctx.lineTo(marker.corners[0].x, marker.corners[0].y);
+        vctx.lineTo(start.x, start.y);
     }
     vctx.stroke();
 }

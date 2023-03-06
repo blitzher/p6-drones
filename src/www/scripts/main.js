@@ -14,7 +14,11 @@ window.addEventListener("load", (doc, ev) => {
             markers.forEach((element) => {
                 markerPos3D = rendering.estimateMarkerPosition(element);
             });
-            console.log(markerPos3D);
+            console.log(
+                `Markpos x:${Math.round(markerPos3D.x) / 10}cm y:${
+                    Math.round(markerPos3D.y) / 10
+                }cm z:${Math.round(markerPos3D.z) / 10}cm`
+            );
         }
     }, 1000);
 });
