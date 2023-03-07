@@ -62,9 +62,9 @@ const drone = {
 
         setInterval(async () => await sdk.read.battery(), 5000);
     },
-    command: (cmd: string) => {
+    command: async (cmd: string) => {
         if (!drone.connected) return;
-        sdk.control.command(cmd);
+        await sdk.control.command(cmd);
     },
 };
 async function droneControl() {

@@ -29,26 +29,41 @@ function init() {
 
     /* Add event listener to command input field */
     $("form").addEventListener("submit", (ev) => {
-        const cmd = $("#input-command").value;
+        ev.preventDefault();
+        const ifield = $("#input-command");
+        const cmd = ifield.value;
+        ifield.value = "";
         command(ws, cmd);
+        return false;
     });
 }
 
 export const droneState = {
-    position: {
+    position: new Vector3({
         x: 0,
         y: 0,
         z: 0,
-    },
+    }),
     rotation: {
         pitch: 0,
         yaw: 0,
         roll: 0,
     },
+    speed: new Vector3({
+        x: 0,
+        y: 0,
+        z: 0,
+    }),
     updatePosition: function (speed) {
-        this.position.x += speed.x;
-        this.position.y += speed.y;
-        this.position.z += speed.z;
+        const temp = speed.z;
+        speed.z = speed.y;
+        speed.y = temp;
+
+        const temp2 = speed.z;
+        speed.z = speed.x;
+        speed.x = temp2;
+
+        this.position = this.position.add(speed);
     },
 
     updateRotation: function (pitch, yaw, roll) {
@@ -68,7 +83,9 @@ function handle(pkg, ws) {
             console.error(`Server error: ${pkg.data}`);
             break;
         case "state":
-            rendering.updateState(pkg.data);
+            const dataToRender = pkg.data;
+            Object.assign(dataToRender, droneState);
+            rendering.updateState(dataToRender);
             droneState.updatePosition(pkg.data.speed);
             droneState.updateRotation(
                 pkg.data.pitch,
@@ -93,6 +110,7 @@ function handle(pkg, ws) {
 /**
  * Temporary function for sending raw command to the drone;
  */
+
 function command(ws, cmd) {
     ws.send(
         JSON.stringify({

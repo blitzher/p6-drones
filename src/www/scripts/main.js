@@ -13,12 +13,23 @@ window.addEventListener("load", (doc, ev) => {
             rendering.renderMarkers(markers);
             markers.forEach((element) => {
                 markerPos3D = rendering.estimateMarkerPosition(element);
+
+                console.log(
+                    `Absolute x:${
+                        Math.round(markerPos3D.absolute.x) / 10
+                    }cm y:${Math.round(markerPos3D.absolute.y) / 10}cm z:${
+                        Math.round(markerPos3D.absolute.z) / 10
+                    }cm`
+                );
+
+                console.log(
+                    `Relative x:${
+                        Math.round(markerPos3D.relative.x) / 10
+                    }cm y:${Math.round(markerPos3D.relative.y) / 10}cm z:${
+                        Math.round(markerPos3D.relative.z) / 10
+                    }cm`
+                );
             });
-            console.log(
-                `Markpos x:${Math.round(markerPos3D.x) / 10}cm y:${
-                    Math.round(markerPos3D.y) / 10
-                }cm z:${Math.round(markerPos3D.z) / 10}cm`
-            );
         }
     }, 1000);
 });

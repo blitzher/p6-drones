@@ -51,6 +51,8 @@ function init() {
     vcanvas.width = 420;
     vcanvas.height = 315;
     vctx = vcanvas.getContext("2d");
+    vctx.strokeStyle = "red";
+    vctx.lineWidth = 2;
 
     /* Attach event listeners to hovering element */
     initHoveringElement();
@@ -165,19 +167,13 @@ function estimateMarkerPosition(marker) {
     let z0 = x1 ** 2 / dist ** 2 + y1 ** 2 / dist ** 2 + 1;
     let z1 = z0 * dist;
 
-    /* Construct the vector from the direction,
-     * length and position of the drone  */
-    //const direction = new Marker3D({ x: x0, y: y0, z: z0 });
-    //const norm = direction.normalise();
-    //const scaled = norm.scale(dist);
-
     const markerRelativePosition = new Vector3({ x: x1, y: y1, z: z1 });
 
     /* Adjust for camera tilt, estimated 15degrees */
     const cameraAdjusted = rotateVectorAroundXAxis(
         markerRelativePosition,
         /*Degrees recalculated to radians*/
-        (15 * Math.PI) / 180 - droneState.rotation.pitch
+        Math.PI / 12 - droneState.rotation.pitch
     );
 
     /* Adjust for rotation of drone */
@@ -187,9 +183,9 @@ function estimateMarkerPosition(marker) {
     );
 
     /* Actual in-environment position of marker, relative to the starting position of the drone */
-    const position = adjustedPosition.add(droneState.position);
+    const position = adjustedPosition.add(droneState.position.scale(10));
 
-    return position;
+    return { absolute: position, relative: adjustedPosition };
 }
 
 /**
@@ -209,8 +205,9 @@ function feed(data) {
  */
 function findMarkers() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    vctx.clearRect(0, 0, vcanvas.width, vcanvas.height);
     const imgData = extractImgData();
-    const markers = ARReader(imgData);
+    let markers = ARReader(imgData);
 
     if (markers.length == 0) {
         let marker = {};
@@ -226,6 +223,7 @@ function findMarkers() {
         //markers.push(marker);
     }
 
+    markers = markers.filter((marker) => marker.id != 97);
     return markers;
 }
 
@@ -234,9 +232,6 @@ function findMarkers() {
  * @param {Marker[]} markers
  */
 function renderMarkers(markers) {
-    vctx.clearRect(0, 0, vcanvas.width, vcanvas.height);
-    vctx.strokeStyle = "red";
-    vctx.lineWidth = 2;
     vctx.beginPath();
     for (let marker of markers) {
         const start = linInterpCanvas(marker.corners[0], canvas, vcanvas);
@@ -259,6 +254,10 @@ function updateState(state) {
 	&nbsp;x: ${state.speed.x}<br>
 	&nbsp;y: ${state.speed.y}<br>
 	&nbsp;z: ${state.speed.z}<br>
+	Position:<br>
+	&nbsp;x: ${state.position.x}<br>
+	&nbsp;y: ${state.position.y}<br>
+	&nbsp;z: ${state.position.z}<br>
     Temperature:<br>
 	&nbsp;low: ${state.temperature.low}<br>
 	&nbsp;high: ${state.temperature.high}<br>
@@ -269,8 +268,7 @@ function updateState(state) {
     Acceleration:<br>
 	&nbsp;x: ${state.acceleration.x}<br>
 	&nbsp;y: ${state.acceleration.y}<br>
-	&nbsp;z: ${state.acceleration.z}<br>
-    `;
+	&nbsp;z: ${state.acceleration.z}<br>`;
 
     stateinfodata.innerHTML = formattedData;
 }

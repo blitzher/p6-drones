@@ -27,7 +27,7 @@ This is my _very cool_ website, very nice
 <div><canvas id="map"></canvas></div>
 </div>
 
-<form action="">
+<form>
 Command drone <input id="input-command" type="text"></input>
 </form>
 
