@@ -12,9 +12,7 @@ export class H264Segmenter {
     constructor(segment: h264segment) {
         this.bitrateEstimate = 0;
         setTimeout(() => {
-            console.log(
-                `Estimated Mbitrate: ${this.bitrateEstimate / 10 ** 7}`
-            );
+            console.log(`Estimated Mbitrate: ${this.bitrateEstimate / 10e7}`);
         }, 10000);
     }
 

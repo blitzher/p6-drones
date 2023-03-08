@@ -4,17 +4,14 @@ import * as path from "path";
 
 /* Import npm packages */
 import express from "express";
-import tellojs from "tellojs";
+import { sdk } from "tellojs-sdk30";
 import expressWs from "express-ws";
 import { v4 as uuidv4 } from "uuid";
 import { WebSocket } from "ws";
 
 /* Import local packages and typedef */
 import { H264Segmenter } from "./h264-segmenter";
-import { SDK } from "./sdk";
 import environment from "./environment";
-
-const sdk: SDK = tellojs;
 
 /* Global constant */
 const PORT = 42069;
@@ -64,9 +61,13 @@ const drone = {
     },
     command: async (cmd: string) => {
         if (!drone.connected) return;
-        await sdk.control.command(cmd);
+
+        sdk.control.command(cmd).catch((e) => {
+            console.log(e);
+        });
     },
 };
+
 async function droneControl() {
     try {
         await sdk.control.connect();
@@ -102,8 +103,14 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
+    let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
+        clearTimeout(disconnectedTimeout);
         com.state(res);
+        disconnectedTimeout = setTimeout(async () => {
+            drone.connected = false;
+            console.log("Drone disconnected");
+        }, 1000);
     });
 }
 
