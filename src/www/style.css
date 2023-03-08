@@ -1,4 +1,3 @@
-
 * {
     color: ghostwhite;
     font-family: 'Courier New', Courier, monospace;
@@ -14,7 +13,6 @@ html {
 
 body {
     width: 100vw;
-    display:block;
     align-items: center;
 }
 
@@ -31,14 +29,33 @@ canvas, video {
 }
 
 #canvases {
-    display: flex
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 100%;
+}
+
+#canvases>div {
+    display: grid;
+}
+
+#vcanvas {
+    /* position: fixed; */
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 10;
+    background:transparent;
+}
+
+#camera {
+    grid-row: 1;
+    grid-column: 1;
 }
 
 .hovering {
     z-index: 9;
     position: absolute;
     display: flex;
-    flex-direction:column;
+    flex-direction: column;
     top: 600px;
     left: 150px;
     width: 150px;
@@ -48,12 +65,18 @@ canvas, video {
     border: 5px solid #7F2020;
     border-radius: 10px;
     padding: 5px;
+    z-index: 10;
+}
+
+#map {
+    grid-column: 2;
 }
 
 span {
     display: flex;
 }
-span > * {
+
+span>* {
     margin: 10px;
 }
 
@@ -68,7 +91,12 @@ span > * {
     border-radius: 50%;
 }
 
-#stateinfo-data{
+#stateinfo-data {
     display: none;
 
+}
+
+input {
+    background-color: #303050;
+    border: solid 1px ghostwhite;
 }

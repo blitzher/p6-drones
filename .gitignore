@@ -1,6 +1,7 @@
 node_modules/*
 imgs/*
 bin/*
+build/*
 
 # Ignore compiled html
 src/www/index.html

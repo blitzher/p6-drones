@@ -13,7 +13,6 @@
 <script type="module" src="scripts/main.js"></script>
 
 </head>
-
 <div>
 
 # Hello there
@@ -21,11 +20,16 @@
 This is my _very cool_ website, very nice
 
 <div id=canvases>
-<div><video id="camera" autoplay muted></video></div>
+<div>
+	<video id="camera" autoplay muted></video>
+	<canvas id="vcanvas"></canvas>
+</div>
 <div><canvas id="map"></canvas></div>
 </div>
 
-This is other text
+<form>
+Command drone <input id="input-command" type="text"></input>
+</form>
 
 </div>
 
