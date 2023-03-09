@@ -31,6 +31,14 @@ class Vector3 {
         const l = this.length();
         return new Vector3({ x: this.x / l, y: this.y / l, z: this.z / l });
     }
+
+    serialize() {
+        return JSON.stringify({
+            x: this.x,
+            y: this.y,
+            z: this.z,
+        });
+    }
 }
 
 const linInterp = (v, a, b, c, d) => ((v - a) / (b - a)) * (d - c) + c;

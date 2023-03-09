@@ -112,7 +112,6 @@ function ARReader(imgData) {
 }
 
 /**
- *
  * @param {Marker} marker
  * @returns
  */
@@ -247,7 +246,7 @@ function renderMarkers(markers) {
 }
 
 function updateState(state) {
-    const formattedData = `
+    let formattedData = `
     Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}<br>
     Battery: ${state.battery}%<br>
     Speed:<br>

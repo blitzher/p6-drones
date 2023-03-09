@@ -54,16 +54,26 @@ export const droneState = {
         y: 0,
         z: 0,
     }),
-    updatePosition: function (speed) {
-        const temp = speed.z;
-        speed.z = speed.y;
-        speed.y = temp;
+    updatePosition: function (rawSpeed) {
+        if (!this._dt) {
+            this._dt = Date.now();
+            return;
+        }
+        /* Construct vector */
+        let vector = new Vector3({
+            x: rawSpeed.y * 10,
+            y: rawSpeed.z * 10,
+            z: rawSpeed.x * 10,
+        });
+        vector = rotateVectorAroundYAxis(vector, -this.rotation.yaw);
 
-        const temp2 = speed.z;
-        speed.z = speed.x;
-        speed.x = temp2;
+        /* Scale wrt. deltaTime */
+        const cTime = Date.now();
+        const deltaTime = (cTime - this._dt) / 1000;
+        this._dt = cTime;
+        vector = vector.scale(deltaTime);
 
-        this.position = this.position.add(speed);
+        this.position = this.position.add(vector);
     },
 
     updateRotation: function (pitch, yaw, roll) {
@@ -83,15 +93,15 @@ function handle(pkg, ws) {
             console.error(`Server error: ${pkg.data}`);
             break;
         case "state":
-            const dataToRender = pkg.data;
-            Object.assign(dataToRender, droneState);
-            rendering.updateState(dataToRender);
-            droneState.updatePosition(pkg.data.speed);
             droneState.updateRotation(
                 pkg.data.pitch,
                 pkg.data.yaw,
                 pkg.data.roll
             );
+            droneState.updatePosition(pkg.data.speed);
+            const dataToRender = pkg.data;
+            Object.assign(dataToRender, droneState);
+            rendering.updateState(dataToRender);
             ws.send(
                 JSON.stringify({
                     type: "dronestate",

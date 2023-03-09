@@ -62,7 +62,7 @@ const drone = {
     command: async (cmd: string) => {
         if (!drone.connected) return;
 
-        sdk.control.command(cmd).catch((e) => {
+        sdk.command(cmd).catch((e) => {
             console.log(e);
         });
     },
@@ -105,8 +105,8 @@ async function droneControl() {
     const stateEmitter = sdk.receiver.state.bind();
     let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
-        clearTimeout(disconnectedTimeout);
         com.state(res);
+        clearTimeout(disconnectedTimeout);
         disconnectedTimeout = setTimeout(async () => {
             drone.connected = false;
             console.log("Drone disconnected");
