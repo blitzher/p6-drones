@@ -12,6 +12,7 @@ function init() {
 
     ws.addEventListener("message", (msg) => {
         let pkg;
+
         try {
             pkg = JSON.parse(msg.data);
         } catch (e) {
