@@ -62,7 +62,7 @@ const drone = {
     command: async (cmd: string) => {
         if (!drone.connected) return;
 
-        sdk.control.command(cmd).catch((e) => {
+        sdk.command(cmd).catch((e) => {
             console.log(e);
         });
     },
@@ -103,8 +103,10 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
-    let disconnectedTimeout = setTimeout(() => {}, 10e5);
+    let disconnectedTimeout = setTimeout(() => { }, 10e5);
     stateEmitter.on("message", (res) => {
+        //sdk.read.speed().then(x => console.log(x));
+        console.log(res.speed);
         clearTimeout(disconnectedTimeout);
         com.state(res);
         disconnectedTimeout = setTimeout(async () => {
@@ -146,7 +148,7 @@ function handle(pkg: Package) {
             drone.command(pkg.data);
             break;
         case "dronestate":
-            environment;
+            console.log(pkg)
             break;
     }
 }
