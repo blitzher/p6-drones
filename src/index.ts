@@ -12,6 +12,7 @@ import { WebSocket } from "ws";
 /* Import local packages and typedef */
 import { H264Segmenter } from "./h264-segmenter";
 import environment from "./environment";
+import Fly from "./Fly";
 
 /* Global constant */
 const PORT = 42069;
