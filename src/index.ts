@@ -106,8 +106,12 @@ async function droneControl() {
     const stateEmitter = sdk.receiver.state.bind();
     let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
-        //sdk.read.speed().then(x => console.log(x));
-        console.log(res.speed);
+        console.log(res.tof)
+        // if (res.tof > 120) {
+        //     drone.command("flip l");
+        //     //drone.command("flip left");
+
+        // }
         clearTimeout(disconnectedTimeout);
         com.state(res);
         disconnectedTimeout = setTimeout(async () => {
