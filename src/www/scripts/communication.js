@@ -54,6 +54,12 @@ export const droneState = {
         y: 0,
         z: 0,
     }),
+    instructedPos: new Vector3({
+        x: 0,
+        y: 0,
+        z: 0,
+    }),
+    com: "",
     updatePosition: function (rawSpeed) {
         if (!this._dt) {
             this._dt = Date.now();
@@ -63,7 +69,7 @@ export const droneState = {
         let vector = new Vector3({
             x: rawSpeed.y * 10,
             y: rawSpeed.z * 10,
-            z: rawSpeed.x * 10,
+            z: -rawSpeed.x * 10,
         });
         vector = rotateVectorAroundYAxis(vector, -this.rotation.yaw);
 
@@ -72,6 +78,37 @@ export const droneState = {
         const deltaTime = (cTime - this._dt) / 1000;
         this._dt = cTime;
         vector = vector.scale(deltaTime);
+        const input = this.com.split(" ");
+
+        switch (input[0]) {
+            case "forward":
+                this.instructedPos.z += Number(input[1]);
+                this.com = "";
+                break;
+            case "back":
+                this.instructedPos.z -= Number(input[1]);
+                this.com = "";
+                break;
+            case "right":
+                this.instructedPos.x += Number(input[1]);
+                this.com = "";
+                break;
+            case "left":
+                this.instructedPos.x -= Number(input[1]);
+                this.com = "";
+                break;
+            case "up":
+                this.instructedPos.y += Number(input[1]);
+                this.com = "";
+                break;
+            case "down":
+                this.instructedPos.y -= Number(input[1]);
+                this.com = "";
+                break;
+            default:
+                this.com = "";
+                break;
+        }
 
         this.position = this.position.add(vector);
     },
@@ -128,6 +165,8 @@ function command(ws, cmd) {
             data: cmd,
         })
     );
+    droneState.com = cmd;
+    console.log(cmd);
 }
 
 export default {

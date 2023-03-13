@@ -246,17 +246,22 @@ function renderMarkers(markers) {
 }
 
 function updateState(state) {
+    let x = Math.round((state.position.x + state.instructedPos.x) / 2);
+    let y = Math.round((state.position.y + state.instructedPos.y) / 2);
+    let z = Math.round((state.position.z + state.instructedPos.z) / 2);
+
     let formattedData = `
     Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}<br>
     Battery: ${state.battery}%<br>
     Speed:<br>
-	&nbsp;x: ${state.speed.x}<br>
-	&nbsp;y: ${state.speed.y}<br>
-	&nbsp;z: ${state.speed.z}<br>
 	Position:<br>
-	&nbsp;x: ${state.position.x}<br>
-	&nbsp;y: ${state.position.y}<br>
-	&nbsp;z: ${state.position.z}<br>
+	&nbsp;x: ${x}<br>
+	&nbsp;y: ${y}<br>
+	&nbsp;z: ${z}<br>
+    InstructedPosition:<br>
+	&nbsp;x: ${state.instructedPos.x}<br>
+	&nbsp;y: ${state.instructedPos.y}<br>
+	&nbsp;z: ${state.instructedPos.z}<br>
     Temperature:<br>
 	&nbsp;low: ${state.temperature.low}<br>
 	&nbsp;high: ${state.temperature.high}<br>
