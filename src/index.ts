@@ -12,6 +12,7 @@ import { WebSocket } from "ws";
 /* Import local packages and typedef */
 import { H264Segmenter } from "./h264-segmenter";
 import environment from "./environment";
+import Fly from "./Fly";
 
 /* Global constant */
 const PORT = 42069;
@@ -103,7 +104,7 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
-    let disconnectedTimeout = setTimeout(() => { }, 10e5);
+    let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
         //sdk.read.speed().then(x => console.log(x));
         console.log(res.speed);
@@ -148,7 +149,7 @@ function handle(pkg: Package) {
             drone.command(pkg.data);
             break;
         case "dronestate":
-            console.log(pkg)
+            console.log(pkg);
             break;
     }
 }
