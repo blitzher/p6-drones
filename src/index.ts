@@ -84,7 +84,6 @@ async function droneControl() {
     drone.connected = true;
 
     console.log(`Drone connection established`);
-
     const videoEmitter = await sdk.receiver.video.bind();
     let isFirst = true;
     let segmenter: H264Segmenter;
@@ -104,14 +103,10 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
-    let disconnectedTimeout = setTimeout(() => {}, 10e5);
+    environment.path.SnakePattern();
+    let disconnectedTimeout = setTimeout(() => { }, 10e5);
     stateEmitter.on("message", (res) => {
-        console.log(res.tof)
-        // if (res.tof > 120) {
-        //     drone.command("flip l");
-        //     //drone.command("flip left");
 
-        // }
         clearTimeout(disconnectedTimeout);
         com.state(res);
         disconnectedTimeout = setTimeout(async () => {
