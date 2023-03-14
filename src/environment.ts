@@ -1,3 +1,5 @@
+import { sdk, SDK } from "tellojs-sdk30";
+
 type DroneState = {
     x: number;
     y: number;
@@ -20,8 +22,8 @@ class Object3D {
     collidesWith(other: Object3D): boolean {
         const distance = Math.sqrt(
             (other.x - this.x) ** 2 +
-                (other.y - this.y) ** 2 +
-                (other.z - this.z) ** 2
+            (other.y - this.y) ** 2 +
+            (other.z - this.z) ** 2
         );
 
         return distance < this.radius + other.radius;
@@ -91,8 +93,49 @@ testEnvironment.addObject(150, 0, 150, 20),
     testEnvironment.addObject(150, 50, 150, 20),
     testEnvironment.addObject(150, 150, 150, 20);
 
+
+
+class Fly {
+
+
+
+}
+
+class Path {
+    public async SnakePattern() {
+        await sdk.control.takeOff()
+            .then(() => sdk.control.move.up(150))
+            .catch((e) => console.log(e));
+
+
+        for (let index = 0; index < 5; index++) {
+            if (index % 2 == 0) {
+                await sdk.control.move.front(100)
+                    .then(() => sdk.control.rotate.clockwise(90))
+                    .then(() => sdk.control.move.front(30))
+                    .then(() => sdk.control.rotate.clockwise(90))
+                    .catch((e) => console.log(e));
+            } else {
+                await sdk.control.move.front(100)
+                    .then(() => sdk.control.rotate.counterClockwise(90))
+                    .then(() => sdk.control.move.front(30))
+                    .then(() => sdk.control.rotate.counterClockwise(90))
+                    .catch((e) => console.log(e));
+            }
+        }
+        await sdk.control.move.down(50)
+            .then(() => sdk.control.flip.back())
+            .then(() => sdk.control.land())
+            .catch((e) => console.log(e));
+
+
+    }
+
+}
+
 export default {
     environment: new Environment(),
     drone: new Object3D(0, 0, 0, 20),
     testEnvironment,
+    path: new Path()
 };
