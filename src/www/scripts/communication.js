@@ -4,8 +4,6 @@ import rendering from "./rendering.js";
 /**
  * @type {WebSocket}
  */
-let ws;
-
 function init() {
     const wsUrl = `ws:${window.location.host}`;
     const ws = new WebSocket(wsUrl);
@@ -39,88 +37,6 @@ function init() {
     });
 }
 
-export const droneState = {
-    position: new Vector3({
-        x: 0,
-        y: 0,
-        z: 0,
-    }),
-    rotation: {
-        pitch: 0,
-        yaw: 0,
-        roll: 0,
-    },
-    speed: new Vector3({
-        x: 0,
-        y: 0,
-        z: 0,
-    }),
-    instructedPos: new Vector3({
-        x: 0,
-        y: 0,
-        z: 0,
-    }),
-    com: "",
-    updatePosition: function (rawSpeed) {
-        if (!this._dt) {
-            this._dt = Date.now();
-            return;
-        }
-        /* Construct vector */
-        let vector = new Vector3({
-            x: rawSpeed.y * 10,
-            y: rawSpeed.z * 10,
-            z: -rawSpeed.x * 10,
-        });
-        vector = rotateVectorAroundYAxis(vector, -this.rotation.yaw);
-
-        /* Scale wrt. deltaTime */
-        const cTime = Date.now();
-        const deltaTime = (cTime - this._dt) / 1000;
-        this._dt = cTime;
-        vector = vector.scale(deltaTime);
-        const input = this.com.split(" ");
-
-        switch (input[0]) {
-            case "forward":
-                this.instructedPos.z += Number(input[1]);
-                this.com = "";
-                break;
-            case "back":
-                this.instructedPos.z -= Number(input[1]);
-                this.com = "";
-                break;
-            case "right":
-                this.instructedPos.x += Number(input[1]);
-                this.com = "";
-                break;
-            case "left":
-                this.instructedPos.x -= Number(input[1]);
-                this.com = "";
-                break;
-            case "up":
-                this.instructedPos.y += Number(input[1]);
-                this.com = "";
-                break;
-            case "down":
-                this.instructedPos.y -= Number(input[1]);
-                this.com = "";
-                break;
-            default:
-                this.com = "";
-                break;
-        }
-
-        this.position = this.position.add(vector);
-    },
-
-    updateRotation: function (pitch, yaw, roll) {
-        this.rotation.pitch = (pitch * Math.PI) / 180;
-        this.rotation.yaw = (yaw * Math.PI) / 180;
-        this.rotation.roll = (roll * Math.PI) / 180;
-    },
-};
-
 function handle(pkg, ws) {
     switch (pkg.type) {
         case "stream":
@@ -131,12 +47,6 @@ function handle(pkg, ws) {
             console.error(`Server error: ${pkg.data}`);
             break;
         case "state":
-            droneState.updateRotation(
-                pkg.data.pitch,
-                pkg.data.yaw,
-                pkg.data.roll
-            );
-            droneState.updatePosition(pkg.data.speed);
             const dataToRender = pkg.data;
             Object.assign(dataToRender, droneState);
             rendering.updateState(dataToRender);

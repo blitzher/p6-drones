@@ -4,14 +4,14 @@ import * as path from "path";
 
 /* Import npm packages */
 import express from "express";
-import { sdk } from "tellojs-sdk30";
+import { State as StateInfo, sdk } from "tellojs-sdk30";
 import expressWs from "express-ws";
 import { v4 as uuidv4 } from "uuid";
 import { WebSocket } from "ws";
 
-/* Import local packages and typedef */
+/* Import local packages */
 import { H264Segmenter } from "./h264-segmenter";
-import environment from "./environment";
+import * as env from "./environment";
 import Fly from "./Fly";
 
 /* Global constant */
@@ -40,7 +40,7 @@ const com = {
                 })
             );
     },
-    state: (state: object) => {
+    state: (state: StateInfo) => {
         for (let { client } of clients)
             client.send(
                 JSON.stringify({
@@ -48,6 +48,9 @@ const com = {
                     data: state,
                 })
             );
+
+        env.droneState.updatePosition(state.speed);
+        env.droneState.updateRotation(state.pitch, state.yaw, state.roll);
     },
 };
 
@@ -103,11 +106,12 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
-    environment.path.SnakePattern();
+    env.Path.SnakePattern();
     let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
         clearTimeout(disconnectedTimeout);
         com.state(res);
+
         disconnectedTimeout = setTimeout(async () => {
             drone.connected = false;
             console.log("Drone disconnected");
