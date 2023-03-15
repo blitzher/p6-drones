@@ -102,31 +102,38 @@ class Fly {
 }
 
 class Path {
+    public async DesignPattern(movement: number) {
+
+    }
+
+
     public async SnakePattern() {
-        await sdk.control.takeOff()
-            .then(() => sdk.control.move.up(150))
-            .catch((e) => console.log(e));
+        // await sdk.control.takeOff()
+        //     .then(() => sdk.control.move.up(150))
+        //     .catch((e) => console.log(e));
 
 
-        for (let index = 0; index < 5; index++) {
-            if (index % 2 == 0) {
-                await sdk.control.move.front(100)
-                    .then(() => sdk.control.rotate.clockwise(90))
-                    .then(() => sdk.control.move.front(30))
-                    .then(() => sdk.control.rotate.clockwise(90))
-                    .catch((e) => console.log(e));
-            } else {
-                await sdk.control.move.front(100)
-                    .then(() => sdk.control.rotate.counterClockwise(90))
-                    .then(() => sdk.control.move.front(30))
-                    .then(() => sdk.control.rotate.counterClockwise(90))
-                    .catch((e) => console.log(e));
-            }
-        }
-        await sdk.control.move.down(50)
-            .then(() => sdk.control.flip.back())
-            .then(() => sdk.control.land())
-            .catch((e) => console.log(e));
+        // for (let index = 0; index < 5; index++) {
+        //     if (index % 2 == 0) {
+        //         await sdk.control.move.front(100)
+        //             .then(() => sdk.control.rotate.clockwise(90))
+        //             .then(() => sdk.control.move.front(30))
+        //             .then(() => sdk.control.rotate.clockwise(90))
+        //             .catch((e) => console.log(e));
+        //     } else {
+        //         await sdk.control.move.front(100)
+        //             .then(() => sdk.control.rotate.counterClockwise(90))
+        //             .then(() => sdk.control.move.front(30))
+        //             .then(() => sdk.control.rotate.counterClockwise(90))
+        //             .catch((e) => console.log(e));
+        //     }
+        // }
+        // await sdk.control.move.down(50)
+        //     .then(() => sdk.control.flip.back())
+        //     .then(() => sdk.control.land())
+        //     .catch((e) => console.log(e));
+
+        // await sdk.command("takeoff").then(() => sdk.command("forward 100")).then(() => sdk.command("flip"));
 
 
     }
