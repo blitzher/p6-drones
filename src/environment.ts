@@ -102,8 +102,43 @@ class Fly {
 }
 
 class Path {
-    public async DesignPattern(movement: number) {
+    public async DesignPattern(mapWidth: number, mapLength: number) {
+        let iterations: number = Math.floor(mapWidth / 30);
+        let moveLength: number = mapLength;
 
+
+
+        let mission: (() => Promise<any>)[] = [];
+        mission.push(() => sdk.control.takeOff());
+
+        for (let index = 0; index < iterations; index++) {
+            if (index % 2 == 0) {
+
+                mission.push(() => sdk.control.move.front(moveLength));
+                mission.push(() => sdk.control.rotate.clockwise(90));
+                mission.push(() => sdk.control.move.front(30));
+                mission.push(() => sdk.control.rotate.clockwise(90));
+            } else {
+                mission.push(() => sdk.control.move.front(moveLength));
+                mission.push(() => sdk.control.rotate.counterClockwise(90));
+                mission.push(() => sdk.control.move.front(30));
+                mission.push(() => sdk.control.rotate.counterClockwise(90));
+            }
+        }
+
+        mission.push(() => sdk.control.land());
+        return mission;
+
+    }
+
+
+    public async test() {
+        const missiontest: (() => Promise<any>)[] = [];
+
+    }
+
+    public test1() {
+        console.log("Hello");
     }
 
 
@@ -132,8 +167,16 @@ class Path {
         //     .then(() => sdk.control.flip.back())
         //     .then(() => sdk.control.land())
         //     .catch((e) => console.log(e));
+        let a = await this.DesignPattern(60, 100);
 
-        // await sdk.command("takeoff").then(() => sdk.command("forward 100")).then(() => sdk.command("flip"));
+        // for (let index = 0; index < 6; index++) {
+
+        //     await a[index]();
+
+        // }
+        for (const iterator of a) {
+            await iterator();
+        }
 
 
     }
