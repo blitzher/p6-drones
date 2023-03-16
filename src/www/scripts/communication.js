@@ -54,10 +54,10 @@ function handle(pkg, ws) {
             Object.assign(dataToRender, droneState);
             rendering.updateState(dataToRender);
             break;
-        case "environment":
+        case "environment" /* {environment: string[]} */:
             console.log("Environment NYI");
             break;
-        case "drone":
+        case "drone" /* {dronePosition: string, dronePositionHistory: string[]} */:
             console.log("DroneData NYI");
             break;
         default:
