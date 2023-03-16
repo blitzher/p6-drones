@@ -5,7 +5,7 @@ import environment3D from "./3dmap.js";
 window.addEventListener("load", (doc, ev) => {
     rendering.initialise();
     communication.initialise();
-    environment3D.cube3D();
+    environment3D.render3DCube();
 
     setInterval(() => {
         const markers = rendering.findMarkers();

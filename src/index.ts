@@ -52,10 +52,12 @@ const com = {
         env.droneState.updateRotation(state.pitch, state.yaw, state.roll);
     },
     environment: (data: { environment: string[] }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
     },
     drone: (data: { dronePosition: string; dronePositionHistory: string }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -130,9 +132,12 @@ async function droneControl() {
     env.environment.listen("environment", (data: { environment: string[] }) => {
         com.environment(data);
     });
-    env.environment.listen("drone", (data: { dronePosition: string; dronePositionHistory: string }) => {
-        com.drone(data);
-    });
+    env.environment.listen(
+        "drone",
+        (data: { dronePosition: string; dronePositionHistory: string }) => {
+            com.drone(data);
+        }
+    );
 }
 
 app.ws("/", (ws) => {
