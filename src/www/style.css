@@ -33,7 +33,19 @@ canvas, video {
     grid-template-columns: 50% 50%;
     grid-template-rows: 100%;
 }
-
+button{
+    position:relative;
+    background-color: red;
+    border: 5px solid #7F2020;
+    border-radius: 100%;
+    padding: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+button:active {
+    background-color: #7F2020;
+    transform: translateY(4px);
+  }
 #canvases>div {
     display: grid;
 }

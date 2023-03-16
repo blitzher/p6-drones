@@ -35,11 +35,10 @@ This is my _very cool_ website, very nice
 </div>
 <div><canvas id="map"></canvas></div>
 </div>
-
 <form>
 Command drone <input id="input-command" type="text"></input>
 </form>
-
+<button id="button">Emergency Stop</button>
 </div>
 
 <div class="hovering" id="stateinfo-window">

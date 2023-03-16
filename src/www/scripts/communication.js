@@ -37,6 +37,11 @@ function init() {
         command(ws, cmd);
         return false;
     });
+    $("#button").addEventListener("click", (ev) => {
+        const emergencyStop = "stop";
+        command(ws, emergencyStop);
+        return false;
+    });
 }
 
 function handle(pkg, ws) {
