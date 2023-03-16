@@ -1,6 +1,8 @@
 import rendering from "./rendering.js";
 
 /* Declare global variables for use in component */
+export let droneState = {};
+
 /**
  * @type {WebSocket}
  */
@@ -48,17 +50,15 @@ function handle(pkg, ws) {
             break;
         case "state":
             const dataToRender = pkg.data;
+            droneState = pkg.data;
             Object.assign(dataToRender, droneState);
             rendering.updateState(dataToRender);
-            ws.send(
-                JSON.stringify({
-                    type: "dronestate",
-                    data: droneState,
-                })
-            );
             break;
-        case "mapdata":
-            console.log("Map NYI");
+        case "environment" /* {environment: string[]} */:
+            console.log("Environment NYI");
+            break;
+        case "drone" /* {dronePosition: string, dronePositionHistory: string[]} */:
+            console.log("DroneData NYI");
             break;
         default:
             console.error(`Unknown package type: ${pkg.type}`);
@@ -76,8 +76,6 @@ function command(ws, cmd) {
             data: cmd,
         })
     );
-    droneState.com = cmd;
-    console.log(cmd);
 }
 
 export default {

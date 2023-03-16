@@ -9,7 +9,7 @@ export class Vector3 {
         this.z = z;
     }
 
-    add({ x, y, z }) {
+    add({ x, y, z }: { x: number; y: number; z: number }): Vector3 {
         return new Vector3({ x: this.x + x, y: this.y + y, z: +this.z + z });
     }
 

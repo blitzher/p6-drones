@@ -14,7 +14,7 @@ class Object3D {
     z: number;
     radius: number;
 
-    constructor(x, y, z, radius) {
+    constructor(x: number, y: number, z: number, radius: number) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -53,7 +53,7 @@ export const droneState = {
         y: 0,
         z: 0,
     }),
-    updatePosition: function (speed) {
+    updatePosition: function (speed: { z: number; y: number; x: number }) {
         const temp = speed.z;
         speed.z = speed.y;
         speed.y = temp;
@@ -65,17 +65,19 @@ export const droneState = {
         this.position = this.position.add(speed);
     },
 
-    updateRotation: function (pitch, yaw, roll) {
+    updateRotation: function (pitch: number, yaw: number, roll: number) {
         this.rotation.pitch = (pitch * Math.PI) / 180;
         this.rotation.yaw = (yaw * Math.PI) / 180;
         this.rotation.roll = (roll * Math.PI) / 180;
     },
 };
 
-class Environment extends EventEmitter {
+interface EnvironmentEmitter {}
+
+class Environment extends EventEmitter implements EnvironmentEmitter {
     public objects: Object3D[];
 
-    private dronePositionHistory: Object3D[];
+    private dronePositionHistory: Object3D[] = [];
     private drone: Object3D;
 
     private borderLength = 200;
@@ -86,16 +88,18 @@ class Environment extends EventEmitter {
         this.drone = new Object3D(0, 0, 0, 20);
     }
 
-    public OutsideBoundary(drone: Object3D): boolean {
+    public outsideBoundary(drone: Object3D): boolean {
         const actualLength = Math.sqrt(Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2);
 
         if (actualLength > this.borderLength || drone.z > this.borderLength) {
             return true;
         }
+        return false;
     }
 
     public addObject(x: number, y: number, z: number, r: number) {
         this.objects.push(new Object3D(x, y, z, r));
+        this.emit("object", this.serialize());
     }
 
     public updateDronePosition(droneState: DroneState) {
@@ -104,20 +108,30 @@ class Environment extends EventEmitter {
         this.drone.z = droneState.z;
 
         this.dronePositionHistory.push(new Object3D(this.drone.x, this.drone.y, this.drone.z, 2));
+        this.emit("drone", {
+            dronePosition: this.drone.serialize(),
+            dronePositionHistory: this.dronePositionHistory.map((pos) => pos.serialize()),
+        });
     }
 
     public serialize() {
         return JSON.stringify({
-            dronePositionHistory: this.dronePositionHistory.map((position) => position.serialize()),
             environment: this.objects.map((object) => object.serialize()),
-            drone: this.drone.serialize(),
         });
     }
-}
-class Fly {}
 
-export const Path = {
-    async SnakePattern() {
+    public listen(
+        ...args:
+            | [event: "environment", listener: (data: { environment: string[] }) => void]
+            | [event: "drone", listener: (data: { dronePosition: string; dronePositionHistory: string }) => void]
+    ): this {
+        console.log(args);
+        return this.on(args[0], args[1]);
+    }
+}
+
+export const path = {
+    async snakePattern() {
         await sdk.control
             .takeOff()
             .then(() => sdk.control.move.up(150))
