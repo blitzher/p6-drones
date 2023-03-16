@@ -10,6 +10,7 @@ let vctx;
 /* Find and set constant element references */
 const stateinfodata = $("#stateinfo-data");
 const videoElem = $("#camera");
+const mapCanvas3D = $("#map");
 
 /* Field of Views of the camera, calculated from the 82.6 degree diagonal FOV */
 const xFov = 1.1533;
