@@ -8,6 +8,7 @@
 <script type="text/javascript" src="libs/jmuxer.min.js"></script>
 <script type="text/javascript" src="libs/cv.js"></script>
 <script type="text/javascript" src="libs/aruco.js"></script>
+<script type="text/javascript" src="libs/three.min.js"></script>
 
 <script type="text/javascript" src="scripts/utilities.js"></script>
 <script type="module" src="scripts/main.js"></script>
