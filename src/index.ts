@@ -12,7 +12,6 @@ import { WebSocket } from "ws";
 /* Import local packages */
 import { H264Segmenter } from "./h264-segmenter";
 import * as env from "./environment";
-import Fly from "./Fly";
 
 /* Global constant */
 const PORT = 42069;
@@ -51,6 +50,12 @@ const com = {
 
         env.droneState.updatePosition(state.speed);
         env.droneState.updateRotation(state.pitch, state.yaw, state.roll);
+    },
+    environment: (data: { environment: string[] }) => {
+        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+    },
+    drone: (data: { dronePosition: string; dronePositionHistory: string }) => {
+        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -106,16 +111,27 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
-    env.Path.SnakePattern();
+    /* env.path.snakePattern(); */
+    sdk.set.mon().catch((e) => {});
     let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
         clearTimeout(disconnectedTimeout);
         com.state(res);
+        env.droneState.updatePosition(res.speed);
+        env.droneState.updateRotation(res.pitch, res.yaw, res.roll);
+        env.environment.updateDronePosition(env.droneState.position);
 
         disconnectedTimeout = setTimeout(async () => {
             drone.connected = false;
             console.log("Drone disconnected");
         }, 1000);
+    });
+
+    env.environment.listen("environment", (data: { environment: string[] }) => {
+        com.environment(data);
+    });
+    env.environment.listen("drone", (data: { dronePosition: string; dronePositionHistory: string }) => {
+        com.drone(data);
     });
 }
 
@@ -151,7 +167,8 @@ function handle(pkg: Package) {
             drone.command(pkg.data);
             break;
         case "dronestate":
-            console.log(pkg);
+            console.log("Receiving 'dronestate' pkg");
+
             break;
     }
 }

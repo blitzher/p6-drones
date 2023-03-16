@@ -120,17 +120,11 @@ function estimateDistance(marker) {
     const FOCAL_LENGTH = 25; /* mm */
     const MARKER_HEIGHT = 140; /* mm */
     const APPARENT_HEIGHT =
-        (marker.corners[3].y -
-            marker.corners[0].y +
-            marker.corners[2].y -
-            marker.corners[1].y) /
-        2; /* pixels */
+        (marker.corners[3].y - marker.corners[0].y + marker.corners[2].y - marker.corners[1].y) / 2; /* pixels */
     const IMAGE_HEIGHT = canvas.height; /* pixels */
     const SENSOR_HEIGHT = 2.0775; /* mm */
     return (
-        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) /
-            (APPARENT_HEIGHT * SENSOR_HEIGHT)) *
-        0.1
+        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) / (APPARENT_HEIGHT * SENSOR_HEIGHT)) * 0.1
     ); /* Divide by 10 because ¯\_(ツ)_/¯ */
 }
 
@@ -138,18 +132,8 @@ function estimateMarkerPosition(marker) {
     const dist = estimateDistance(marker);
 
     /* Find center of the marker */
-    const x =
-        (marker.corners[0].x +
-            marker.corners[1].x +
-            marker.corners[2].x +
-            marker.corners[3].x) /
-        4;
-    const y =
-        (marker.corners[0].y +
-            marker.corners[1].y +
-            marker.corners[2].y +
-            marker.corners[3].y) /
-        4;
+    const x = (marker.corners[0].x + marker.corners[1].x + marker.corners[2].x + marker.corners[3].x) / 4;
+    const y = (marker.corners[0].y + marker.corners[1].y + marker.corners[2].y + marker.corners[3].y) / 4;
 
     /* Find the relative screen position of the marker */
     const [mx, my] = [canvas.width / 2, canvas.height / 2];
@@ -177,10 +161,7 @@ function estimateMarkerPosition(marker) {
     );
 
     /* Adjust for rotation of drone */
-    const adjustedPosition = rotateVectorAroundYAxis(
-        cameraAdjusted,
-        droneState.rotation.yaw
-    );
+    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState.rotation.yaw);
 
     /* Actual in-environment position of marker, relative to the starting position of the drone */
     const position = adjustedPosition.add(droneState.position.scale(10));
@@ -247,9 +228,9 @@ function renderMarkers(markers) {
 }
 
 function updateState(state) {
-    let x = Math.round((state.position.x + state.instructedPos.x) / 2);
-    let y = Math.round((state.position.y + state.instructedPos.y) / 2);
-    let z = Math.round((state.position.z + state.instructedPos.z) / 2);
+    let x = 0; // Math.round((state.position.x + state.instructedPos.x) / 2);
+    let y = 0; //Math.round((state.position.y + state.instructedPos.y) / 2);
+    let z = 0; //Math.round((state.position.z + state.instructedPos.z) / 2);
 
     let formattedData = `
     Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}<br>
@@ -260,9 +241,9 @@ function updateState(state) {
 	&nbsp;y: ${y}<br>
 	&nbsp;z: ${z}<br>
     InstructedPosition:<br>
-	&nbsp;x: ${state.instructedPos.x}<br>
-	&nbsp;y: ${state.instructedPos.y}<br>
-	&nbsp;z: ${state.instructedPos.z}<br>
+	&nbsp;x: ${state.x}<br>
+	&nbsp;y: ${state.y}<br>
+	&nbsp;z: ${state.z}<br>
     Temperature:<br>
 	&nbsp;low: ${state.temperature.low}<br>
 	&nbsp;high: ${state.temperature.high}<br>
