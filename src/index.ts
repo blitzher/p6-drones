@@ -12,6 +12,8 @@ import { WebSocket } from "ws";
 /* Import local packages */
 import { H264Segmenter } from "./h264-segmenter";
 import * as env from "./environment";
+import { Vector3 } from "./linerAlgebra";
+import { Object3D } from "./environment";
 
 /* Global constant */
 const PORT = 42069;
@@ -51,13 +53,11 @@ const com = {
         env.droneState.updatePosition(state.speed);
         env.droneState.updateRotation(state.pitch, state.yaw, state.roll);
     },
-    environment: (data: { environment: string[] }) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "environment", data }));
+    environment: (data: Object3D[]) => {
+        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
     },
-    drone: (data: { dronePosition: string; dronePositionHistory: string }) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "drone", data }));
+    drone: (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -121,23 +121,13 @@ async function droneControl() {
         com.state(res);
         env.droneState.updatePosition(res.speed);
         env.droneState.updateRotation(res.pitch, res.yaw, res.roll);
-        env.environment.updateDronePosition(<any>env.droneState);
+        env.environment.updateDronePosition(env.droneState.position);
 
         disconnectedTimeout = setTimeout(async () => {
             drone.connected = false;
             console.log("Drone disconnected");
         }, 1000);
     });
-
-    env.environment.listen("environment", (data: { environment: string[] }) => {
-        com.environment(data);
-    });
-    env.environment.listen(
-        "drone",
-        (data: { dronePosition: string; dronePositionHistory: string }) => {
-            com.drone(data);
-        }
-    );
 }
 
 app.ws("/", (ws) => {
@@ -178,9 +168,32 @@ function handle(pkg: Package) {
     }
 }
 
+function startTest() {
+    console.log(`Starting test: ${process.title}`);
+
+    /* Position of dummy boxes for testing */
+    let time = 0;
+    setInterval(() => {
+        let x = Math.cos(time) * time * 3;
+        let z = Math.sin(time) * time * 3;
+        let obstacle = new Object3D(x, 0, z, 10);
+        time += 0.2;
+        env.environment.addObject({ obj: obstacle });
+    }, 1000);
+
+    env.environment.listen("objects", (data: Object3D[]) => {
+        com.environment(data);
+    });
+    env.environment.listen("drone", (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+        com.drone(data);
+    });
+}
+
 /* Launch server */
 app.listen(PORT, async () => {
     console.log(`Listening on ${PORT}...`);
+
+    startTest();
 
     console.log(`Connecting to drone...`);
     while (!drone.connected) {

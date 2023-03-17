@@ -50,10 +50,8 @@ function render3DCube() {
             cube.rotation.x = rotation;
             cube.rotation.y = rotation;
         });
-        camera.position.x =
-            cameraOffset.length() * Math.sin(time * cameraSpeed);
-        camera.position.z =
-            cameraOffset.length() * Math.cos(time * cameraSpeed);
+        camera.position.x = cameraOffset.length() * Math.sin(time * cameraSpeed);
+        camera.position.z = cameraOffset.length() * Math.cos(time * cameraSpeed);
         camera.lookAt(0, 0, 0);
         light.position.set(...camera.position);
         renderer.render(scene, camera);
@@ -62,17 +60,25 @@ function render3DCube() {
     animateCubes();
 }
 
-function make3DCubeInstance(geometry, color, x) {
+function make3DCubeInstance(size, pos, color) {
+    const geometry = new THREE.BoxGeometry(...Object.values(size));
     const material = new THREE.MeshPhongMaterial({ color });
 
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
-    cube.position.x = x;
-    cube.position.y = 2;
+    cube.position.set(...Object.values(pos));
     return cube;
+}
+
+function clearCubes() {
+    for (let cube of cubes) {
+        cubes.pop;
+    }
 }
 
 export default {
     render3DCube,
+    clearCubes,
+    make3DCubeInstance,
 };
