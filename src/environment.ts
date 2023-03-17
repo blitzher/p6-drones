@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { sdk, SDK } from "tellojs-sdk30";
 
 type DroneState = {
@@ -19,7 +20,7 @@ class Object3D {
         this.radius = radius;
     }
 
-    collidesWith(other: Object3D): boolean {
+    public collidesWith(other: Object3D): boolean {
         const distance = Math.sqrt(
             (other.x - this.x) ** 2 +
             (other.y - this.y) ** 2 +
@@ -87,33 +88,38 @@ class Environment {
     }
 }
 
-let testEnvironment = new Environment();
-
-testEnvironment.addObject(150, 0, 150, 20),
-    testEnvironment.addObject(150, 50, 150, 20),
-    testEnvironment.addObject(150, 150, 150, 20);
 
 
 
 class Fly {
-
+    a: number
 
 
 }
 
+
+type DroneCommand = {
+    Command: Promise<any>;
+}
+
+
 class Path {
+
+    DroneCommand: Promise<any>[];
+
+    constructor(dronecommand) {
+        this.DroneCommand = dronecommand;
+    }
+
     public async DesignPattern(mapWidth: number, mapLength: number) {
         let iterations: number = Math.floor(mapWidth / 30);
         let moveLength: number = mapLength;
-
-
 
         let mission: (() => Promise<any>)[] = [];
         mission.push(() => sdk.control.takeOff());
 
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
-
                 mission.push(() => sdk.control.move.front(moveLength));
                 mission.push(() => sdk.control.rotate.clockwise(90));
                 mission.push(() => sdk.control.move.front(30));
@@ -127,65 +133,46 @@ class Path {
         }
 
         mission.push(() => sdk.control.land());
-        return mission;
+        return this.DroneCommand;
 
-    }
-
-
-    public async test() {
-        const missiontest: (() => Promise<any>)[] = [];
-
-    }
-
-    public test1() {
-        console.log("Hello");
     }
 
 
     public async SnakePattern() {
-        // await sdk.control.takeOff()
-        //     .then(() => sdk.control.move.up(150))
-        //     .catch((e) => console.log(e));
 
-
-        // for (let index = 0; index < 5; index++) {
-        //     if (index % 2 == 0) {
-        //         await sdk.control.move.front(100)
-        //             .then(() => sdk.control.rotate.clockwise(90))
-        //             .then(() => sdk.control.move.front(30))
-        //             .then(() => sdk.control.rotate.clockwise(90))
-        //             .catch((e) => console.log(e));
-        //     } else {
-        //         await sdk.control.move.front(100)
-        //             .then(() => sdk.control.rotate.counterClockwise(90))
-        //             .then(() => sdk.control.move.front(30))
-        //             .then(() => sdk.control.rotate.counterClockwise(90))
-        //             .catch((e) => console.log(e));
-        //     }
-        // }
-        // await sdk.control.move.down(50)
-        //     .then(() => sdk.control.flip.back())
-        //     .then(() => sdk.control.land())
-        //     .catch((e) => console.log(e));
         let a = await this.DesignPattern(60, 100);
 
-        // for (let index = 0; index < 6; index++) {
 
-        //     await a[index]();
 
-        // }
+
         for (const iterator of a) {
-            await iterator();
+            this.ResolveCollision(iterator);
+
         }
-
-
     }
+
+    public ResolveCollision(a: Promise<any>) {
+        console.log(a.);
+
+        // for (const box of environment.environment) {
+
+        //     if (drone.collidesWith(box)) {
+
+        //     }
+        // }
+    }
+
 
 }
 
+const environment = new Environment();
+const drone = new Object3D(0, 0, 0, 20);
+const testEnvironment = new Environment();
+const path = new Path();
+
 export default {
-    environment: new Environment(),
-    drone: new Object3D(0, 0, 0, 20),
+    environment,
+    drone,
     testEnvironment,
-    path: new Path()
+    path,
 };
