@@ -121,7 +121,7 @@ async function droneControl() {
         com.state(res);
         env.droneState.updatePosition(res.speed);
         env.droneState.updateRotation(res.pitch, res.yaw, res.roll);
-        env.environment.updateDronePosition(env.droneState.position);
+        env.environment.updateDronePosition(<any>env.droneState);
 
         disconnectedTimeout = setTimeout(async () => {
             drone.connected = false;

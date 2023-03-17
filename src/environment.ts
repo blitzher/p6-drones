@@ -1,12 +1,8 @@
 import { EventEmitter } from "stream";
-import { sdk } from "tellojs-sdk30";
+import { sdk, State as _StateInfo } from "tellojs-sdk30";
 import { Vector3 } from "./linerAlgebra";
 
-type DroneState = {
-    x: number;
-    y: number;
-    z: number;
-};
+type StateInfo = _StateInfo & { position: { x: number; y: number; z: number } };
 
 class Object3D {
     x: number;
@@ -72,9 +68,7 @@ export const droneState = {
     },
 };
 
-interface EnvironmentEmitter {}
-
-class Environment extends EventEmitter implements EnvironmentEmitter {
+class Environment extends EventEmitter {
     public objects: Object3D[];
 
     private dronePositionHistory: Object3D[] = [];
@@ -102,10 +96,10 @@ class Environment extends EventEmitter implements EnvironmentEmitter {
         this.emit("object", this.serialize());
     }
 
-    public updateDronePosition(droneState: DroneState) {
-        this.drone.x = droneState.x;
-        this.drone.y = droneState.y;
-        this.drone.z = droneState.z;
+    public updateDronePosition(droneState: StateInfo) {
+        this.drone.x = droneState.position.x;
+        this.drone.y = droneState.position.y;
+        this.drone.z = droneState.position.z;
 
         this.dronePositionHistory.push(new Object3D(this.drone.x, this.drone.y, this.drone.z, 2));
         this.emit("drone", {

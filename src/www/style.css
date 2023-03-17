@@ -68,9 +68,9 @@ button:active {
     position: absolute;
     display: flex;
     flex-direction: column;
+    width: 150px;
     top: 600px;
     left: 150px;
-    width: 150px;
     height: fit-content;
     margin: 0;
     background-color: brown;
@@ -78,6 +78,7 @@ button:active {
     border-radius: 10px;
     padding: 5px;
     z-index: 10;
+    display: none;
 }
 
 #map {
