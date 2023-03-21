@@ -23,10 +23,42 @@ body>div {
 
 canvas, video {
     background-color: white;
-    margin: 25px;
-    width: 420px;
-    height: 315px;
+    margin: 24px;
+    width: 840px;
+    height: 630px;
 }
+
+.quad-size {
+    width: 400px;
+    height: 300px;
+    margin: 6px;
+}
+
+
+canvas.quad-size{
+    display:none
+}
+
+#camera, #camera1 {
+    grid-column: 1;
+}
+
+#camera2, #camera3 {
+    grid-column: 2;
+}
+
+#camera, #camera2 {
+    grid-row: 1;
+    margin-top: 24px;
+    margin-bottom: auto;
+}
+
+#camera1, #camera3 {
+    grid-row: 2;
+    margin-top: auto;
+    margin-bottom: 24px;
+}
+
 
 #canvases {
     display: grid;
@@ -54,6 +86,8 @@ button:hover{
 }
 #canvases>div {
     display: grid;
+    align-items: center;
+    justify-items: center
 }
 
 #vcanvas {
@@ -62,11 +96,6 @@ button:hover{
     grid-row: 1;
     z-index: 10;
     background:transparent;
-}
-
-#camera {
-    grid-row: 1;
-    grid-column: 1;
 }
 
 .hovering {
@@ -115,7 +144,6 @@ span>* {
 
 #stateinfo-data {
     display: none;
-
 }
 
 input {
@@ -125,6 +153,7 @@ input {
 
 #user-input{
     display: grid;
+    margin: 0px 24px;
     grid-template-columns: 50% 50%;
     grid-template-rows: 100%;
 }
