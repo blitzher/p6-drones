@@ -28,17 +28,19 @@
 
 This is my _very cool_ website, very nice
 
-<div id=canvases>
+<div id="canvases">
 <div>
 	<video id="camera" autoplay muted></video>
 	<canvas id="vcanvas"></canvas>
 </div>
 <div><canvas id="map"></canvas></div>
 </div>
+<div id = "user-input">
 <form>
 Command drone <input id="input-command" type="text"></input>
 </form>
 <button id="button">Emergency Stop</button>
+</div>
 </div>
 
 <div class="hovering" id="stateinfo-window">
