@@ -22,15 +22,13 @@ export class H264Segmenter {
         const prePushLength = this.buffer.length;
         for (let i = 0; i < segment.length; i++) this.buffer.push(segment[i]);
 
-        for (let i = 0; i < segment.length - 2; i++) {
-            if (
-                segment[i] == this.breaker_segment[0] &&
-                segment[i + 1] == this.breaker_segment[1] &&
-                segment[i + 2] == this.breaker_segment[2] &&
-                segment[i + 3] == this.breaker_segment[3]
-            ) {
-                return Uint8Array.from(this.buffer.splice(0, prePushLength));
-            }
+        if (
+            segment[0] == this.breaker_segment[0] &&
+            segment[1] == this.breaker_segment[1] &&
+            segment[2] == this.breaker_segment[2] &&
+            segment[3] == this.breaker_segment[3]
+        ) {
+            return Uint8Array.from(this.buffer.splice(0, prePushLength));
         }
     }
 }

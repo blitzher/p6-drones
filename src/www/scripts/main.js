@@ -1,9 +1,11 @@
 import communication from "./communication.js";
 import rendering from "./rendering.js";
+import environment3D from "./3dmap.js";
 
 window.addEventListener("load", (doc, ev) => {
     rendering.initialise();
     communication.initialise();
+    environment3D.render3DCube();
 
     setInterval(() => {
         const markers = rendering.findMarkers();

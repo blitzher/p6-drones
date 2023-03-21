@@ -1,4 +1,5 @@
 import rendering from "./rendering.js";
+import environment3d from "./3dmap.js";
 
 /* Declare global variables for use in component */
 export let droneState = {};
@@ -37,6 +38,11 @@ function init() {
         command(ws, cmd);
         return false;
     });
+    $("#button").addEventListener("click", (ev) => {
+        const emergencyStop = "stop";
+        command(ws, emergencyStop);
+        return false;
+    });
 }
 
 function handle(pkg, ws) {
@@ -54,10 +60,17 @@ function handle(pkg, ws) {
             Object.assign(dataToRender, droneState);
             rendering.updateState(dataToRender);
             break;
-        case "environment" /* {environment: string[]} */:
-            console.log("Environment NYI");
+        case "environment" /* [Object3D] */:
+            environment3d.clearCubes();
+            for (let marker of pkg.data) {
+                environment3d.make3DCubeInstance(
+                    { x: 1, y: 1, z: 1 },
+                    { x: marker.x, y: marker.y, z: marker.z },
+                    0x0000ff
+                );
+            }
             break;
-        case "drone" /* {dronePosition: string, dronePositionHistory: string[]} */:
+        case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
             console.log("DroneData NYI");
             break;
         default:

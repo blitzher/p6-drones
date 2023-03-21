@@ -1,14 +1,10 @@
 import { EventEmitter } from "stream";
-import { sdk } from "tellojs-sdk30";
+import { sdk, State as _StateInfo } from "tellojs-sdk30";
 import { Vector3 } from "./linerAlgebra";
 
-type DroneState = {
-    x: number;
-    y: number;
-    z: number;
-};
+type StateInfo = _StateInfo & { position: { x: number; y: number; z: number } };
 
-class Object3D {
+export class Object3D {
     x: number;
     y: number;
     z: number;
@@ -72,20 +68,16 @@ export const droneState = {
     },
 };
 
-interface EnvironmentEmitter {}
-
-class Environment extends EventEmitter implements EnvironmentEmitter {
+class Environment extends EventEmitter {
     public objects: Object3D[];
 
     private dronePositionHistory: Object3D[] = [];
-    private drone: Object3D;
 
     private borderLength = 200;
 
     constructor() {
         super();
         this.objects = [];
-        this.drone = new Object3D(0, 0, 0, 20);
     }
 
     public outsideBoundary(drone: Object3D): boolean {
@@ -97,33 +89,32 @@ class Environment extends EventEmitter implements EnvironmentEmitter {
         return false;
     }
 
-    public addObject(x: number, y: number, z: number, r: number) {
-        this.objects.push(new Object3D(x, y, z, r));
-        this.emit("object", this.serialize());
+    public addObject(arg: { pos?: { x: number; y: number; z: number; r: number }; obj?: Object3D }) {
+        let obj;
+        if (arg.pos) obj = new Object3D(arg.pos.x, arg.pos.y, arg.pos.z, arg.pos.r);
+        else if (arg.obj) obj = arg.obj;
+        else throw new Error(`Invalid object passed to environment.addObject: ${arg}`);
+
+        this.objects.push(obj);
+        this.emit("objects", this.objects);
     }
 
-    public updateDronePosition(droneState: DroneState) {
-        this.drone.x = droneState.x;
-        this.drone.y = droneState.y;
-        this.drone.z = droneState.z;
-
-        this.dronePositionHistory.push(new Object3D(this.drone.x, this.drone.y, this.drone.z, 2));
+    public updateDronePosition(newState: { x: number; y: number; z: number }) {
+        this.dronePositionHistory.push(new Object3D(newState.x, newState.y, newState.z, 2));
         this.emit("drone", {
-            dronePosition: this.drone.serialize(),
-            dronePositionHistory: this.dronePositionHistory.map((pos) => pos.serialize()),
+            dronePosition: droneState.position,
+            dronePositionHistory: this.dronePositionHistory,
         });
     }
 
     public serialize() {
-        return JSON.stringify({
-            environment: this.objects.map((object) => object.serialize()),
-        });
+        return JSON.stringify(this.objects.map((object) => object.serialize()));
     }
 
     public listen(
         ...args:
-            | [event: "environment", listener: (data: { environment: string[] }) => void]
-            | [event: "drone", listener: (data: { dronePosition: string; dronePositionHistory: string }) => void]
+            | [event: "objects", listener: (data: Object3D[]) => void]
+            | [event: "drone", listener: (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => void]
     ): this {
         console.log(args);
         return this.on(args[0], args[1]);

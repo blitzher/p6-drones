@@ -8,6 +8,15 @@
 <script type="text/javascript" src="libs/jmuxer.min.js"></script>
 <script type="text/javascript" src="libs/cv.js"></script>
 <script type="text/javascript" src="libs/aruco.js"></script>
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three/build/three.module.js"
+    }
+  }
+</script>
 
 <script type="text/javascript" src="scripts/utilities.js"></script>
 <script type="module" src="scripts/main.js"></script>
@@ -19,23 +28,24 @@
 
 This is my _very cool_ website, very nice
 
-<div id=canvases>
+<div id="canvases">
 <div>
 	<video id="camera" autoplay muted></video>
 	<canvas id="vcanvas"></canvas>
 </div>
 <div><canvas id="map"></canvas></div>
 </div>
-
+<div id = "user-input">
 <form>
 Command drone <input id="input-command" type="text"></input>
 </form>
-
+<button id="button">Emergency Stop</button>
+</div>
 </div>
 
 <div class="hovering" id="stateinfo-window">
 <div style="display:flex; width:100%;">
-<div class="move-hover">++++++++</div>
+<div class="move-hover">+++State+++</div>
 <div class="hide-show" style="text-align: right; width: fit-content" id="hide-show-info">&darr;</div> 
 </div>
 <span id="stateinfo-data">No state data</span>

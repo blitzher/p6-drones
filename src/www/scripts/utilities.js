@@ -89,3 +89,8 @@ const rotateVectorAroundYAxis = ({ x, y, z }, phi) => {
         z: rotationMatrix[2][0] * x + rotationMatrix[2][2] * z,
     });
 };
+
+const cookie = JSON.parse(document.cookie || "{}");
+const writeCookie = () => {
+    document.cookie = JSON.stringify(cookie);
+};
