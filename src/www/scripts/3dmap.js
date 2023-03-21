@@ -9,11 +9,11 @@ const mapCanvas3D = $("#map");
 const fov = 75;
 const aspect = 4 / 3;
 const near = 0.1;
-const far = 100;
+const far = 1000;
 const color = 0xffffff;
 const intensity = 1.5;
 const scene = new THREE.Scene();
-const planeGeometry = new THREE.PlaneGeometry(100, 100);
+const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 const droneMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 const cameraSpeed = 0.3;
 const cubes = [];
@@ -23,6 +23,7 @@ let droneObject;
 loader.load("../resources/drone.glb", (gltf) => {
     /** @type {THREE.Object3D} */
     const obj = gltf.scene;
+    obj.scale.set(10, 10, 10);
     obj.castShadow = true;
     /** @type {THREE.Mesh} */
     const mesh = obj.children[0];
@@ -35,7 +36,7 @@ loader.load("../resources/drone.glb", (gltf) => {
 function render3DCube() {
     let time = 0;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    const cameraOffset = new THREE.Vector3(0, 10, 7);
+    const cameraOffset = new THREE.Vector3(0, 100, 70);
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
@@ -69,8 +70,10 @@ function render3DCube() {
             cube.rotation.x = rotation;
             cube.rotation.y = rotation;
         });
-        camera.position.x = cameraOffset.length() * Math.sin(time * cameraSpeed);
-        camera.position.z = cameraOffset.length() * Math.cos(time * cameraSpeed);
+        camera.position.x =
+            cameraOffset.length() * Math.sin(time * cameraSpeed);
+        camera.position.z =
+            cameraOffset.length() * Math.cos(time * cameraSpeed);
         camera.lookAt(0, 0, 0);
         light.position.set(...camera.position);
         renderer.render(scene, camera);

@@ -64,7 +64,7 @@ function handle(pkg, ws) {
             environment3d.clearCubes();
             for (let marker of pkg.data) {
                 environment3d.make3DCubeInstance(
-                    { x: 1, y: 1, z: 1 },
+                    { x: 10, y: 10, z: 10 },
                     { x: marker.x, y: marker.y, z: marker.z },
                     0x0000ff
                 );
@@ -72,7 +72,7 @@ function handle(pkg, ws) {
             break;
         case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
             const pos = pkg.data.dronePosition;
-            environment3d.updateDronePosition(pos.x / 10, pos.y / 10, pos.z / 10);
+            environment3d.updateDronePosition(pos.x, pos.y, pos.z);
             console.log(pos);
             break;
         default:

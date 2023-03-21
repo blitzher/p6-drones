@@ -51,10 +51,15 @@ const com = {
             );
     },
     environment: (data: Object3D[]) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
     },
-    drone: (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
+    drone: (data: {
+        dronePosition: Object3D;
+        dronePositionHistory: Object3D[];
+    }) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -180,8 +185,8 @@ function startTest() {
     const BOX_COUNT = 20;
     let time = 0;
     const addObjectInterval = setInterval(() => {
-        let x = Math.cos(time) * time * 3;
-        let z = Math.sin(time) * time * 3;
+        let x = Math.cos(time) * time * 30;
+        let z = Math.sin(time) * time * 30;
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
         env.environment.addObject({ obj: obstacle });
@@ -191,9 +196,15 @@ function startTest() {
     env.environment.listen("objects", (data: Object3D[]) => {
         com.environment(data);
     });
-    env.environment.listen("drone", (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-        com.drone(data);
-    });
+    env.environment.listen(
+        "drone",
+        (data: {
+            dronePosition: Object3D;
+            dronePositionHistory: Object3D[];
+        }) => {
+            com.drone(data);
+        }
+    );
 }
 
 /* Launch server */
