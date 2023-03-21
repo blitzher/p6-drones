@@ -58,6 +58,8 @@ export const droneState = {
         speed.z = speed.x;
         speed.x = temp2;
 
+        console.log(speed);
+
         this.position = this.position.add(speed);
     },
 

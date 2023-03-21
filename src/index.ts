@@ -49,9 +49,6 @@ const com = {
                     data: state,
                 })
             );
-
-        env.droneState.updatePosition(state.speed);
-        env.droneState.updateRotation(state.pitch, state.yaw, state.roll);
     },
     environment: (data: Object3D[]) => {
         for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
@@ -119,7 +116,12 @@ async function droneControl() {
     stateEmitter.on("message", (res) => {
         clearTimeout(disconnectedTimeout);
         com.state(res);
-        env.droneState.updatePosition(res.speed);
+        const speed = {
+            x: Number.parseInt(res.speed.x),
+            y: Number.parseInt(res.speed.y),
+            z: Number.parseInt(res.speed.z),
+        };
+        env.droneState.updatePosition(speed);
         env.droneState.updateRotation(res.pitch, res.yaw, res.roll);
         env.environment.updateDronePosition(env.droneState.position);
 

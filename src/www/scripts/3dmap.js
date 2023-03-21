@@ -17,6 +17,7 @@ const planeGeometry = new THREE.PlaneGeometry(100, 100);
 const droneMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 const cameraSpeed = 0.3;
 const cubes = [];
+let droneObject;
 
 /* Add drone model to scene */
 loader.load("../resources/drone.glb", (gltf) => {
@@ -26,10 +27,9 @@ loader.load("../resources/drone.glb", (gltf) => {
     /** @type {THREE.Mesh} */
     const mesh = obj.children[0];
     mesh.material = droneMaterial;
-    console.log(gltf);
-    console.log(obj);
     obj.translateY(2);
     scene.add(obj);
+    droneObject = obj;
 });
 
 function render3DCube() {
@@ -92,12 +92,17 @@ function make3DCubeInstance(size, pos, color) {
 
 function clearCubes() {
     for (let cube of cubes) {
-        cubes.pop();
+        cube.pop();
     }
+}
+
+function updateDronePosition(x, y, z) {
+    droneObject.position.set(x, y, z);
 }
 
 export default {
     render3DCube,
     clearCubes,
     make3DCubeInstance,
+    updateDronePosition,
 };

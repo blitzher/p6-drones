@@ -71,7 +71,9 @@ function handle(pkg, ws) {
             }
             break;
         case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
-            console.log("DroneData NYI");
+            const pos = pkg.data.dronePosition;
+            environment3d.updateDronePosition(pos.x / 10, pos.y / 10, pos.z / 10);
+            console.log(pos);
             break;
         default:
             console.error(`Unknown package type: ${pkg.type}`);
