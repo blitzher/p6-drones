@@ -8,15 +8,9 @@
 <script type="text/javascript" src="libs/jmuxer.min.js"></script>
 <script type="text/javascript" src="libs/cv.js"></script>
 <script type="text/javascript" src="libs/aruco.js"></script>
-<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three/build/three.module.js"
-    }
-  }
-</script>
+<script type="module" src="libs/three.min.js"></script>
+<script type="module" src="libs/glfloader.js"></script>
 
 <script type="text/javascript" src="scripts/utilities.js"></script>
 <script type="module" src="scripts/main.js"></script>

@@ -1,25 +1,41 @@
 import { droneState } from "./communication.js";
-import * as THREE from "three";
+import * as THREE from "../libs/three.min.js";
+import { GLTFLoader } from "../libs/glfloader.js";
+
+/* Initalise GLTF loader */
+const loader = new GLTFLoader();
 
 const mapCanvas3D = $("#map");
 const fov = 75;
 const aspect = 4 / 3;
 const near = 0.1;
 const far = 100;
-const boxWidth = 1;
-const boxHeight = 1;
-const boxDepth = 1;
 const color = 0xffffff;
 const intensity = 1.5;
 const scene = new THREE.Scene();
-const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+const planeGeometry = new THREE.PlaneGeometry(100, 100);
+const droneMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 const cameraSpeed = 0.3;
 const cubes = [];
+
+/* Add drone model to scene */
+loader.load("../resources/drone.glb", (gltf) => {
+    /** @type {THREE.Object3D} */
+    const obj = gltf.scene;
+    obj.castShadow = true;
+    /** @type {THREE.Mesh} */
+    const mesh = obj.children[0];
+    mesh.material = droneMaterial;
+    console.log(gltf);
+    console.log(obj);
+    obj.translateY(2);
+    scene.add(obj);
+});
 
 function render3DCube() {
     let time = 0;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    const cameraOffset = new THREE.Vector3(0, 20, 15);
+    const cameraOffset = new THREE.Vector3(0, 10, 7);
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
@@ -29,14 +45,21 @@ function render3DCube() {
         antialias: true,
         canvas: mapCanvas3D,
     });
+    renderer.setPixelRatio(window.devicePixelRatio * 3);
 
     const light = new THREE.PointLight(color, intensity);
-    light.position.set(0, 0, 4);
+    light.position.set(0, 0, 10);
     scene.add(light);
     const amb = new THREE.AmbientLight();
-    amb.intensity = 0.5;
+    amb.intensity = 0.2;
     //scene.add(amb);
-    scene.add(new THREE.GridHelper(100, 100));
+    // scene.add(new THREE.GridHelper(100, 100));
+
+    const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    scene.add(plane);
+    plane.lookAt(0, 1, 0);
+    plane.translateZ(-1);
 
     function animateCubes() {
         time += 0.01; // convert time to seconds
@@ -46,10 +69,8 @@ function render3DCube() {
             cube.rotation.x = rotation;
             cube.rotation.y = rotation;
         });
-        camera.position.x =
-            cameraOffset.length() * Math.sin(time * cameraSpeed);
-        camera.position.z =
-            cameraOffset.length() * Math.cos(time * cameraSpeed);
+        camera.position.x = cameraOffset.length() * Math.sin(time * cameraSpeed);
+        camera.position.z = cameraOffset.length() * Math.cos(time * cameraSpeed);
         camera.lookAt(0, 0, 0);
         light.position.set(...camera.position);
         renderer.render(scene, camera);

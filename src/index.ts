@@ -135,6 +135,9 @@ app.ws("/", (ws) => {
     clients.push({ client: ws, uuid: myUuid });
     console.log("New client!");
 
+    /* When a new client connects, send the current env */
+    env.environment.emitEnvironment();
+
     ws.onmessage = (msg) => {
         try {
             const pkg = JSON.parse(msg.data.toString());
@@ -172,13 +175,15 @@ function startTest() {
     console.log(`Starting test: ${process.title}`);
 
     /* Position of dummy boxes for testing */
+    const BOX_COUNT = 20;
     let time = 0;
-    setInterval(() => {
+    const addObjectInterval = setInterval(() => {
         let x = Math.cos(time) * time * 3;
         let z = Math.sin(time) * time * 3;
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
         env.environment.addObject({ obj: obstacle });
+        if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
     }, 1000);
 
     env.environment.listen("objects", (data: Object3D[]) => {

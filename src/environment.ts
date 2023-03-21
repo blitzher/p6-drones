@@ -107,6 +107,14 @@ class Environment extends EventEmitter {
         });
     }
 
+    public emitEnvironment() {
+        this.emit("objects", this.objects);
+        this.emit("drone", {
+            dronePosition: droneState.position,
+            dronePositionHistory: this.dronePositionHistory,
+        });
+    }
+
     public serialize() {
         return JSON.stringify(this.objects.map((object) => object.serialize()));
     }
