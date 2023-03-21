@@ -39,6 +39,10 @@ This is my _very cool_ website, very nice
 <form>
 Command drone <input id="input-command" type="text"></input>
 </form>
+<p id=toggle-cam>Toggle Camera Mode</p>
+<input type="checkbox" id="switch"
+      class="checkbox" />
+<label for="switch" class="toggle"></label>
 <button id="button">Emergency Stop</button>
 </div>
 </div>

@@ -65,29 +65,28 @@ canvas.quad-size{
     grid-template-columns: 50% 50%;
     grid-template-rows: 100%;
 }
-button{
+#button{
+    grid-row: 2;
     background-color: red;
     border: 5px solid #7F2020;
     border-radius: 100%;
     padding: 20px;
     text-align: center;
     font-size: 16px;
-    float: left;
     width: fit-content;
     height: fit-content;
-    margin-left: auto;
 }
-button:active {
+#button:active {
     background-color: #7F2020;
     transform: translateY(4px);
   }
-button:hover{
+#button:hover{
     cursor:pointer;
 }
 #canvases>div {
     display: grid;
     align-items: center;
-    justify-items: center
+    justify-items: center;
 }
 
 #vcanvas {
@@ -155,5 +154,47 @@ input {
     display: grid;
     margin: 0px 24px;
     grid-template-columns: 50% 50%;
-    grid-template-rows: 100%;
+}
+
+.toggle:hover{
+    cursor: pointer;
+}  
+.toggle {
+    position : relative;
+    display : grid;
+    grid-row: 2;
+    width : 100px;
+    height : 52px;
+    background-color: red;
+    border-radius: 30px;
+    border: 2px solid gray;
+    margin-left:24px;
+}
+    
+.toggle:after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: gray;
+    top: 1px;
+    left: 1px;
+    transition:  all 0.5s;
+}
+.checkbox:checked + .toggle::after {
+    left : 50px;
+}
+       
+.checkbox:checked + .toggle {
+    background-color: green;
+}
+#toggle-cam{
+    margin-left: 24px;
+    font-size: medium;
+}
+.checkbox {
+    margin-left: auto;
+    display : grid;
+    grid-row: 2;
 }
