@@ -23,37 +23,70 @@ body>div {
 
 canvas, video {
     background-color: white;
-    margin: 25px;
-    width: 420px;
-    height: 315px;
+    margin: 24px;
+    width: 840px;
+    height: 630px;
 }
+
+.quad-size {
+    width: 400px;
+    height: 300px;
+    margin: 6px;
+}
+
+
+canvas.quad-size{
+    display:none
+}
+
+#camera, #camera1 {
+    grid-column: 1;
+}
+
+#camera2, #camera3 {
+    grid-column: 2;
+}
+
+#camera, #camera2 {
+    grid-row: 1;
+    margin-top: 24px;
+    margin-bottom: auto;
+}
+
+#camera1, #camera3 {
+    grid-row: 2;
+    margin-top: auto;
+    margin-bottom: 24px;
+}
+
 
 #canvases {
     display: grid;
     grid-template-columns: 50% 50%;
     grid-template-rows: 100%;
 }
-button{
+#button{
+    grid-row: 2;
     background-color: red;
     border: 5px solid #7F2020;
     border-radius: 100%;
     padding: 20px;
     text-align: center;
     font-size: 16px;
-    float: left;
     width: fit-content;
     height: fit-content;
-    margin-left: auto;
 }
-button:active {
+#button:active {
     background-color: #7F2020;
     transform: translateY(4px);
   }
-button:hover{
+#button:hover{
     cursor:pointer;
 }
 #canvases>div {
     display: grid;
+    align-items: center;
+    justify-items: center;
 }
 
 #vcanvas {
@@ -62,11 +95,6 @@ button:hover{
     grid-row: 1;
     z-index: 10;
     background:transparent;
-}
-
-#camera {
-    grid-row: 1;
-    grid-column: 1;
 }
 
 .hovering {
@@ -115,7 +143,6 @@ span>* {
 
 #stateinfo-data {
     display: none;
-
 }
 
 input {
@@ -125,6 +152,49 @@ input {
 
 #user-input{
     display: grid;
+    margin: 0px 24px;
     grid-template-columns: 50% 50%;
-    grid-template-rows: 100%;
+}
+
+.toggle:hover{
+    cursor: pointer;
+}  
+.toggle {
+    position : relative;
+    display : grid;
+    grid-row: 2;
+    width : 100px;
+    height : 52px;
+    background-color: red;
+    border-radius: 30px;
+    border: 2px solid gray;
+    margin-left:24px;
+}
+    
+.toggle:after {
+    content: '';
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: gray;
+    top: 1px;
+    left: 1px;
+    transition:  all 0.5s;
+}
+.checkbox:checked + .toggle::after {
+    left : 50px;
+}
+       
+.checkbox:checked + .toggle {
+    background-color: green;
+}
+#toggle-cam{
+    margin-left: 24px;
+    font-size: medium;
+}
+.checkbox {
+    margin-left: auto;
+    display : grid;
+    grid-row: 2;
 }

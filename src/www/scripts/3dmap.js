@@ -1,44 +1,99 @@
 import { droneState } from "./communication.js";
-import * as THREE from "three";
+import * as THREE from "../libs/three.min.js";
+import { GLTFLoader } from "../libs/glfloader.js";
+import { OrbitControls } from "../libs/orbitcontrols.js";
+
+/* Initalise GLTF loader */
+const loader = new GLTFLoader();
+
+const CAMERA_MODE_ORBIT = 0;
+const CAMERA_MODE_DRONE = 1;
 
 const mapCanvas3D = $("#map");
 const fov = 75;
 const aspect = 4 / 3;
 const near = 0.1;
-const far = 100;
-const boxWidth = 1;
-const boxHeight = 1;
-const boxDepth = 1;
+const far = 1000;
 const color = 0xffffff;
 const intensity = 1.5;
 const scene = new THREE.Scene();
-const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+const droneMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 const cameraSpeed = 0.3;
 const cubes = [];
+const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    canvas: mapCanvas3D,
+});
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.maxPolarAngle = (Math.PI / 2) - 0.1;
+
+
+
+let droneObject;
+let cameraMode = CAMERA_MODE_ORBIT;
+let loadCachedFlag = false;
+
+
+/* Add drone model to scene */
+loader.load("../resources/drone.glb", (gltf) => {
+    /** @type {THREE.Object3D} */
+    const obj = gltf.scene;
+    obj.scale.set(10, 10, 10);
+    obj.castShadow = true;
+    /** @type {THREE.Mesh} */
+    const mesh = obj.children[0];
+    mesh.material = droneMaterial;
+    obj.translateY(2);
+    scene.add(obj);
+    droneObject = obj;
+});
+
+/* Add event listener to camera toggle, that changes camera behaviour */
+let cachedCameraState = { position: {}, rotation: {} };
+const switchElem = $("#switch");
+switchElem.addEventListener('click', () => {
+
+    const newCameraMode = switchElem.checked ? CAMERA_MODE_DRONE : CAMERA_MODE_ORBIT;
+    /* When entering orbit mode, load from cache */
+    if (newCameraMode == CAMERA_MODE_ORBIT) {
+        loadCachedFlag = true;
+    }
+    else {
+        Object.assign(cachedCameraState.position, camera.position);
+        Object.assign(cachedCameraState.rotation, camera.rotation);
+        console.log(cachedCameraState);
+    }
+
+
+    cameraMode = newCameraMode;
+    controls.enabled = !switchElem.checked;
+
+})
+
 
 function render3DCube() {
     let time = 0;
-    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    const cameraOffset = new THREE.Vector3(0, 20, 15);
+    const cameraOffset = new THREE.Vector3(0, 100, 70);
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
 
-    camera.lookAt(0, 0, 0);
-    const renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        canvas: mapCanvas3D,
-    });
+    renderer.setPixelRatio(window.devicePixelRatio * 3);
 
-    const light = new THREE.PointLight(color, intensity);
-    light.position.set(0, 0, 4);
-    scene.add(light);
     const amb = new THREE.AmbientLight();
-    amb.intensity = 0.5;
-    //scene.add(amb);
-    scene.add(new THREE.GridHelper(100, 100));
+    amb.intensity = 1;
+    scene.add(amb);
+    // scene.add(new THREE.GridHelper(100, 100));
 
-    function animateCubes() {
+    const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    scene.add(plane);
+    plane.lookAt(0, 1, 0);
+    plane.translateZ(-5);
+
+    function mainLoop() {
         time += 0.01; // convert time to seconds
         cubes.forEach((cube, ndx) => {
             const speed = 1 + ndx * 0.1;
@@ -46,17 +101,46 @@ function render3DCube() {
             cube.rotation.x = rotation;
             cube.rotation.y = rotation;
         });
-        camera.position.x =
+
+        /* Update camera and controls */
+        cameraControls(controls);
+        controls.update();
+
+        /*camera.position.x =
             cameraOffset.length() * Math.sin(time * cameraSpeed);
         camera.position.z =
             cameraOffset.length() * Math.cos(time * cameraSpeed);
         camera.lookAt(0, 0, 0);
-        light.position.set(...camera.position);
+        light.position.set(...camera.position);*/
         renderer.render(scene, camera);
-        requestAnimationFrame(animateCubes);
+        requestAnimationFrame(mainLoop);
     }
-    animateCubes();
+    mainLoop();
 }
+
+/**
+ * 
+ * @param {OrbitControls} controls 
+ */
+function cameraControls(controls) {
+
+    if (cameraMode == CAMERA_MODE_DRONE) {
+        if (droneObject) {
+            let { x, y, z } = droneObject.position;
+            camera.position.set(x, y, z);
+        }
+
+    } else if (cameraMode == CAMERA_MODE_ORBIT) {
+        if (loadCachedFlag) {
+            camera.position.set(...Object.values(cachedCameraState.position))
+            camera.rotation.set(cachedCameraState.rotation);
+            loadCachedFlag = false;
+        }
+
+        /* Let orbit controls handle it :) */
+    }
+}
+
 
 function make3DCubeInstance(size, pos, color) {
     const geometry = new THREE.BoxGeometry(...Object.values(size));
@@ -71,12 +155,17 @@ function make3DCubeInstance(size, pos, color) {
 
 function clearCubes() {
     for (let cube of cubes) {
-        cubes.pop();
+        cube.pop();
     }
+}
+
+function updateDronePosition(x, y, z) {
+    droneObject.position.set(x, y, z);
 }
 
 export default {
     render3DCube,
     clearCubes,
     make3DCubeInstance,
+    updateDronePosition,
 };

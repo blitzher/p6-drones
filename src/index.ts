@@ -49,15 +49,17 @@ const com = {
                     data: state,
                 })
             );
-
-        env.droneState.updatePosition(state.speed);
-        env.droneState.updateRotation(state.pitch, state.yaw, state.roll);
     },
     environment: (data: Object3D[]) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
     },
-    drone: (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
+    drone: (data: {
+        dronePosition: Object3D;
+        dronePositionHistory: Object3D[];
+    }) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -119,7 +121,12 @@ async function droneControl() {
     stateEmitter.on("message", (res) => {
         clearTimeout(disconnectedTimeout);
         com.state(res);
-        env.droneState.updatePosition(res.speed);
+        const speed = {
+            x: Number.parseInt(res.speed.x),
+            y: Number.parseInt(res.speed.y),
+            z: Number.parseInt(res.speed.z),
+        };
+        env.droneState.updatePosition(speed);
         env.droneState.updateRotation(res.pitch, res.yaw, res.roll);
         env.environment.updateDronePosition(env.droneState.position);
 
@@ -134,6 +141,9 @@ app.ws("/", (ws) => {
     const myUuid = uuidv4();
     clients.push({ client: ws, uuid: myUuid });
     console.log("New client!");
+
+    /* When a new client connects, send the current env */
+    env.environment.emitEnvironment();
 
     ws.onmessage = (msg) => {
         try {
@@ -172,21 +182,29 @@ function startTest() {
     console.log(`Starting test: ${process.title}`);
 
     /* Position of dummy boxes for testing */
+    const BOX_COUNT = 20;
     let time = 0;
-    setInterval(() => {
-        let x = Math.cos(time) * time * 3;
-        let z = Math.sin(time) * time * 3;
+    const addObjectInterval = setInterval(() => {
+        let x = Math.cos(time) * time * 30;
+        let z = Math.sin(time) * time * 30;
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
         env.environment.addObject({ obj: obstacle });
+        if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
     }, 1000);
 
     env.environment.listen("objects", (data: Object3D[]) => {
         com.environment(data);
     });
-    env.environment.listen("drone", (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-        com.drone(data);
-    });
+    env.environment.listen(
+        "drone",
+        (data: {
+            dronePosition: Object3D;
+            dronePositionHistory: Object3D[];
+        }) => {
+            com.drone(data);
+        }
+    );
 }
 
 /* Launch server */

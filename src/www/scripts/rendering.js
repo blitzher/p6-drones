@@ -65,6 +65,9 @@ function initHoveringElement() {
     if (cookie && cookie.hovering) {
         stateinfowindow.style.left = cookie.hovering.newX;
         stateinfowindow.style.top = cookie.hovering.newY;
+    } else {
+        stateinfowindow.style.top = "600";
+        stateinfowindow.style.left = "150";
     }
     stateinfowindow.style.display = "block";
 

@@ -58,6 +58,8 @@ export const droneState = {
         speed.z = speed.x;
         speed.x = temp2;
 
+        console.log(speed);
+
         this.position = this.position.add(speed);
     },
 
@@ -101,6 +103,14 @@ class Environment extends EventEmitter {
 
     public updateDronePosition(newState: { x: number; y: number; z: number }) {
         this.dronePositionHistory.push(new Object3D(newState.x, newState.y, newState.z, 2));
+        this.emit("drone", {
+            dronePosition: droneState.position,
+            dronePositionHistory: this.dronePositionHistory,
+        });
+    }
+
+    public emitEnvironment() {
+        this.emit("objects", this.objects);
         this.emit("drone", {
             dronePosition: droneState.position,
             dronePositionHistory: this.dronePositionHistory,
