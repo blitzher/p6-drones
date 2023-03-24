@@ -1,21 +1,16 @@
 /* Add event listener to camera toggle, that changes camera behaviour */
-export function initBB() {
-    let cachedCameraState = { position: {}, rotation: {} };
+import map3d from "../3d-map/3d-map.js";
+import communication from "../communication/communication.js";
+function initBB() {
     const switchElem = $("#switch");
 
     /* Add event listener to toggle camera switch */
     switchElem.addEventListener("click", () => {
-        const newCameraMode = switchElem.checked ? CAMERA_MODE_DRONE : CAMERA_MODE_ORBIT;
-        /* When entering orbit mode, load from cache */
-        if (newCameraMode == CAMERA_MODE_ORBIT) {
-            loadCachedFlag = true;
-        } else {
-            Object.assign(cachedCameraState.position, camera.position);
-            Object.assign(cachedCameraState.rotation, camera.rotation);
-        }
+        const newCameraMode = switchElem.checked
+            ? map3d.CAMERA_MODE.DRONE
+            : map3d.CAMERA_MODE.ORBIT;
 
-        cameraMode = newCameraMode;
-        controls.enabled = !switchElem.checked;
+        map3d.setCameraMode(newCameraMode);
     });
 
     /* Add event listener to command input field */
@@ -24,14 +19,18 @@ export function initBB() {
         const ifield = $("#input-command");
         const cmd = ifield.value;
         ifield.value = "";
-        command(ws, cmd);
+        communication.command(cmd);
         return false;
     });
 
     /* Add event listener to emergency stop button */
     $("#button").addEventListener("click", (ev) => {
         const emergencyStop = "stop";
-        command(ws, emergencyStop);
+        communication.command(emergencyStop);
         return false;
     });
 }
+
+export default {
+    initialise: initBB,
+};

@@ -16,16 +16,16 @@
     display: none;
 }
 
-.move-hover,
-.hide-show {
+#move-hover,
+#toggle-state-window {
     user-select: none;
     margin: 0;
     width: 100%;
 }
-.move-hover:hover {
+#move-hover:hover {
     cursor: grab;
 }
-.hide-show {
+#toggle-state-window {
     width: fit-content;
     border-radius: 50%;
 }

@@ -1,17 +1,17 @@
 /* communication.js */
 import droneCam from "../drone-cam/drone-cam.js";
 import environment3d from "../3d-map/3d-map.js";
+import stateWindow from "../state-window/state-window.js";
 
 /* Declare global variables for use in component */
 export let droneState = {};
-
+const wsUrl = `ws:${window.location.host}`;
+let ws;
 /**
  * @type {WebSocket}
  */
 function init() {
-    const wsUrl = `ws:${window.location.host}`;
-    const ws = new WebSocket(wsUrl);
-
+    ws = new WebSocket(wsUrl);
     ws.addEventListener("message", (msg) => {
         let pkg;
 
@@ -42,9 +42,8 @@ function handle(pkg, ws) {
             break;
         case "state":
             const dataToRender = pkg.data;
-            droneState = pkg.data;
-            Object.assign(dataToRender, droneState);
-            droneCam.updateState(dataToRender);
+            Object.assign(droneState, pkg.data);
+            stateWindow.updateState(dataToRender);
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
@@ -69,7 +68,12 @@ function handle(pkg, ws) {
  * Temporary function for sending raw command to the drone;
  */
 
-function command(ws, cmd) {
+function command(cmd) {
+    console.log(ws);
+    if (ws.readyState != 1) {
+        console.log("Websocket is not open!");
+        return;
+    }
     ws.send(
         JSON.stringify({
             type: "command",
@@ -81,4 +85,5 @@ function command(ws, cmd) {
 export default {
     initialise: init,
     droneState,
+    command,
 };

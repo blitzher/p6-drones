@@ -5,8 +5,8 @@
 </style>
 
 <div style="display:flex; width:100%;">
-<div class="move-hover">+++State+++</div>
-<div class="hide-show" style="text-align: right; width: fit-content" id="hide-show-info">&darr;</div> 
+<div id="move-hover">+++State+++</div>
+<div id="toggle-state-window" style="text-align: right; width: fit-content">&darr;</div> 
 </div>
 <span id="stateinfo-data">No state data</span>
 

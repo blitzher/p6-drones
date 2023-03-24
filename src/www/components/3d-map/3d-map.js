@@ -11,6 +11,7 @@ const CAMERA_MODE = {
     DRONE: 1,
 };
 
+let cachedCameraState = { position: {}, rotation: {} };
 const mapCanvas3D = $("#map");
 const fov = 75;
 const aspect = 4 / 3;
@@ -90,7 +91,7 @@ function render3DCube() {
  *
  * @param {OrbitControls} controls
  */
-function cameraControls(controls) {
+function cameraControls() {
     if (cameraMode == CAMERA_MODE.DRONE) {
         if (droneObject) {
             let { x, y, z } = droneObject.position;
@@ -104,6 +105,18 @@ function cameraControls(controls) {
         }
 
         /* Let orbit controls handle it :) */
+    }
+}
+
+function setCameraMode(newMode) {
+    cameraMode = newMode;
+    controls.enabled = cameraMode == CAMERA_MODE.ORBIT;
+    /* When entering orbit mode, load from cache */
+    if (newMode == CAMERA_MODE.ORBIT) {
+        loadCachedFlag = true;
+    } else {
+        Object.assign(cachedCameraState.position, camera.position);
+        Object.assign(cachedCameraState.rotation, camera.rotation);
     }
 }
 
@@ -133,5 +146,6 @@ export default {
     clearCubes,
     make3DCubeInstance,
     updateDronePosition,
-    CAMERA_MODES: CAMERA_MODE,
+    CAMERA_MODE,
+    setCameraMode,
 };
