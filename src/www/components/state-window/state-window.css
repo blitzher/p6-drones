@@ -1,0 +1,35 @@
+.hovering {
+    z-index: 9;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+    top: 600px;
+    left: 150px;
+    height: fit-content;
+    margin: 0;
+    background-color: brown;
+    border: 5px solid #7f2020;
+    border-radius: 10px;
+    padding: 5px;
+    z-index: 10;
+    display: none;
+}
+
+.move-hover,
+.hide-show {
+    user-select: none;
+    margin: 0;
+    width: 100%;
+}
+.move-hover:hover {
+    cursor: grab;
+}
+.hide-show {
+    width: fit-content;
+    border-radius: 50%;
+}
+
+#stateinfo-data {
+    display: none;
+}

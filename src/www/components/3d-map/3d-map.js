@@ -1,25 +1,25 @@
-import { droneState } from "./communication.js";
-import * as THREE from "../libs/three.min.js";
-import { GLTFLoader } from "../libs/glfloader.js";
-import { OrbitControls } from "../libs/orbitcontrols.js";
+/*3d-map.js*/
+import * as THREE from "../../libs/three.min.js";
+import { GLTFLoader } from "../../libs/glfloader.js";
+import { OrbitControls } from "../../libs/orbitcontrols.js";
 
 /* Initalise GLTF loader */
 const loader = new GLTFLoader();
 
-const CAMERA_MODE_ORBIT = 0;
-const CAMERA_MODE_DRONE = 1;
+const CAMERA_MODE = {
+    ORBIT: 0,
+    DRONE: 1,
+};
 
 const mapCanvas3D = $("#map");
 const fov = 75;
 const aspect = 4 / 3;
 const near = 0.1;
 const far = 1000;
-const color = 0xffffff;
-const intensity = 1.5;
+
 const scene = new THREE.Scene();
 const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 const droneMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-const cameraSpeed = 0.3;
 const cubes = [];
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
 const renderer = new THREE.WebGLRenderer({
@@ -27,17 +27,14 @@ const renderer = new THREE.WebGLRenderer({
     canvas: mapCanvas3D,
 });
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.maxPolarAngle = (Math.PI / 2) - 0.1;
-
-
+controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
 let droneObject;
-let cameraMode = CAMERA_MODE_ORBIT;
+let cameraMode = CAMERA_MODE.ORBIT;
 let loadCachedFlag = false;
 
-
 /* Add drone model to scene */
-loader.load("../resources/drone.glb", (gltf) => {
+loader.load("../../resources/drone.glb", (gltf) => {
     /** @type {THREE.Object3D} */
     const obj = gltf.scene;
     obj.scale.set(10, 10, 10);
@@ -49,29 +46,6 @@ loader.load("../resources/drone.glb", (gltf) => {
     scene.add(obj);
     droneObject = obj;
 });
-
-/* Add event listener to camera toggle, that changes camera behaviour */
-let cachedCameraState = { position: {}, rotation: {} };
-const switchElem = $("#switch");
-switchElem.addEventListener('click', () => {
-
-    const newCameraMode = switchElem.checked ? CAMERA_MODE_DRONE : CAMERA_MODE_ORBIT;
-    /* When entering orbit mode, load from cache */
-    if (newCameraMode == CAMERA_MODE_ORBIT) {
-        loadCachedFlag = true;
-    }
-    else {
-        Object.assign(cachedCameraState.position, camera.position);
-        Object.assign(cachedCameraState.rotation, camera.rotation);
-        console.log(cachedCameraState);
-    }
-
-
-    cameraMode = newCameraMode;
-    controls.enabled = !switchElem.checked;
-
-})
-
 
 function render3DCube() {
     let time = 0;
@@ -106,12 +80,6 @@ function render3DCube() {
         cameraControls(controls);
         controls.update();
 
-        /*camera.position.x =
-            cameraOffset.length() * Math.sin(time * cameraSpeed);
-        camera.position.z =
-            cameraOffset.length() * Math.cos(time * cameraSpeed);
-        camera.lookAt(0, 0, 0);
-        light.position.set(...camera.position);*/
         renderer.render(scene, camera);
         requestAnimationFrame(mainLoop);
     }
@@ -119,20 +87,18 @@ function render3DCube() {
 }
 
 /**
- * 
- * @param {OrbitControls} controls 
+ *
+ * @param {OrbitControls} controls
  */
 function cameraControls(controls) {
-
-    if (cameraMode == CAMERA_MODE_DRONE) {
+    if (cameraMode == CAMERA_MODE.DRONE) {
         if (droneObject) {
             let { x, y, z } = droneObject.position;
             camera.position.set(x, y, z);
         }
-
-    } else if (cameraMode == CAMERA_MODE_ORBIT) {
+    } else if (cameraMode == CAMERA_MODE.ORBIT) {
         if (loadCachedFlag) {
-            camera.position.set(...Object.values(cachedCameraState.position))
+            camera.position.set(...Object.values(cachedCameraState.position));
             camera.rotation.set(cachedCameraState.rotation);
             loadCachedFlag = false;
         }
@@ -140,7 +106,6 @@ function cameraControls(controls) {
         /* Let orbit controls handle it :) */
     }
 }
-
 
 function make3DCubeInstance(size, pos, color) {
     const geometry = new THREE.BoxGeometry(...Object.values(size));
@@ -168,4 +133,5 @@ export default {
     clearCubes,
     make3DCubeInstance,
     updateDronePosition,
+    CAMERA_MODES: CAMERA_MODE,
 };

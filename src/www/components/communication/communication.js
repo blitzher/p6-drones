@@ -1,5 +1,6 @@
-import rendering from "./rendering.js";
-import environment3d from "./3dmap.js";
+/* communication.js */
+import droneCam from "../drone-cam/drone-cam.js";
+import environment3d from "../3d-map/3d-map.js";
 
 /* Declare global variables for use in component */
 export let droneState = {};
@@ -28,28 +29,13 @@ function init() {
 
         handle(pkg, ws);
     });
-
-    /* Add event listener to command input field */
-    $("form").addEventListener("submit", (ev) => {
-        ev.preventDefault();
-        const ifield = $("#input-command");
-        const cmd = ifield.value;
-        ifield.value = "";
-        command(ws, cmd);
-        return false;
-    });
-    $("#button").addEventListener("click", (ev) => {
-        const emergencyStop = "stop";
-        command(ws, emergencyStop);
-        return false;
-    });
 }
 
 function handle(pkg, ws) {
     switch (pkg.type) {
         case "stream":
             const h264data = Uint8Array.from(pkg.data);
-            rendering.feed(h264data);
+            droneCam.feed(h264data);
             break;
         case "error":
             console.error(`Server error: ${pkg.data}`);
@@ -58,7 +44,7 @@ function handle(pkg, ws) {
             const dataToRender = pkg.data;
             droneState = pkg.data;
             Object.assign(dataToRender, droneState);
-            rendering.updateState(dataToRender);
+            droneCam.updateState(dataToRender);
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
@@ -73,7 +59,6 @@ function handle(pkg, ws) {
         case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
             const pos = pkg.data.dronePosition;
             environment3d.updateDronePosition(pos.x, pos.y, pos.z);
-            console.log(pos);
             break;
         default:
             console.error(`Unknown package type: ${pkg.type}`);

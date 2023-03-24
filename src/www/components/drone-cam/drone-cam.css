@@ -1,0 +1,58 @@
+canvas,
+video {
+    background-color: white;
+    margin: 24px;
+    width: 840px;
+    height: 630px;
+}
+
+.quad-size {
+    width: 400px;
+    height: 300px;
+    margin: 6px;
+}
+
+canvas.quad-size {
+    display: none;
+}
+
+#canvases > div {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+}
+
+#camera,
+#camera1 {
+    grid-column: 1;
+}
+
+#camera2,
+#camera3 {
+    grid-column: 2;
+}
+
+#camera,
+#camera2 {
+    grid-row: 1;
+    margin-top: 24px;
+    margin-bottom: auto;
+}
+
+#camera1,
+#camera3 {
+    grid-row: 2;
+    margin-top: auto;
+    margin-bottom: 24px;
+}
+
+#vcanvas {
+    z-index: 10;
+    background: transparent;
+}
+
+#canvases {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 100%;
+}

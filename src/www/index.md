@@ -22,39 +22,15 @@
 
 This is my _very cool_ website, very nice
 
-<div id="canvases">
 <div>
-	<video id="camera" class="quad-size"autoplay muted></video>
-	<video id="camera1" class="quad-size"autoplay muted></video>
-	<video id="camera2" class="quad-size"autoplay muted></video>
-	<video id="camera3" class="quad-size"autoplay muted></video>
-	<canvas id="vcanvas" class="quad-size"></canvas>
-	<canvas id="vcanvas1" class="quad-size"></canvas>
-	<canvas id="vcanvas2" class="quad-size"></canvas>
-	<canvas id="vcanvas3" class="quad-size"></canvas>
-</div>
-<div><canvas id="map"></canvas></div>
-</div>
-<div id = "user-input">
-<form>
-Command drone <input id="input-command" type="text"></input>
-</form>
-<div style="grid-column:2; display: flex; flex-direction: row;">
-<div>
-<p id=toggle-cam>Toggle Camera Mode</p>
-<input type="checkbox" id="switch"
-      class="checkbox" />
-<label for="switch" class="toggle"></label>
-</div>
-<button id="button" style="margin-left:auto;">Emergency Stop</button>
-</div>
-</div>
+<div class="flex-row-centered">
+#mdinclude<components/drone-cam/drone-cam.md>
+#mdinclude<components/3d-map/3d-map.md>
 </div>
 
-<div class="hovering" id="stateinfo-window">
-<div style="display:flex; width:100%;">
-<div class="move-hover">+++State+++</div>
-<div class="hide-show" style="text-align: right; width: fit-content" id="hide-show-info">&darr;</div> 
+#mdinclude<components/bottom-bar/bottom-bar.md>
+
 </div>
-<span id="stateinfo-data">No state data</span>
+#mdinclude<components/state-window/state-window.md>
+
 </div>
