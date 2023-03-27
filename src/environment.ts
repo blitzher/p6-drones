@@ -93,8 +93,6 @@ class Environment extends EventEmitter {
 
     private borderLength = 200;
 
-    private borderLength = 200;
-
     constructor() {
         super();
         this.objects = [];
@@ -152,19 +150,13 @@ class Environment extends EventEmitter {
 
 
 
-class Fly {
-    a: number
-
-
-}
-
 
 
 class DronePath {
     mapWidth: number;
     mapLength: number;
 
-    constructor(mapwidth, maplength) {
+    constructor(mapwidth: number, maplength: number) {
         this.mapWidth = mapwidth;
         this.mapLength = maplength;
 
@@ -200,25 +192,22 @@ class DronePath {
 
     }
 
-    public calculateSnakeGo(iterations: number, currentIteration: number, moveLength: number, moveWidth: number): Position3D {
-        let goPosition: Position3D;
-        goPosition.x = drone.x;
-        goPosition.y = drone.y;
-        goPosition.z = drone.z;
+    public calculateSnakeGo(iterations: number, currentIteration: number, moveLength: number, moveWidth: number): Vector3 {
+        let goPosition: Vector3 = new Vector3(drone);
 
         if (currentIteration == 0) {
 
-            for (const box of environment.environment) {
+            for (const box of environment.objects) {
                 for (let i = 0; i < moveLength / 10; i++) {
                     if (drone.collidesWith(box, i * 10, 0, 0)) {
                         //goPosition.x = (goPosition.x + moveLength) / 2
-                        return drone;
+                        return goPosition;
                     }
                 }
             }
 
 
-            return
+            return goPosition
         }
 
 
@@ -242,7 +231,7 @@ class DronePath {
         console.log(a[0]);
         // console.log(a.keys);
 
-        for (const box of environment.environment) {
+        for (const box of environment.objects) {
 
             if (drone.collidesWith(box)) {
 
@@ -252,18 +241,13 @@ class DronePath {
 
 
 }
+// const testEnvironment = new Environment();
+// const path = new DronePath(60, 100);
 
-const environment = new Environment();
-const drone = new Object3D(0, 0, 0, 20);
-const testEnvironment = new Environment();
-const path = new DronePath(60, 100);
-
-export default {
-    environment,
-    drone,
-    testEnvironment,
-    path,
-};
+// export default {
+//     testEnvironment,
+//     path,
+// };
 
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);
