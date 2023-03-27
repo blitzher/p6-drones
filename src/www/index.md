@@ -9,6 +9,9 @@
 <script type="text/javascript" src="libs/cv.js"></script>
 <script type="text/javascript" src="libs/aruco.js"></script>
 
+<script type="module" src="libs/three.min.js"></script>
+<script type="module" src="libs/glfloader.js"></script>
+
 <script type="text/javascript" src="scripts/utilities.js"></script>
 <script type="module" src="scripts/main.js"></script>
 
@@ -19,24 +22,15 @@
 
 This is my _very cool_ website, very nice
 
-<div id=canvases>
 <div>
-	<video id="camera" autoplay muted></video>
-	<canvas id="vcanvas"></canvas>
-</div>
-<div><canvas id="map"></canvas></div>
-</div>
-
-<form>
-Command drone <input id="input-command" type="text"></input>
-</form>
-
+<div class="flex-row-centered">
+#mdinclude<components/drone-cam/drone-cam.md>
+#mdinclude<components/3d-map/3d-map.md>
 </div>
 
-<div class="hovering" id="stateinfo-window">
-<div style="display:flex; width:100%;">
-<div class="move-hover">++++++++</div>
-<div class="hide-show" style="text-align: right; width: fit-content" id="hide-show-info">&darr;</div> 
+#mdinclude<components/bottom-bar/bottom-bar.md>
+
 </div>
-<span id="stateinfo-data">No state data</span>
+#mdinclude<components/state-window/state-window.md>
+
 </div>

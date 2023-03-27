@@ -1,4 +1,5 @@
-import { droneState } from "./communication.js";
+/*drone-cam.js*/
+import { droneState } from "../communication/communication.js";
 
 /* Declare global variables for use in component */
 let ctx, canvas, detector, jmuxer, vcanvas;
@@ -8,7 +9,6 @@ let ctx, canvas, detector, jmuxer, vcanvas;
 let vctx;
 
 /* Find and set constant element references */
-const stateinfodata = $("#stateinfo-data");
 const videoElem = $("#camera");
 
 /* Field of Views of the camera, calculated from the 82.6 degree diagonal FOV */
@@ -53,43 +53,6 @@ function init() {
     vctx = vcanvas.getContext("2d");
     vctx.strokeStyle = "red";
     vctx.lineWidth = 2;
-
-    /* Attach event listeners to hovering element */
-    initHoveringElement();
-}
-
-function initHoveringElement() {
-    let attached = false;
-    const moveElem = $(".move-hover");
-    const stateinfowindow = $("#stateinfo-window");
-
-    moveElem.addEventListener("mousedown", (ev) => {
-        attached = true;
-
-        const mousemove = (ev) => {
-            stateinfowindow.style.left = ev.clientX - 10;
-            stateinfowindow.style.top = ev.clientY - 10;
-        };
-
-        const mouseup = (ev) => {
-            attached = false;
-            document.removeEventListener("mousemove", mousemove);
-        };
-
-        moveElem.addEventListener("mouseup", mouseup);
-        document.addEventListener("mousemove", mousemove);
-    });
-
-    const hideShowInfoElem = $("#hide-show-info");
-    hideShowInfoElem.addEventListener("mousedown", (ev) => {
-        if (stateinfodata.style.display != "block") {
-            stateinfodata.style.display = "block";
-            hideShowInfoElem.innerHTML = "&#8593;";
-        } else {
-            stateinfodata.style.display = "none";
-            hideShowInfoElem.innerHTML = "&#8595;";
-        }
-    });
 }
 
 function extractImgData() {
@@ -112,7 +75,6 @@ function ARReader(imgData) {
 }
 
 /**
- *
  * @param {Marker} marker
  * @returns
  */
@@ -173,19 +135,16 @@ function estimateMarkerPosition(marker) {
     const cameraAdjusted = rotateVectorAroundXAxis(
         markerRelativePosition,
         /*Degrees recalculated to radians*/
-        Math.PI / 12 - droneState.rotation.pitch
+        Math.PI / 12 - droneState.pitch
     );
 
     /* Adjust for rotation of drone */
     const adjustedPosition = rotateVectorAroundYAxis(
         cameraAdjusted,
-        droneState.rotation.yaw
+        droneState.yaw
     );
 
-    /* Actual in-environment position of marker, relative to the starting position of the drone */
-    const position = adjustedPosition.add(droneState.position.scale(10));
-
-    return { absolute: position, relative: adjustedPosition };
+    return { relative: adjustedPosition };
 }
 
 /**
@@ -246,38 +205,10 @@ function renderMarkers(markers) {
     vctx.stroke();
 }
 
-function updateState(state) {
-    const formattedData = `
-    Pitch/Roll/Yaw: ${state.pitch}/${state.roll}/${state.yaw}<br>
-    Battery: ${state.battery}%<br>
-    Speed:<br>
-	&nbsp;x: ${state.speed.x}<br>
-	&nbsp;y: ${state.speed.y}<br>
-	&nbsp;z: ${state.speed.z}<br>
-	Position:<br>
-	&nbsp;x: ${state.position.x}<br>
-	&nbsp;y: ${state.position.y}<br>
-	&nbsp;z: ${state.position.z}<br>
-    Temperature:<br>
-	&nbsp;low: ${state.temperature.low}<br>
-	&nbsp;high: ${state.temperature.high}<br>
-    Height: ${state.heigh}<br>
-    TOF: ${state.tof}<br>
-    Barometer: ${state.barometer}<br>
-    Flight time: ${state.time}<br>
-    Acceleration:<br>
-	&nbsp;x: ${state.acceleration.x}<br>
-	&nbsp;y: ${state.acceleration.y}<br>
-	&nbsp;z: ${state.acceleration.z}<br>`;
-
-    stateinfodata.innerHTML = formattedData;
-}
-
 export default {
     initialise: init,
     feed,
     findMarkers,
-    updateState,
     estimateMarkerPosition,
     renderMarkers,
 };

@@ -1,11 +1,11 @@
 import { sdk } from "tellojs-sdk30";
-import environment from "./environment";
+import { environment, drone } from "./environment";
 
 function Avoid() {
-    environment.testEnvironment.environment.forEach((obstacle) => {
+    environment.objects.forEach((obstacle) => {
         if (
-            environment.drone.collidesWith(obstacle) ||
-            environment.testEnvironment.OutsideBoundary
+            drone.collidesWith(obstacle) ||
+            environment.outsideBoundary(drone)
         ) {
             console.log(`Collision detected with: ${obstacle}`);
         }

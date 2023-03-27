@@ -1,6 +1,7 @@
 * {
     color: ghostwhite;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: "Courier New", Courier, monospace;
+    margin: 0;
 }
 
 p {
@@ -16,87 +17,22 @@ body {
     align-items: center;
 }
 
-body>div {
+body > div {
     margin: 50px auto;
     width: min-content;
 }
 
-canvas, video {
-    background-color: white;
-    margin: 25px;
-    width: 420px;
-    height: 315px;
-}
-
-#canvases {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: 100%;
-}
-
-#canvases>div {
-    display: grid;
-}
-
-#vcanvas {
-    /* position: fixed; */
-    grid-column: 1;
-    grid-row: 1;
-    z-index: 10;
-    background:transparent;
-}
-
-#camera {
-    grid-row: 1;
-    grid-column: 1;
-}
-
-.hovering {
-    z-index: 9;
-    position: absolute;
+.flex-row-centered {
     display: flex;
-    flex-direction: column;
-    top: 600px;
-    left: 150px;
-    width: 150px;
-    height: fit-content;
-    margin: 0;
-    background-color: brown;
-    border: 5px solid #7F2020;
-    border-radius: 10px;
-    padding: 5px;
-    z-index: 10;
-}
-
-#map {
-    grid-column: 2;
+    flex-direction: row;
+    place-items: center;
+    width: 100%;
 }
 
 span {
     display: flex;
 }
 
-span>* {
+span > * {
     margin: 10px;
-}
-
-.move-hover, .hide-show {
-    user-select: none;
-    margin: 0;
-    width: 100%;
-}
-
-.hide-show {
-    width: fit-content;
-    border-radius: 50%;
-}
-
-#stateinfo-data {
-    display: none;
-
-}
-
-input {
-    background-color: #303050;
-    border: solid 1px ghostwhite;
 }

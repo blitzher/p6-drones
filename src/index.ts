@@ -4,15 +4,16 @@ import * as path from "path";
 
 /* Import npm packages */
 import express from "express";
-import { sdk } from "tellojs-sdk30";
+import { State as StateInfo, sdk } from "tellojs-sdk30";
 import expressWs from "express-ws";
 import { v4 as uuidv4 } from "uuid";
 import { WebSocket } from "ws";
 
-/* Import local packages and typedef */
+/* Import local packages */
 import { H264Segmenter } from "./h264-segmenter";
-import environment from "./environment";
-import Fly from "./Fly";
+import * as env from "./environment";
+import { Vector3 } from "./linerAlgebra";
+import { Object3D } from "./environment";
 
 /* Global constant */
 const PORT = 42069;
@@ -40,7 +41,7 @@ const com = {
                 })
             );
     },
-    state: (state: object) => {
+    state: (state: StateInfo) => {
         for (let { client } of clients)
             client.send(
                 JSON.stringify({
@@ -48,6 +49,17 @@ const com = {
                     data: state,
                 })
             );
+    },
+    environment: (data: Object3D[]) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
+    },
+    drone: (data: {
+        dronePosition: Object3D;
+        dronePositionHistory: Object3D[];
+    }) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -103,12 +115,22 @@ async function droneControl() {
     });
 
     const stateEmitter = sdk.receiver.state.bind();
-    environment.path.SnakePattern();
+    /* env.path.snakePattern(); */
+    sdk.set.mon().catch((e) => { });
     let disconnectedTimeout = setTimeout(() => { }, 10e5);
     stateEmitter.on("message", (res) => {
 
         clearTimeout(disconnectedTimeout);
         com.state(res);
+        const speed = {
+            x: Number.parseInt(res.speed.x),
+            y: Number.parseInt(res.speed.y),
+            z: Number.parseInt(res.speed.z),
+        };
+        env.droneState.updatePosition(speed);
+        env.droneState.updateRotation(res.pitch, res.yaw, res.roll);
+        env.environment.updateDronePosition(env.droneState.position);
+
         disconnectedTimeout = setTimeout(async () => {
             drone.connected = false;
             console.log("Drone disconnected");
@@ -120,6 +142,9 @@ app.ws("/", (ws) => {
     const myUuid = uuidv4();
     clients.push({ client: ws, uuid: myUuid });
     console.log("New client!");
+
+    /* When a new client connects, send the current env */
+    env.environment.emitEnvironment();
 
     ws.onmessage = (msg) => {
         try {
@@ -148,14 +173,46 @@ function handle(pkg: Package) {
             drone.command(pkg.data);
             break;
         case "dronestate":
-            console.log(pkg);
+            console.log("Receiving 'dronestate' pkg");
+
             break;
     }
+}
+
+function startTest() {
+    console.log(`Starting test: ${process.title}`);
+
+    /* Position of dummy boxes for testing */
+    const BOX_COUNT = 20;
+    let time = 0;
+    const addObjectInterval = setInterval(() => {
+        let x = Math.cos(time) * time * 30;
+        let z = Math.sin(time) * time * 30;
+        let obstacle = new Object3D(x, 0, z, 10);
+        time += 0.2;
+        env.environment.addObject({ obj: obstacle });
+        if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
+    }, 1000);
+
+    env.environment.listen("objects", (data: Object3D[]) => {
+        com.environment(data);
+    });
+    env.environment.listen(
+        "drone",
+        (data: {
+            dronePosition: Object3D;
+            dronePositionHistory: Object3D[];
+        }) => {
+            com.drone(data);
+        }
+    );
 }
 
 /* Launch server */
 app.listen(PORT, async () => {
     console.log(`Listening on ${PORT}...`);
+
+    startTest();
 
     console.log(`Connecting to drone...`);
     while (!drone.connected) {

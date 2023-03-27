@@ -1,26 +1,24 @@
-import communication from "./communication.js";
-import rendering from "./rendering.js";
+import communication from "../components/communication/communication.js";
+import droneCam from "../components/drone-cam/drone-cam.js";
+import map3d from "../components/3d-map/3d-map.js";
+import stateWindow from "../components/state-window/state-window.js";
+import bottomBar from "../components/bottom-bar/bottom-bar.js";
 
 window.addEventListener("load", (doc, ev) => {
-    rendering.initialise();
+    droneCam.initialise();
     communication.initialise();
+    map3d.render3DCube();
+    stateWindow.initialise();
+    bottomBar.initialise();
 
     setInterval(() => {
-        const markers = rendering.findMarkers();
+        const markers = droneCam.findMarkers();
         let markerPos3D;
 
         if (markers.length > 0) {
-            rendering.renderMarkers(markers);
+            droneCam.renderMarkers(markers);
             markers.forEach((element) => {
-                markerPos3D = rendering.estimateMarkerPosition(element);
-
-                console.log(
-                    `Absolute x:${
-                        Math.round(markerPos3D.absolute.x) / 10
-                    }cm y:${Math.round(markerPos3D.absolute.y) / 10}cm z:${
-                        Math.round(markerPos3D.absolute.z) / 10
-                    }cm`
-                );
+                markerPos3D = droneCam.estimateMarkerPosition(element);
 
                 console.log(
                     `Relative x:${
