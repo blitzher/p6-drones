@@ -28,6 +28,7 @@
 #toggle-state-window {
     width: fit-content;
     border-radius: 50%;
+    text-align: right;
 }
 
 #stateinfo-data {
