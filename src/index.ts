@@ -14,6 +14,7 @@ import { H264Segmenter } from "./h264-segmenter";
 import * as env from "./environment";
 import { Vector3 } from "./linerAlgebra";
 import { Object3D } from "./environment";
+import { dronePath } from "./environment";
 
 /* Global constant */
 const PORT = 42069;
@@ -170,7 +171,7 @@ function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
             if (pkg.data == "initSearch") {
-                env.dronePath.Fly("Snake");
+                env.dronePath.DesignPattern();
             }
             drone.command(pkg.data);
             break;

@@ -186,7 +186,7 @@ class DronePath {
 
         const mission: (() => Promise<any>)[] = [];
 
-        mission.push(() => sdk.control.takeOff());
+        //mission.push(() => sdk.control.takeOff());
 
         let flyDestination: Vector3 = new Vector3(droneState.position);
         let relevantBoxes: Object3D[] = [];
@@ -258,3 +258,4 @@ class DronePath {
 }
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);
+export const dronePath = new DronePath(200, 200);

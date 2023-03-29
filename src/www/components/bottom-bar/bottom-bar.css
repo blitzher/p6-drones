@@ -5,7 +5,6 @@ input {
 
 #button {
     grid-row: 2;
-    background-color: red;
     border: 5px solid #7f2020;
     border-radius: 100%;
     padding: 20px;
@@ -14,6 +13,12 @@ input {
     width: fit-content;
     height: fit-content;
     margin-left: auto;
+}
+#emergency-button {
+    background-color: red;
+}
+#init-button {
+    background-color: green;
 }
 #button:active {
     background-color: #7f2020;
