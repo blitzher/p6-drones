@@ -1,3 +1,4 @@
+import { relative } from "path";
 import { EventEmitter } from "stream";
 import { sdk, State as _StateInfo } from "tellojs-sdk30";
 import { Vector3 } from "./linerAlgebra";
@@ -196,10 +197,9 @@ class DronePath {
         let goPosition: Vector3 = new Vector3(drone);
 
         if (currentIteration == 0) {
-
             for (const box of environment.objects) {
                 for (let i = 0; i < moveLength / 10; i++) {
-                    if (drone.collidesWith(box, i * 10, 0, 0)) {
+                    if (drone.collidesWith(box, i * 10)) {
                         //goPosition.x = (goPosition.x + moveLength) / 2
                         return goPosition;
                     }
@@ -212,6 +212,25 @@ class DronePath {
 
 
         return goPosition;
+    }
+
+    public getRelevantBoxes(flyDestination: Vector3, moveLength: number): Object3D[] {
+        let relevantBoxes: Object3D[] = [];
+        let positionCheck: Vector3 = droneState.position;
+
+        let moveVector: Vector3 = positionCheck.subtract(flyDestination);
+
+        for (const box of environment.objects) {
+            //Checks each 5 cm. if there is a box in the path
+            for (let i = 0; i < moveLength; i += 5) {
+                let dronePositions: Object3D = new Object3D(moveVector.x + i, moveVector.y + i, moveVector.z + i, 20);
+
+                if (dronePositions.collidesWith(box)) {
+                    relevantBoxes.push(box);
+                }
+            }
+        }
+        return relevantBoxes;
     }
 
 
