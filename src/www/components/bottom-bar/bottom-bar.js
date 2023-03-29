@@ -24,9 +24,14 @@ function initBB() {
     });
 
     /* Add event listener to emergency stop button */
-    $("#button").addEventListener("click", (ev) => {
+    $("#emergency-button").addEventListener("click", (ev) => {
         const emergencyStop = "stop";
         communication.command(emergencyStop);
+        return false;
+    });
+    /* Add event listener to emergency stop button */
+    $("#init-button").addEventListener("click", (ev) => {
+        communication.command("initSearch");
         return false;
     });
 }

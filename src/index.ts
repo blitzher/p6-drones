@@ -116,10 +116,9 @@ async function droneControl() {
 
     const stateEmitter = sdk.receiver.state.bind();
     /* env.path.snakePattern(); */
-    sdk.set.mon().catch((e) => { });
-    let disconnectedTimeout = setTimeout(() => { }, 10e5);
+    sdk.set.mon().catch((e) => {});
+    let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
-
         clearTimeout(disconnectedTimeout);
         com.state(res);
         const speed = {
@@ -170,6 +169,9 @@ app.ws("/", (ws) => {
 function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
+            if (pkg.data == "initSearch") {
+                env.dronePath.Fly("Snake");
+            }
             drone.command(pkg.data);
             break;
         case "dronestate":

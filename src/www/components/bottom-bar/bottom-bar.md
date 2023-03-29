@@ -17,7 +17,8 @@ Command drone <input id="input-command" type="text"></input>
                   class="checkbox" />
             <label for="switch" class="toggle"></label>
       </div>
-      <button id="button">Emergency Stop</button>
+      <button id="emergency-button">Emergency Stop</button>
+      <button id="init-button">Initiate Search</button>
 </div>
 
 <script type="module" src="../components/bottom-bar/bottom-bar.js">
