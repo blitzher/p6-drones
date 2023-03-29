@@ -242,12 +242,27 @@ class DronePath {
 
                 if (dronePositions.collidesWith(box)) {
                     relevantBoxes.push(box);
+                    console.log(box);
                 }
             }
         }
         return relevantBoxes;
     }
 
+    public async Fly(patteren: string) {
+        switch (patteren) {
+            case "Snake":
+                const snake = await this.DesignPattern();
+                for (const iterator of snake!) {
+                    await iterator();
+                }
+
+                break;
+
+            default:
+                break;
+        }
+    }
     // const testEnvironment = new Environment();
     // const path = new DronePath(60, 100);
 
