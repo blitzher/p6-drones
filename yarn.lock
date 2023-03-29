@@ -1374,10 +1374,10 @@ tar-stream@^2.1.4:
     inherits "^2.0.3"
     readable-stream "^3.1.1"
 
-tellojs-sdk30@^1.1.7:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/tellojs-sdk30/-/tellojs-sdk30-1.1.7.tgz#728458045a5927df956ef87009d767dd8b94dc8a"
-  integrity sha512-fSmbB5ZfE4UrtT6L2Z9dS9BL+9uuzr3aOxTSJiwEBbFBgZuth2qdbeHsNi73bIehD/NFrs5fdwcLYMjixlsWUQ==
+tellojs-sdk30@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/tellojs-sdk30/-/tellojs-sdk30-1.2.1.tgz#9afc1392d123d564211ae6193fb31a879ecae039"
+  integrity sha512-AOUvSCTPnOV/Gllsers/NPIWPdFVpmtdePyd1MLbbsHR6/Ufy67vD8/S6E7d2iFGuGRewqirfjgEotZa/zfgPQ==
 
 to-array-buffer@^3.0.0:
   version "3.2.0"

@@ -13,19 +13,18 @@ window.addEventListener("load", (doc, ev) => {
 
     setInterval(() => {
         const markers = droneCam.findMarkers();
-        let markerPos3D;
+        let markerPos;
 
         if (markers.length > 0) {
             droneCam.renderMarkers(markers);
-            markers.forEach((element) => {
-                markerPos3D = droneCam.estimateMarkerPosition(element);
+            markers.forEach((marker) => {
+                markerPos = droneCam.estimateMarkerPosition(marker);
+                communication.sendMarker(markerPos);
 
                 console.log(
-                    `Relative x:${
-                        Math.round(markerPos3D.relative.x) / 10
-                    }cm y:${Math.round(markerPos3D.relative.y) / 10}cm z:${
-                        Math.round(markerPos3D.relative.z) / 10
-                    }cm`
+                    `Relative x:${Math.round(markerPos.relative.x) / 10}cm y:${
+                        Math.round(markerPos.relative.y) / 10
+                    }cm z:${Math.round(markerPos.relative.z) / 10}cm`
                 );
             });
         }

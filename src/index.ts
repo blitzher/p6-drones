@@ -12,7 +12,6 @@ import { WebSocket } from "ws";
 /* Import local packages */
 import { H264Segmenter } from "./h264-segmenter";
 import * as env from "./environment";
-import { Vector3 } from "./linerAlgebra";
 import { Object3D } from "./environment";
 
 /* Global constant */
@@ -23,6 +22,14 @@ const { app } = expressWs(express());
 type UWebSocket = { client: WebSocket; uuid: string };
 type Package = { type: string; data: any };
 const clients: UWebSocket[] = [];
+
+const DRONE_ONE = {
+    ip: "192.168.1.141",
+    port: {
+        video: 9000,
+        state: 10000,
+    },
+};
 
 /* Setup web server */
 app.use(express.json());
@@ -51,15 +58,10 @@ const com = {
             );
     },
     environment: (data: Object3D[]) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
     },
-    drone: (data: {
-        dronePosition: Object3D;
-        dronePositionHistory: Object3D[];
-    }) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "drone", data }));
+    drone: (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -83,38 +85,42 @@ const drone = {
 
 async function droneControl() {
     try {
+        sdk.setIP(DRONE_ONE.ip);
         await sdk.control.connect();
     } catch (e) {
         console.log("Could not connect to drone. Retrying...");
+        console.log(e);
         return;
     }
 
     const sdkVersion = await sdk.read.sdk();
     console.log(`"Using SDK version: ${sdkVersion}`);
+    await sdk.set.port(DRONE_ONE.port.state, DRONE_ONE.port.video);
 
     drone.keepAlive();
     drone.connected = true;
 
     console.log(`Drone connection established`);
-    const videoEmitter = await sdk.receiver.video.bind();
+    const videoEmitter = (await sdk.receiver.video.bind(9000)).emitter;
     let isFirst = true;
     let segmenter: H264Segmenter;
-    videoEmitter.on("message", (res) => {
+    videoEmitter.on("message", (...res) => {
+        console.log(res);
         /* If its the first segment, initialise a new segmenter */
         if (isFirst) {
-            segmenter = new H264Segmenter(res);
+            segmenter = new H264Segmenter(res[0]);
             isFirst = false;
         }
 
         /* Feed the segmenter segments as they come in */
-        const segment = segmenter.feed(res);
+        const segment = segmenter.feed(res[0]);
 
         /* If the segmenter.feed method returns an object,
          * dispatch the segment to clients */
         if (segment) com.video(segment);
     });
 
-    const stateEmitter = sdk.receiver.state.bind();
+    const stateEmitter = sdk.receiver.state.bind(10000).emitter;
     /* env.path.snakePattern(); */
     sdk.set.mon().catch((e) => {});
     let disconnectedTimeout = setTimeout(() => {}, 10e5);
@@ -171,8 +177,21 @@ function handle(pkg: Package) {
         case "command":
             drone.command(pkg.data);
             break;
-        case "dronestate":
-            console.log("Receiving 'dronestate' pkg");
+        case "marker":
+            console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
+
+            const marker = pkg.data.relative;
+            const id = pkg.data.id;
+
+            env.environment.addObject({
+                pos: {
+                    x: marker.x / 10,
+                    y: marker.y / 10,
+                    z: marker.z / 10,
+                    r: env.BOX_RADIUS,
+                },
+                id,
+            });
 
             break;
     }
@@ -189,22 +208,9 @@ function startTest() {
         let z = Math.sin(time) * time * 30;
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
-        env.environment.addObject({ obj: obstacle });
+        env.environment.addObject({ obj: obstacle, id: time });
         if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
     }, 1000);
-
-    env.environment.listen("objects", (data: Object3D[]) => {
-        com.environment(data);
-    });
-    env.environment.listen(
-        "drone",
-        (data: {
-            dronePosition: Object3D;
-            dronePositionHistory: Object3D[];
-        }) => {
-            com.drone(data);
-        }
-    );
 }
 
 /* Launch server */
@@ -217,4 +223,12 @@ app.listen(PORT, async () => {
     while (!drone.connected) {
         await droneControl();
     }
+
+    /* Listen for environment updates, and send to frontend */
+    env.environment.listen("objects", (data: Object3D[]) => {
+        com.environment(data);
+    });
+    env.environment.listen("drone", (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+        com.drone(data);
+    });
 });

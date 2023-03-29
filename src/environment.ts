@@ -58,8 +58,6 @@ export const droneState = {
         speed.z = speed.x;
         speed.x = temp2;
 
-        console.log(speed);
-
         this.position = this.position.add(speed);
     },
 
@@ -72,9 +70,7 @@ export const droneState = {
 
 class Environment extends EventEmitter {
     public objects: Object3D[];
-
     private dronePositionHistory: Object3D[] = [];
-
     private borderLength = 200;
 
     constructor() {
@@ -91,7 +87,7 @@ class Environment extends EventEmitter {
         return false;
     }
 
-    public addObject(arg: { pos?: { x: number; y: number; z: number; r: number }; obj?: Object3D }) {
+    public addObject(arg: { pos?: { x: number; y: number; z: number; r: number }; obj?: Object3D; id: number }) {
         let obj;
         if (arg.pos) obj = new Object3D(arg.pos.x, arg.pos.y, arg.pos.z, arg.pos.r);
         else if (arg.obj) obj = arg.obj;
@@ -126,7 +122,6 @@ class Environment extends EventEmitter {
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [event: "drone", listener: (data: { dronePosition: Object3D; dronePositionHistory: Object3D[] }) => void]
     ): this {
-        console.log(args);
         return this.on(args[0], args[1]);
     }
 }
@@ -166,3 +161,4 @@ export const path = {
 
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);
+export const BOX_RADIUS = 10;
