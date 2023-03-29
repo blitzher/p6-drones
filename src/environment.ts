@@ -170,13 +170,13 @@ class DronePath {
 
         const mission: (() => Promise<any>)[] = [];
 
-        mission.push(() => sdk.control.takeOff());
+
 
         let flyDestination: Vector3 = new Vector3(droneState.position);
         let relevantBoxes: Object3D[] = [];
 
 
-        for (let index = 0; index < iterations; index++) {
+        for (let index = 0; index < 1; index++) {
             if (index % 2 == 0) {
                 flyDestination.x += moveLength;
                 relevantBoxes = this.getRelevantBoxes(flyDestination, moveLength)
@@ -220,12 +220,28 @@ class DronePath {
 
                 if (dronePositions.collidesWith(box)) {
                     relevantBoxes.push(box);
+                    console.log(box);
                 }
             }
         }
         return relevantBoxes;
     }
 
+
+    public async Fly(patteren: string) {
+        switch (patteren) {
+            case "Snake":
+                const snake = await this.DesignPattern();
+                for (const iterator of snake!) {
+                    await iterator();
+                }
+
+                break;
+
+            default:
+                break;
+        }
+    }
     // const testEnvironment = new Environment();
     // const path = new DronePath(60, 100);
 
@@ -236,3 +252,4 @@ class DronePath {
 }
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);
+export const dronePath = new DronePath(200, 200);

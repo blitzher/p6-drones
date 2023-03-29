@@ -14,6 +14,8 @@ import { H264Segmenter } from "./h264-segmenter";
 import * as env from "./environment";
 import { Vector3 } from "./linerAlgebra";
 import { Object3D } from "./environment";
+import Fly from "./Fly";
+
 
 /* Global constant */
 const PORT = 42069;
@@ -116,7 +118,7 @@ async function droneControl() {
 
     const stateEmitter = sdk.receiver.state.bind();
     /* env.path.snakePattern(); */
-    sdk.set.mon().catch((e) => { });
+    //sdk.set.mon().catch((e) => { });
     let disconnectedTimeout = setTimeout(() => { }, 10e5);
     stateEmitter.on("message", (res) => {
 
@@ -170,12 +172,18 @@ app.ws("/", (ws) => {
 function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
-            drone.command(pkg.data);
+            if (pkg.data = "Snake") {
+                env.dronePath.Fly("Snake");
+            } else {
+                drone.command(pkg.data);
+            }
             break;
         case "dronestate":
             console.log("Receiving 'dronestate' pkg");
-
             break;
+        case "Fly":
+            env.dronePath.Fly("Snake");
+
     }
 }
 
