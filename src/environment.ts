@@ -184,78 +184,41 @@ class DronePath {
         let moveLength: number = this.mapLength;
         let moveWidth: number = 30;
 
-        const mission: Array<[string, () => Promise<any>]> = [];
+        const mission: (() => Promise<any>)[] = [];
 
-        mission.push(["takeOff", () => sdk.control.takeOff()]);
+        mission.push(() => sdk.control.takeOff());
+
+        let flyDestination: Vector3 = new Vector3(droneState.position);
+        let relevantBoxes: Object3D[] = [];
 
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
-                mission.push([
-                    "front",
-                    () =>
-                        sdk.control.go(
-                            this.calculateSnakeGo(
-                                iterations,
-                                index,
-                                moveLength,
-                                moveWidth
-                            ),
-                            100
-                        ),
-                ]);
-                mission.push([
-                    "clockwise",
-                    () => sdk.control.rotate.clockwise(90),
-                ]);
+                flyDestination.x += moveLength;
+                relevantBoxes = this.getRelevantBoxes(
+                    flyDestination,
+                    moveLength
+                );
 
-                mission.push(["front", () => sdk.control.move.front(30)]);
-                mission.push([
-                    "clockwise",
-                    () => sdk.control.rotate.clockwise(90),
-                ]);
-            } else {
-                mission.push([
-                    "front",
-                    () => sdk.control.move.front(moveLength),
-                ]);
-                mission.push([
-                    "counterClockwise",
-                    () => sdk.control.rotate.counterClockwise(90),
-                ]);
-                mission.push(["front", () => sdk.control.move.front(30)]);
-                mission.push([
-                    "counterClockwise",
-                    () => sdk.control.rotate.counterClockwise(90),
-                ]);
-            }
-        }
-
-        mission.push(["land", () => sdk.control.land()]);
-        return mission;
-    }
-
-    public calculateSnakeGo(
-        iterations: number,
-        currentIteration: number,
-        moveLength: number,
-        moveWidth: number
-    ): Vector3 {
-        let goPosition: Vector3 = new Vector3(drone);
-
-        if (currentIteration == 0) {
-            for (const box of environment.objects) {
-                for (let i = 0; i < moveLength / 10; i++) {
-                    if (drone.collidesWith(box, i * 10)) {
-                        //goPosition.x = (goPosition.x + moveLength) / 2
-                        return goPosition;
-                    }
+                if (relevantBoxes.length == 0) {
+                    mission.push(() => sdk.control.go(flyDestination, 100));
+                    mission.push(() => sdk.control.rotate.clockwise(90));
+                } else {
+                    mission.push(() => sdk.control.go(relevantBoxes[0], 100));
                 }
+
+                //     mission.push(() => sdk.control.move.front(30));
+                //     mission.push(() => sdk.control.rotate.clockwise(90));
+                // } else {
+                //     mission.push(() => sdk.control.move.front(moveLength));
+                //     mission.push(() => sdk.control.rotate.counterClockwise(90));
+                //     mission.push(() => sdk.control.move.front(30));
+                //     mission.push(() => sdk.control.rotate.counterClockwise(90));
+                // }
             }
 
-            return goPosition;
+            mission.push(() => sdk.control.land());
+            return mission;
         }
-
-        return goPosition;
     }
 
     public getRelevantBoxes(
@@ -285,32 +248,13 @@ class DronePath {
         return relevantBoxes;
     }
 
-    public async SnakePattern() {
-        let a = await this.DesignPattern();
+    // const testEnvironment = new Environment();
+    // const path = new DronePath(60, 100);
 
-        for (const iterator of a) {
-            await this.ResolveCollision(iterator);
-            await iterator[1]();
-        }
-    }
-
-    public async ResolveCollision(a: [string, () => Promise<any>]) {
-        console.log(a[0]);
-        // console.log(a.keys);
-
-        for (const box of environment.objects) {
-            if (drone.collidesWith(box)) {
-            }
-        }
-    }
+    // export default {
+    //     testEnvironment,
+    //     path,
+    // };
 }
-// const testEnvironment = new Environment();
-// const path = new DronePath(60, 100);
-
-// export default {
-//     testEnvironment,
-//     path,
-// };
-
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);
