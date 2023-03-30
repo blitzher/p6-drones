@@ -203,7 +203,7 @@ class DronePath {
                     mission.push(() => sdk.control.go(flyDestination, 100));
                     mission.push(() => sdk.control.rotate.clockwise(90));
                 } else {
-                    mission.push(() => sdk.control.go(relevantBoxes[0], 100));
+                    mission.push(() => this.Maneuver(relevantBoxes[0]));
                 }
 
                 //     mission.push(() => sdk.control.move.front(30));
@@ -263,6 +263,22 @@ class DronePath {
                 break;
         }
     }
+
+    public async Maneuver(obstacle: Object3D) {
+        const maneuverCommands: (() => Promise<any>)[] = [];
+
+        const obstaclePosition = new Object3D(
+            obstacle.x - obstacle.radius,
+            obstacle.y - obstacle.radius,
+            obstacle.z - obstacle.radius,
+            obstacle.radius
+        );
+        // Go to position just before hitting the obstacle
+        maneuverCommands.push(() => sdk.control.go(obstaclePosition, 100));
+
+        return maneuverCommands;
+    }
+
     // const testEnvironment = new Environment();
     // const path = new DronePath(60, 100);
 
