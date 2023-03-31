@@ -29,16 +29,16 @@ export class Object3D {
         if (checkX != undefined && checkY != undefined && checkZ != undefined) {
             const distance = Math.sqrt(
                 (other.x - this.x + checkX) ** 2 +
-                    (other.y - this.y + checkY) ** 2 +
-                    (other.z - this.z + checkZ) ** 2
+                (other.y - this.y + checkY) ** 2 +
+                (other.z - this.z + checkZ) ** 2
             );
 
             return distance < this.radius + other.radius;
         } else {
             const distance = Math.sqrt(
                 (other.x - this.x) ** 2 +
-                    (other.y - this.y) ** 2 +
-                    (other.z - this.z) ** 2
+                (other.y - this.y) ** 2 +
+                (other.z - this.z) ** 2
             );
 
             return distance < this.radius + other.radius;
@@ -158,12 +158,12 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                  event: "drone",
-                  listener: (data: {
-                      dronePosition: Object3D;
-                      dronePositionHistory: Object3D[];
-                  }) => void
-              ]
+                event: "drone",
+                listener: (data: {
+                    dronePosition: Object3D;
+                    dronePositionHistory: Object3D[];
+                }) => void
+            ]
     ): this {
         console.log(args);
         return this.on(args[0], args[1]);
@@ -228,19 +228,16 @@ class DronePath {
         let relevantBoxes: Object3D[] = [];
         let positionCheck: Vector3 = droneState.position;
 
-        let moveVector: Vector3 = positionCheck.subtract(flyDestination);
+        let moveVector: Vector3 = positionCheck.subtract(flyDestination).normalise();
+        let dronePosition: Object3D = new Object3D(0, 0, 0, 20);
 
         for (const box of environment.objects) {
             //Checks each 5 cm. if there is a box in the path
             for (let i = 0; i < moveLength; i += 5) {
-                let dronePositions: Object3D = new Object3D(
-                    moveVector.x + i,
-                    moveVector.y + i,
-                    moveVector.z + i,
-                    20
-                );
+                moveVector.scale(i);
+                dronePosition = new Object3D(moveVector.x, moveVector.y, moveVector.z, 20);
 
-                if (dronePositions.collidesWith(box)) {
+                if (dronePosition.collidesWith(box)) {
                     relevantBoxes.push(box);
                     console.log(box);
                 }
