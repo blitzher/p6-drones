@@ -33,4 +33,11 @@ export class Vector3 {
     subtract({ x, y, z }: { x: number; y: number; z: number }): Vector3 {
         return new Vector3({ x: this.x - x, y: this.y - y, z: +this.z - z });
     }
+    compare(other: Vector3) {
+        Math.sqrt(
+            (this.x - other.x) ** 2 +
+                (this.x - other.x) ** 2 +
+                (this.x - other.x) ** 2
+        );
+    }
 }

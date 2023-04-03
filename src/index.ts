@@ -120,7 +120,7 @@ async function droneControl() {
     const stateEmitter = sdk.receiver.state.bind();
     /* env.path.snakePattern(); */
     //sdk.set.mon().catch((e) => { });
-    let disconnectedTimeout = setTimeout(() => { }, 10e5);
+    let disconnectedTimeout = setTimeout(() => {}, 10e5);
     stateEmitter.on("message", (res) => {
         clearTimeout(disconnectedTimeout);
         com.state(res);
