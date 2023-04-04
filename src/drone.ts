@@ -1,5 +1,5 @@
 import { EventEmitter } from "stream";
-import { sdk, State as StateInfo } from "../tellojs-sdk30";
+import sdk from "../tellojs-sdk30/src";
 import { H264Segmenter } from "./h264-segmenter";
 import { com } from "./frontend-com";
 import * as env from "./environment";
@@ -13,15 +13,10 @@ let nextVideoPort = 10000;
 export const droneState = {};
 export type DroneId = string;
 
-export class Drone {
+export class Drone extends sdk.Drone {
     static allDrones: { [key: string]: Drone } = {};
 
     /* Setup public attributes */
-    private ip: string = "";
-    public id: DroneId = "";
-    public port: { state: number; video: number } = { state: nextStatePort++, video: nextVideoPort++ };
-    public connected: boolean;
-
     public readonly positionHistory: Vector3[] = [];
 
     public readonly state = {
@@ -42,21 +37,9 @@ export class Drone {
         }),
     };
 
-    public emitters = {};
-
-    private stateEmitter!: EventEmitter;
-    private videoEmitter!: EventEmitter;
-
     constructor({ ip, port }: { ip: string; port?: { state?: number; video?: number } }) {
-        this.ip = ip;
-        this.id = ip.split(".").pop() || "";
-
-        /* Assign emitter ports to defaults or arguments */
-        this.port = {
-            state: port?.state || this.port.state,
-            video: port?.video || this.port.video,
-        };
-        this.connected = false;
+        super(ip);
+        console.log({ ip, port });
 
         /* Add drone object reference to arrays */
         Drone.allDrones[this.id] = this;
@@ -64,27 +47,45 @@ export class Drone {
     }
 
     async connect() {
+        console.log(`Connecting to ${this.ip}`);
+
         try {
-            this.send(sdk.control.connect);
+            await sdk.control.connect(this.ip);
         } catch (e) {
-            console.log(`Could not connect to ${this.ip}:${e}. Retrying in 2 seconds...`);
-            setTimeout(this.connect, RECONNECT_TIMEOUT);
+            console.log(`Could not connect to ${this.ip}. Retrying in 2 seconds...`);
+            setTimeout(async () => {
+                await this.connect.bind(this)();
+            }, RECONNECT_TIMEOUT);
             return;
         }
-        console.log(`Drone connection established`);
+        console.log(`Drone connection ${this.ip} established`);
 
         /* Set port properties on drone */
-        this.connected = true;
-        this.send(sdk.set.port, this.port.state, this.port.video);
+        console.log(`Drone ports reset`);
 
-        this.stateEmitter = await this.send(sdk.receiver.video.bind, this.port.state);
-        this.stateEmitter.on("message", this.onstate());
+        this;
 
-        this.videoEmitter = await this.send(sdk.receiver.video.bind, this.port.video);
-        this.videoEmitter.on("message", this.onvideo());
+        setTimeout(() => {
+            console.log("Setting up state emitter...");
+            this.stateEmitter = sdk.receiver.state.bind(this.ip, this.port.state).emitter;
+            this.stateEmitter.on("message", this.onstate());
+
+            console.log("Setting up video emitter...");
+
+            sdk.receiver.video
+                .bind(this.ip, this.port.video)
+                .then((response) => {
+                    this.videoEmitter = response.emitter;
+                    this.videoEmitter.on("message", this.onvideo());
+                })
+                .catch(console.log);
+            console.log("Emitters set up.");
+        }, 5000);
 
         /* Set cooling motors on */
-        sdk.set.mon().catch((e) => {});
+        sdk.set.mon(this.ip).catch((e) => {});
+
+        console.log("Finished connection");
     }
 
     async send(func: Function, ...args: any[]) {

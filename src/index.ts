@@ -3,7 +3,6 @@ import express from "express";
 import expressWs from "express-ws";
 
 /* Import local packages */
-import { H264Segmenter } from "./h264-segmenter";
 import * as env from "./environment";
 import { Object3D } from "./environment";
 import { Drone } from "./drone";
@@ -45,19 +44,21 @@ function startTest() {
 app.listen(HTTP_PORT, async () => {
     console.log(`Listening on ${HTTP_PORT}...`);
 
-    startTest();
-    console.log(`Connecting to drones...`);
+    // startTest();
+
     droneOne.connect();
-    droneTwo.connect();
+    console.log("Finished main");
+
+    // droneTwo.connect();
 
     /* Listen for environment updates, and send to frontend */
-    env.environment.listen("objects", (data: Object3D[]) => {
-        com.environment(data);
-    });
-    env.environment.listen(
-        "drone",
-        (data: { id: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-            com.drone(data);
-        }
-    );
+    // env.environment.listen("objects", (data: Object3D[]) => {
+    //     com.environment(data);
+    // });
+    // env.environment.listen(
+    //     "drone",
+    //     (data: { id: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+    //         com.drone(data);
+    //     }
+    // );
 });
