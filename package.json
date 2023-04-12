@@ -4,7 +4,7 @@
     "scripts": {
         "start": "yarn build && yarn server",
         "build": "tsc",
-        "server": "node build/index.js",
+        "server": "node build/src/index.js",
         "dev": "nodemon -w \"./src/**/*\" -e .ts --exec \"yarn start\""
     },
     "dependencies": {

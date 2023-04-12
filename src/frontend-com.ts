@@ -1,5 +1,5 @@
 import * as env from "./environment";
-import { State as StateInfo } from "../tellojs-sdk30";
+import { StateInfo } from "../tellojs-sdk30/src";
 import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
 
