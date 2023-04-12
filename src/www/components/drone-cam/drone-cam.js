@@ -82,36 +82,25 @@ function estimateDistance(marker) {
     const FOCAL_LENGTH = 25; /* mm */
     const MARKER_HEIGHT = 140; /* mm */
     const APPARENT_HEIGHT =
-        (marker.corners[3].y -
-            marker.corners[0].y +
-            marker.corners[2].y -
-            marker.corners[1].y) /
-        2; /* pixels */
+        (marker.corners[3].y - marker.corners[0].y + marker.corners[2].y - marker.corners[1].y) / 2; /* pixels */
     const IMAGE_HEIGHT = canvas.height; /* pixels */
     const SENSOR_HEIGHT = 2.0775; /* mm */
     return (
-        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) /
-            (APPARENT_HEIGHT * SENSOR_HEIGHT)) *
-        0.1
+        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) / (APPARENT_HEIGHT * SENSOR_HEIGHT)) * 0.1
     ); /* Divide by 10 because ¯\_(ツ)_/¯ */
 }
 
+/**
+ *
+ * @param {Marker} marker
+ * @returns {{relative: {x: number, y:number, z:number}}}
+ */
 function estimateMarkerPosition(marker) {
     const dist = estimateDistance(marker);
 
     /* Find center of the marker */
-    const x =
-        (marker.corners[0].x +
-            marker.corners[1].x +
-            marker.corners[2].x +
-            marker.corners[3].x) /
-        4;
-    const y =
-        (marker.corners[0].y +
-            marker.corners[1].y +
-            marker.corners[2].y +
-            marker.corners[3].y) /
-        4;
+    const x = (marker.corners[0].x + marker.corners[1].x + marker.corners[2].x + marker.corners[3].x) / 4;
+    const y = (marker.corners[0].y + marker.corners[1].y + marker.corners[2].y + marker.corners[3].y) / 4;
 
     /* Find the relative screen position of the marker */
     const [mx, my] = [canvas.width / 2, canvas.height / 2];
@@ -139,12 +128,9 @@ function estimateMarkerPosition(marker) {
     );
 
     /* Adjust for rotation of drone */
-    const adjustedPosition = rotateVectorAroundYAxis(
-        cameraAdjusted,
-        droneState.yaw
-    );
+    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState.yaw);
 
-    return { relative: adjustedPosition };
+    return { relative: adjustedPosition, id: marker.id };
 }
 
 /**
