@@ -262,37 +262,46 @@ class DronePath {
                 boxes = this.getRelevantBoxes(this.destinationArray[j]);
                 if (boxes.length != 0) {
                     //gotoclosesbox + undvigelse skal rykkes in foran her i snake array
-                    snake.splice(i - 1, 0, ...await this.Maneuver(boxes, this.destinationArray[j])); // :^)
+                    snake.splice(i, 0, ...this.Maneuver(boxes, this.destinationArray[j]));
+
                     j++;
                 }
             }
             await snake[i];
         }
     }
-    public async Maneuver(obstacles: Object3D[], flyDestination: Vector3) {
+    public Maneuver(obstacles: Object3D[], flyDestination: Vector3) {
         const maneuverCommands: (() => Promise<any>)[] = [];
-        let nearestBox = this.goToClosestBox(obstacles, flyDestination);
-        let relevantBoxes: Object3D[] = [];
+
+        let lengthArray: number[] = [];
+        let nearestBox: number;
 
         // Go to position just before hitting the obstacle
-        maneuverCommands.push(nearestBox);
+        for (const obstacle of obstacles) {
+            lengthArray.push(flyDestination.lengthToBox(obstacle));
+        }
+
+        nearestBox = lengthArray.indexOf(Math.min(...lengthArray));
+        maneuverCommands.push(() => sdk.control.go(obstacles[nearestBox], 100));
+
         //Avoidance
         maneuverCommands.push(() => sdk.control.rotate.clockwise(90));
+        //maneuverCommands.push(() => sdk.control.rotate.go())
 
         return maneuverCommands;
     }
 
-    public goToClosestBox(obstacles: Object3D[], flyDestination: Vector3) {
+    // public goToClosestBox(obstacles: Object3D[], flyDestination: Vector3) {
 
-        let lengthArray: number[] = [];
-        let nearestBox: number;
-        for (const obstacle of obstacles) {
-            lengthArray.push(flyDestination.lengthToBox(obstacle));
-        }
-        nearestBox = lengthArray.indexOf(Math.min(...lengthArray));
+    //     let lengthArray: number[] = [];
+    //     let nearestBox: number;
+    //     for (const obstacle of obstacles) {
+    //         lengthArray.push(flyDestination.lengthToBox(obstacle));
+    //     }
+    //     nearestBox = lengthArray.indexOf(Math.min(...lengthArray));
 
-        return () => sdk.control.go(obstacles[nearestBox], 100);
-    }
+    //     return () => sdk.control.go(obstacles[nearestBox], 100);
+    // }
 }
 
 

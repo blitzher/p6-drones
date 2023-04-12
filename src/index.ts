@@ -102,7 +102,7 @@ async function droneControl() {
     const videoEmitter = await sdk.receiver.video.bind();
     let isFirst = true;
     let segmenter: H264Segmenter;
-    videoEmitter.on("message", (res) => {
+    videoEmitter("message", (res) => {
         /* If its the first segment, initialise a new segmenter */
         if (isFirst) {
             segmenter = new H264Segmenter(res);
