@@ -1,0 +1,3 @@
+[submodule "tellojs-sdk30"]
+	path = tellojs-sdk30
+	url = git@github.com:blitzher/tellojs-sdk30

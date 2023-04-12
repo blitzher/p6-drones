@@ -69,7 +69,6 @@ function handle(pkg, ws) {
  */
 
 function command(cmd) {
-    console.log(ws);
     if (ws.readyState != 1) {
         console.log("Websocket is not open!");
         return;
@@ -82,8 +81,18 @@ function command(cmd) {
     );
 }
 
+function sendMarker(marker) {
+    ws.send(
+        JSON.stringify({
+            type: "marker",
+            data: marker,
+        })
+    );
+}
+
 export default {
     initialise: init,
     droneState,
     command,
+    sendMarker,
 };

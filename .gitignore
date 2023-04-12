@@ -3,5 +3,7 @@ imgs/*
 bin/*
 build/*
 
+**/*.log
+
 # Ignore compiled html
 src/www/index.html

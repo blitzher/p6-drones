@@ -6,6 +6,7 @@
     "configurations": [
         {
             "type": "node",
+            "runtimeExecutable": "/Users/skovborg/.nvm/versions/node/v18.14.2/bin/node",
             "request": "launch",
             "name": "Launch Typescript",
             "program": "${workspaceFolder}/src/index.ts",
