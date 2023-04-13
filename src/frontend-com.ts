@@ -2,6 +2,7 @@ import * as env from "./environment";
 import { StateInfo } from "../tellojs-sdk30/src";
 import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
+import logger from "../tellojs-sdk30/src/log";
 
 type UWebSocket = { client: WebSocket; uuid: string };
 const clients: UWebSocket[] = [];
@@ -20,6 +21,8 @@ export const com = {
                     id,
                 })
             );
+
+        logger.increment(`Sending video stream to ${id}`);
     },
     state: (state: StateInfo, id: DroneId) => {
         for (let { client } of clients)

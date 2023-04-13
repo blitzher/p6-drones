@@ -15,12 +15,13 @@ const HTTP_PORT = 42069;
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 
+/* 
 const droneOne = new Drone({ ip: "192.168.1.141" });
-const droneTwo = new Drone({ ip: "192.168.1.174" });
-const droneThree = new Drone({ ip: "192.168.1.191" });
-const droneFour = new Drone({ ip: "192.168.1.130" });
+const droneTwo = new Drone({ ip: "192.168.1.174" }); */
+new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.191" });
 
-console.table([droneOne.data(), droneTwo.data(), droneThree.data(), droneFour.data()]);
+console.table(Object.values(Drone.allDrones).map((d) => d.data()));
 
 /* Setup web server */
 app.use(express.json());
@@ -51,18 +52,13 @@ app.listen(HTTP_PORT, async () => {
 
     // startTest();
 
-    droneOne.connect().then(() => {
-        droneOne.set.mon();
-    });
-    droneTwo.connect().then(() => {
-        droneTwo.set.mon();
-    });
-    droneThree.connect().then(() => {
-        droneThree.set.mon();
-    });
-    droneFour.connect().then(() => {
-        droneFour.set.mon();
-    });
+    for (let droneId in Drone.allDrones) {
+        let drone = Drone.allDrones[droneId];
+        drone.connect().then(() => {
+            drone.set.mon();
+            drone.startVideoStream();
+        });
+    }
 
     /* Listen for environment updates, and send to frontend */
     // env.environment.listen("objects", (data: Object3D[]) => {

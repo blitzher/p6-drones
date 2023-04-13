@@ -2,14 +2,15 @@
 import { droneState } from "../communication/communication.js";
 
 /* Declare global variables for use in component */
-let ctx, canvas, detector, jmuxer, vcanvas;
+let ctx = {},
+    canvas = {},
+    detector = {},
+    jmuxer = {},
+    vcanvas = {};
 /**
- * @type {CanvasRenderingContext2D}
+ * @type {{[key:string]:CanvasRenderingContext2D}}
  */
-let vctx;
-
-/* Find and set constant element references */
-const videoElem = $("#camera");
+let vctx = {};
 
 /* Field of Views of the camera, calculated from the 82.6 degree diagonal FOV */
 const xFov = 1.1533;
@@ -27,8 +28,15 @@ const yFov = 0.865;
  */
 
 function init() {
+    initMulticam($("#camera0"), 130);
+    initMulticam($("#camera1"), 191);
+    /* initMulticam($("camera0"), 130)
+    initMulticam($("camera0"), 130) */
+}
+
+function initMulticam(videoElem, id) {
     /* Setup jmuxer on video element */
-    jmuxer = new JMuxer({
+    jmuxer[id] = new JMuxer({
         node: videoElem,
         mode: "video" /* available values are: both, audio and video */,
         fps: 30,
@@ -36,23 +44,24 @@ function init() {
     });
 
     /* Initialise ARuco detector */
-    detector = new AR.Detector();
+    detector[id] = new AR.Detector();
 
     /* Create canvas for extracting video data */
-    canvas = document.createElement("canvas");
-    canvas.width = 960;
-    canvas.height = 720;
+    canvas[id] = document.createElement("canvas");
+    canvas[id].width = 960;
+    canvas[id].height = 720;
 
-    /* Draw video data on canvas for extraction */
-    ctx = canvas.getContext("2d", { willReadFrequently: true });
+    /* Draw video data on canvas[id] for extraction */
+    ctx[id] = canvas[id].getContext("2d", { willReadFrequently: true });
 
     /* Setup visualisation canvas */
-    vcanvas = $("#vcanvas");
-    vcanvas.width = 420;
-    vcanvas.height = 315;
-    vctx = vcanvas.getContext("2d");
-    vctx.strokeStyle = "red";
-    vctx.lineWidth = 2;
+    const vcanvasIndex = Object.keys(vcanvas).length;
+    vcanvas[id] = $(`#vcanvas${vcanvasIndex}`);
+    vcanvas[id].width = 420;
+    vcanvas[id].height = 315;
+    vctx[id] = vcanvas[id].getContext("2d");
+    vctx[id].strokeStyle = "red";
+    vctx[id].lineWidth = 2;
 }
 
 function extractImgData() {
@@ -136,9 +145,10 @@ function estimateMarkerPosition(marker) {
 /**
  *
  * @param {Uint8ClampedArray} data
+ * @param {number} id
  */
-function feed(data) {
-    jmuxer.feed({
+function feed(data, id) {
+    jmuxer[id].feed({
         video: data,
         audio: false,
     });

@@ -38,13 +38,14 @@ export class Drone extends sdk.Drone {
     };
 
     constructor({ ip, port }: { ip: string; port?: { state?: number; video?: number } }) {
-        super(ip);
+        super(ip, port);
 
         /* Add drone object reference to arrays */
         Drone.allDrones[this.id] = this;
         env.environment.addDrone(this);
 
         this.stateEmitter.on("message", this.onstate());
+        this.videoEmitter.on("message", this.onvideo());
     }
 
     private updateState(state: StateInfo) {
