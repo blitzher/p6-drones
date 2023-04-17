@@ -5,11 +5,6 @@ import { com } from "./frontend-com";
 import * as env from "./environment";
 import { Vector3 } from "./linerAlgebra";
 
-const RECONNECT_TIMEOUT = 2000;
-
-let nextStatePort = 9000;
-let nextVideoPort = 10000;
-
 export const droneState = {};
 export type DroneId = string;
 

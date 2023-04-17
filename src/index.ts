@@ -6,7 +6,7 @@ import expressWs from "express-ws";
 import * as env from "./environment";
 import { Object3D } from "./environment";
 import { Drone } from "./drone";
-import { com, initialiseWebSocket } from "./frontend-com";
+import { initialiseWebSocket } from "./frontend-com";
 import logger from "../tellojs-sdk30/src/log";
 
 /* Global constant */
@@ -18,7 +18,7 @@ const { app } = expressWs(express());
 /* 
 const droneOne = new Drone({ ip: "192.168.1.141" });
 const droneTwo = new Drone({ ip: "192.168.1.174" }); */
-new Drone({ ip: "192.168.1.130" });
+// new Drone({ ip: "192.168.1.130" });
 new Drone({ ip: "192.168.1.191" });
 
 console.table(Object.values(Drone.allDrones).map((d) => d.data()));
@@ -54,8 +54,8 @@ app.listen(HTTP_PORT, async () => {
 
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
-        drone.connect().then(() => {
-            drone.set.mon();
+        drone.connect().then(async () => {
+            await drone.set.mon();
             drone.startVideoStream();
         });
     }

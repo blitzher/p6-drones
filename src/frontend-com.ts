@@ -75,7 +75,7 @@ function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
             const [drone_id, ...cmd] = pkg.data.split(" ");
-            Drone.allDrones[drone_id].command(pkg.data);
+            Drone.allDrones[drone_id].command(cmd.join(" "));
             break;
         case "marker":
             console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
