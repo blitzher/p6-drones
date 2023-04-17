@@ -57,7 +57,6 @@ app.listen(HTTP_PORT, async () => {
         drone.connect().then(async () => {
             await drone.set.mon();
             drone.startVideoStream();
-            await drone.control.takeOff();
         });
     }
 

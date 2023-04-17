@@ -29,7 +29,9 @@ const yFov = 0.865;
 
 function init() {
     initMulticam($("#camera0"), 130);
-    initMulticam($("#camera1"), 191);
+    initMulticam($("#camera1"), 141);
+    initMulticam($("#camera2"), 174);
+    initMulticam($("#camera3"), 191);
     /* initMulticam($("camera0"), 130)
     initMulticam($("camera0"), 130) */
 }

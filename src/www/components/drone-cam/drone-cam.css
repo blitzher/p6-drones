@@ -16,9 +16,9 @@ video {
     justify-items: center;
 }
 
-#camera,
+#camera0,
 #camera1,
-#vcanvas,
+#vcanvas0,
 #vcanvas1 {
     grid-column: 1;
     margin-right: 15px;
@@ -32,9 +32,9 @@ video {
     margin-left: 15px;
 }
 
-#camera,
+#camera0,
 #camera2,
-#vcanvas,
+#vcanvas0,
 #vcanvas2 {
     grid-row: 1;
     margin-top: auto;
@@ -50,7 +50,7 @@ video {
     margin-bottom: auto;
 }
 
-#vcanvas,
+#vcanvas0,
 #vcanvas1,
 #vcanvas2,
 #vcanvas3 {
