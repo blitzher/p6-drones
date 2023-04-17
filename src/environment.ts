@@ -1,9 +1,7 @@
 import { EventEmitter } from "stream";
-import { sdk, State as _StateInfo } from "tellojs-sdk30";
+
 import { Vector3 } from "./linerAlgebra";
 import { Drone, DroneId } from "./drone";
-
-type StateInfo = _StateInfo & { position: { x: number; y: number; z: number } };
 
 export class Object3D {
     x: number;
@@ -98,39 +96,6 @@ class Environment extends EventEmitter {
         return this.on(args[0], args[1]);
     }
 }
-
-export const path = {
-    async snakePattern() {
-        await sdk.control
-            .takeOff()
-            .then(() => sdk.control.move.up(150))
-            .catch((e) => console.log(e));
-
-        for (let index = 0; index < 5; index++) {
-            if (index % 2 == 0) {
-                await sdk.control.move
-                    .front(100)
-                    .then(() => sdk.control.rotate.clockwise(90))
-                    .then(() => sdk.control.move.front(30))
-                    .then(() => sdk.control.rotate.clockwise(90))
-                    .catch(console.log);
-            } else {
-                await sdk.control.move
-                    .front(100)
-                    .then(() => sdk.control.rotate.counterClockwise(90))
-                    .then(() => sdk.control.move.front(30))
-                    .then(() => sdk.control.rotate.counterClockwise(90))
-                    .catch((e) => console.log(e));
-            }
-        }
-
-        await sdk.control.move
-            .down(50)
-            .then(() => sdk.control.flip.back())
-            .then(() => sdk.control.land())
-            .catch((e) => console.log(e));
-    },
-};
 
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);

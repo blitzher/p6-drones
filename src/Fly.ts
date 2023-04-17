@@ -1,4 +1,4 @@
-import { sdk } from "tellojs-sdk30";
+import sdk from "../tellojs-sdk30";
 import { environment, drone } from "./environment";
 
 function Avoid() {

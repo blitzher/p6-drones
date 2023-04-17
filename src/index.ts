@@ -19,9 +19,10 @@ const { app } = expressWs(express());
 const droneOne = new Drone({ ip: "192.168.1.141" });
 const droneTwo = new Drone({ ip: "192.168.1.174" }); */
 // new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.141" });
+new Drone({ ip: "192.168.1.174" });
 new Drone({ ip: "192.168.1.191" });
-
-console.table(Object.values(Drone.allDrones).map((d) => d.data()));
 
 /* Setup web server */
 app.use(express.json());
@@ -49,14 +50,14 @@ function startTest() {
 /* Launch server */
 app.listen(HTTP_PORT, async () => {
     console.log(`Listening on ${HTTP_PORT}...`);
-
-    // startTest();
+    logger.log(`Listening on ${HTTP_PORT}...`);
 
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
             await drone.set.mon();
             drone.startVideoStream();
+            await drone.control.takeOff();
         });
     }
 

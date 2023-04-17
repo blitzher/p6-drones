@@ -13,7 +13,8 @@ export const com = {
     video: (buffer: Uint8Array, id: DroneId) => {
         const dataArray = Array.from(buffer);
 
-        for (let { client } of clients)
+        for (let { client } of clients) {
+            logger.increment(`Sending video stream to ${id}`);
             client.send(
                 JSON.stringify({
                     type: "stream",
@@ -21,8 +22,7 @@ export const com = {
                     id,
                 })
             );
-
-        logger.increment(`Sending video stream to ${id}`);
+        }
     },
     state: (state: StateInfo, id: DroneId) => {
         for (let { client } of clients)

@@ -32,7 +32,7 @@ export class Drone extends sdk.Drone {
         }),
     };
 
-    constructor({ ip, port }: { ip: string; port?: { state?: number; video?: number } }) {
+    constructor({ ip, port }: { ip: string; port?: { state: number; video: number } }) {
         super(ip, port);
 
         /* Add drone object reference to arrays */
@@ -83,7 +83,7 @@ export class Drone extends sdk.Drone {
                 y: Number.parseInt(res.speed.y),
                 z: Number.parseInt(res.speed.z),
             };
-            this.updateState(res.state);
+            this.updateState(res);
             this.positionHistory.push(new Vector3(this.state.position));
             env.environment.updateDronePosition(this.id);
         };
