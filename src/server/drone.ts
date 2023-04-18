@@ -54,6 +54,8 @@ export class Drone extends sdk.Drone {
         this.state.rotation.pitch = (state.pitch * Math.PI) / 180;
         this.state.rotation.yaw = (state.yaw * Math.PI) / 180;
         this.state.rotation.roll = (state.roll * Math.PI) / 180;
+
+        this.positionHistory.push(new Vector3(this.state.position));
     }
     onvideo() {
         let isFirst = true;
@@ -78,13 +80,7 @@ export class Drone extends sdk.Drone {
     onstate() {
         return (res: any) => {
             com.state(res, this.id);
-            const speed = {
-                x: Number.parseInt(res.speed.x),
-                y: Number.parseInt(res.speed.y),
-                z: Number.parseInt(res.speed.z),
-            };
             this.updateState(res);
-            this.positionHistory.push(new Vector3(this.state.position));
             env.environment.updateDronePosition(this.id);
         };
     }

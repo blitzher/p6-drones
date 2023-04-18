@@ -6,8 +6,8 @@ import expressWs from "express-ws";
 import * as env from "./environment";
 import { Object3D } from "./environment";
 import { Drone } from "./drone";
-import { initialiseWebSocket } from "./frontend-com";
-import logger from "../tellojs-sdk30/src/log";
+import { com, initialiseWebSocket } from "./frontend-com";
+import logger from "../log";
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -15,10 +15,7 @@ const HTTP_PORT = 42069;
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 
-/* 
-const droneOne = new Drone({ ip: "192.168.1.141" });
-const droneTwo = new Drone({ ip: "192.168.1.174" }); */
-// new Drone({ ip: "192.168.1.130" });
+/* Instantiate drones */
 new Drone({ ip: "192.168.1.130" });
 new Drone({ ip: "192.168.1.141" });
 new Drone({ ip: "192.168.1.174" });
@@ -61,13 +58,13 @@ app.listen(HTTP_PORT, async () => {
     }
 
     /* Listen for environment updates, and send to frontend */
-    // env.environment.listen("objects", (data: Object3D[]) => {
-    //     com.environment(data);
-    // });
-    // env.environment.listen(
-    //     "drone",
-    //     (data: { id: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-    //         com.drone(data);
-    //     }
-    // );
+    env.environment.listen("objects", (data: Object3D[]) => {
+        com.environment(data);
+    });
+    env.environment.listen(
+        "drone",
+        (data: { droneId: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+            com.drone(data);
+        }
+    );
 });

@@ -2,17 +2,17 @@ type h264segment = Uint8Array;
 
 /**
  * Helper class for segmenting h264 segments correctly,
- * as the tello drone doesn't bother.
+ * as the tello drone doesn't bother, and JMuxer struggles.
  */
 export class H264Segmenter {
-    breaker_segment: number[] = [0, 0, 0, 1];
-    buffer: number[] = [];
+    private breaker_segment: number[] = [0, 0, 0, 1];
+    private buffer: number[] = [];
     bitrateEstimate: number;
 
     constructor(segment: h264segment) {
         this.bitrateEstimate = 0;
         setTimeout(() => {
-            console.log(`Estimated Mbitrate: ${this.bitrateEstimate / 10e7}`);
+            console.log(`Estimated Mbitrate: ${this.bitrateEstimate / 10e7}Mb/s`);
         }, 10000);
     }
 

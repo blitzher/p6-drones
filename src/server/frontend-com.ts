@@ -2,7 +2,7 @@ import * as env from "./environment";
 import { StateInfo } from "../tellojs-sdk30/src";
 import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
-import logger from "../tellojs-sdk30/src/log";
+import logger from "../log";
 
 type UWebSocket = { client: WebSocket; uuid: string };
 const clients: UWebSocket[] = [];
@@ -75,7 +75,7 @@ function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
             const [drone_id, ...cmd] = pkg.data.split(" ");
-            Drone.allDrones[drone_id].command(cmd.join(" "));
+            Drone.allDrones[drone_id].command(cmd.join(" "), { shouldRetry: true });
             break;
         case "marker":
             console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);

@@ -47,6 +47,7 @@ const linInterp2d = ({ x, y }, a, b, c, d) => {
         x: linInterp(x, a, b, c, d),
         y: linInterp(y, a, b, c, d),
     };
+    4;
 };
 
 const linInterpCanvas = ({ x, y }, orig, dest) => {
@@ -54,12 +55,6 @@ const linInterpCanvas = ({ x, y }, orig, dest) => {
         x: linInterp(x, 0, orig.width, 0, dest.width),
         y: linInterp(y, 0, orig.height, 0, dest.height),
     };
-};
-
-const quadInterp = (v, a, b, c, d) => {
-    const p = (v - a) / (b - a);
-
-    return c + p ** 2 * (d - c);
 };
 
 const rotateVectorAroundXAxis = ({ x, y, z }, phi) => {

@@ -35,7 +35,6 @@ function handle(pkg, ws) {
     switch (pkg.type) {
         case "stream":
             const h264data = Uint8Array.from(pkg.data);
-            console.table(pkg);
             droneCam.feed(h264data, pkg.id);
             break;
         case "error":

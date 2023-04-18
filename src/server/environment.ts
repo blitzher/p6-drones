@@ -64,6 +64,7 @@ class Environment extends EventEmitter {
     public updateDronePosition(id: string) {
         const drone = this.drones[id];
         this.emit("drone", {
+            droneId: id,
             dronePosition: drone.state.position,
             dronePositionHistory: this.dronePositionHistory,
         });
@@ -90,7 +91,11 @@ class Environment extends EventEmitter {
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
                   event: "drone",
-                  listener: (data: { id: DroneId; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => void
+                  listener: (data: {
+                      droneId: DroneId;
+                      dronePosition: Object3D;
+                      dronePositionHistory: Object3D[];
+                  }) => void
               ]
     ): this {
         return this.on(args[0], args[1]);
