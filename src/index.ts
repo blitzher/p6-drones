@@ -5,6 +5,7 @@ import expressWs from "express-ws";
 /* Import local packages */
 import * as env from "./environment";
 import { Object3D } from "./environment";
+import { dronePath } from "./environment";
 import { Drone } from "./drone";
 import { com, initialiseWebSocket } from "./frontend-com";
 import logger from "../tellojs-sdk30/src/log";
@@ -20,7 +21,12 @@ const droneTwo = new Drone({ ip: "192.168.1.174" });
 const droneThree = new Drone({ ip: "192.168.1.191" });
 const droneFour = new Drone({ ip: "192.168.1.130" });
 
-console.table([droneOne.data(), droneTwo.data(), droneThree.data(), droneFour.data()]);
+console.table([
+    droneOne.data(),
+    droneTwo.data(),
+    droneThree.data(),
+    droneFour.data(),
+]);
 
 /* Setup web server */
 app.use(express.json());
@@ -41,6 +47,7 @@ function startTest() {
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
         env.environment.addObject({ obj: obstacle, id: time });
+
         if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
     }, 1000);
 }

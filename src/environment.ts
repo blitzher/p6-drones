@@ -3,6 +3,8 @@ import { EventEmitter } from "stream";
 import sdk, { StateInfo as _StateInfo } from "../tellojs-sdk30";
 import { Vector3 } from "./linerAlgebra";
 import { Drone, DroneId } from "./drone";
+import { env } from "process";
+import Fly from "./Fly";
 
 type StateInfo = _StateInfo & { position: { x: number; y: number; z: number } };
 const droneOne = Drone.allDrones["0"];
@@ -251,21 +253,40 @@ class DronePath {
         const maneuverCommands: (() => Promise<any>)[] = [];
 
         let lengthArray: number[] = [];
-        let nearestBox: number;
+        let nearestBoxDist: number;
 
-        // Go to position just before hitting the obstacle
+        // Go to position just before hitting the obstacle & locate boxes on either side of current obstacle
         for (const obstacle of obstacles) {
             lengthArray.push(flyDestination.lengthToBox(obstacle));
         }
 
-        nearestBox = lengthArray.indexOf(Math.min(...lengthArray));
-        maneuverCommands.push(() =>
-            droneOne.control.go(obstacles[nearestBox], 100)
+        nearestBoxDist = lengthArray.indexOf(Math.min(...lengthArray));
+
+        let rightBox = new Object3D(
+            obstacles[nearestBoxDist].x + BOX_RADIUS,
+            obstacles[nearestBoxDist].y,
+            obstacles[nearestBoxDist].z,
+            BOX_RADIUS
+        );
+        let leftBox = new Object3D(
+            obstacles[nearestBoxDist].x - BOX_RADIUS,
+            obstacles[nearestBoxDist].y,
+            obstacles[nearestBoxDist].z,
+            BOX_RADIUS
         );
 
-        //Avoidance
+        maneuverCommands.push(() =>
+            droneOne.control.go(obstacles[nearestBoxDist], 100)
+        );
+
+        // Avoidance
+        // TODO: Check if an obstacle is on either side of the current obstacle
+
         maneuverCommands.push(() => droneOne.control.clockwise(90));
-        //maneuverCommands.push(() => sdk.control.rotate.go())
+        maneuverCommands.push(() => droneOne.control.forward(BOX_RADIUS));
+        maneuverCommands.push(() => droneOne.control.counterClockwise(90));
+        maneuverCommands.push(() => droneOne.control.forward(BOX_RADIUS * 2));
+        maneuverCommands.push(() => droneOne.control.counterClockwise(90));
 
         return maneuverCommands;
     }
@@ -294,3 +315,4 @@ class DronePath {
 export const environment = new Environment();
 export const drone = new Object3D(0, 0, 0, 20);
 export const BOX_RADIUS = 10;
+export const dp = new DronePath(30, 30, 1);
