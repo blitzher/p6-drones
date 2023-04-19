@@ -11,7 +11,7 @@ window.addEventListener("load", (doc, ev) => {
     stateWindow.initialise();
     bottomBar.initialise();
 
-    setInterval(() => {
+    /* setInterval(() => {
         const markers = droneCam.findMarkers();
         let markerPos;
 
@@ -28,5 +28,5 @@ window.addEventListener("load", (doc, ev) => {
                 );
             });
         }
-    }, 1000);
+    }, 1000); */
 });

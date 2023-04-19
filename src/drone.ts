@@ -5,11 +5,6 @@ import { com } from "./frontend-com";
 import * as env from "./environment";
 import { Vector3 } from "./linerAlgebra";
 
-const RECONNECT_TIMEOUT = 2000;
-
-let nextStatePort = 9000;
-let nextVideoPort = 10000;
-
 export const droneState = {};
 export type DroneId = string;
 
@@ -37,14 +32,15 @@ export class Drone extends sdk.Drone {
         }),
     };
 
-    constructor({ ip, port }: { ip: string; port?: { state?: number; video?: number } }) {
-        super(ip);
+    constructor({ ip, port }: { ip: string; port?: { state: number; video: number } }) {
+        super(ip, port);
 
         /* Add drone object reference to arrays */
         Drone.allDrones[this.id] = this;
         env.environment.addDrone(this);
 
         this.stateEmitter.on("message", this.onstate());
+        this.videoEmitter.on("message", this.onvideo());
     }
 
     private updateState(state: StateInfo) {
@@ -87,7 +83,7 @@ export class Drone extends sdk.Drone {
                 y: Number.parseInt(res.speed.y),
                 z: Number.parseInt(res.speed.z),
             };
-            this.updateState(res.state);
+            this.updateState(res);
             this.positionHistory.push(new Vector3(this.state.position));
             env.environment.updateDronePosition(this.id);
         };

@@ -6,7 +6,7 @@ import expressWs from "express-ws";
 import * as env from "./environment";
 import { Object3D } from "./environment";
 import { Drone } from "./drone";
-import { com, initialiseWebSocket } from "./frontend-com";
+import { initialiseWebSocket } from "./frontend-com";
 import logger from "../tellojs-sdk30/src/log";
 
 /* Global constant */
@@ -15,12 +15,14 @@ const HTTP_PORT = 42069;
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 
+/* 
 const droneOne = new Drone({ ip: "192.168.1.141" });
-const droneTwo = new Drone({ ip: "192.168.1.174" });
-const droneThree = new Drone({ ip: "192.168.1.191" });
-const droneFour = new Drone({ ip: "192.168.1.130" });
-
-console.table([droneOne.data(), droneTwo.data(), droneThree.data(), droneFour.data()]);
+const droneTwo = new Drone({ ip: "192.168.1.174" }); */
+// new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.141" });
+new Drone({ ip: "192.168.1.174" });
+new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());
@@ -48,21 +50,15 @@ function startTest() {
 /* Launch server */
 app.listen(HTTP_PORT, async () => {
     console.log(`Listening on ${HTTP_PORT}...`);
+    logger.log(`Listening on ${HTTP_PORT}...`);
 
-    // startTest();
-
-    droneOne.connect().then(() => {
-        droneOne.set.mon();
-    });
-    droneTwo.connect().then(() => {
-        droneTwo.set.mon();
-    });
-    droneThree.connect().then(() => {
-        droneThree.set.mon();
-    });
-    droneFour.connect().then(() => {
-        droneFour.set.mon();
-    });
+    for (let droneId in Drone.allDrones) {
+        let drone = Drone.allDrones[droneId];
+        drone.connect().then(async () => {
+            await drone.set.mon();
+            drone.startVideoStream();
+        });
+    }
 
     /* Listen for environment updates, and send to frontend */
     // env.environment.listen("objects", (data: Object3D[]) => {
