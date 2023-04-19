@@ -1,7 +1,6 @@
 /* communication.js */
 import droneCam from "../drone-cam/drone-cam.js";
 import environment3d from "../3d-map/3d-map.js";
-import stateWindow from "../state-window/state-window.js";
 
 /* Declare global variables for use in component */
 export let droneState = {};
@@ -41,9 +40,7 @@ function handle(pkg, ws) {
             console.error(`Server error: ${pkg.data}`);
             break;
         case "state":
-            const dataToRender = pkg.data;
             Object.assign(droneState, pkg.data);
-            stateWindow.updateState(dataToRender);
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();

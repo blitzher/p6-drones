@@ -71,21 +71,16 @@ export class Drone {
     async connect() {
         return new Promise<void>(async (resolve) => {
             logger.log(`Establishing connection to ${this.id}`);
-            while (!this.connected) {
-                /* Enter command mode */
-                try {
-                    await this.send("command", { timeout: constants.timeouts.retryConnectTimeout, shouldReject: true });
-                    const sdk = await this.read.sdk();
-                    const bat = await this.read.battery();
-                    await this.set.port(this.ports.state, this.ports.video);
-                    logger.stat(`Connected to drone ${this.id}@v${sdk}_${bat}%`);
-                    this._connected = true;
-                    commander.relayConnected(this);
-                    resolve();
-                } catch (e) {
-                    logger.increment(`No connection to ${this.id}`);
-                }
-            }
+
+            /* Enter command mode */
+            await this.send("command", { timeout: constants.timeouts.retryConnectTimeout, shouldRetry: true });
+            const sdk = await this.read.sdk();
+            const bat = await this.read.battery();
+            await this.set.port(this.ports.state, this.ports.video);
+            logger.stat(`Connected to drone ${this.id}@v${sdk}_${bat}%`);
+            this._connected = true;
+            commander.relayConnected(this);
+            resolve();
         });
     }
 

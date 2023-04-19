@@ -40,7 +40,7 @@ export class Subcommander {
         this.emitter.emit("ready");
     }
 
-    public enqueue(command: string, ip: IP, options: CommandOptions) {
+    public async enqueue(command: string, ip: IP, options: CommandOptions) {
         return new Promise<string>(async (resolve, reject) => {
             const cmd = { argument: command, destination: ip, reject, options };
             this.commandQueue.push(cmd);
@@ -60,14 +60,13 @@ export class Subcommander {
         this.busy = true;
         this.commanderRef.dispatch(command);
 
-        if (this.connected)
-            this.rejectTimeout = setTimeout(() => {
-                if (command.options.shouldReject) command.reject("No response from drone");
-                logger.error(
-                    `No response from drone @'${command.destination}' on '${command.argument}'\n\t\t\tReturning to ready state`
-                );
-                if (command.options.shouldRetry) this.commandQueue.unshift(command);
-                this.emitter.emit("ready");
-            }, constants.timeouts.rejectTimeout);
+        this.rejectTimeout = setTimeout(() => {
+            if (command.options.shouldReject) command.reject("No response from drone");
+            logger.error(
+                `No response from drone @'${command.destination}' on '${command.argument}'. Returning to ready state`
+            );
+            if (command.options.shouldRetry) this.commandQueue.unshift(command);
+            this.emitter.emit("ready");
+        }, constants.timeouts.rejectTimeout);
     }
 }

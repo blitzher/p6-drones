@@ -57,7 +57,14 @@ const linInterpCanvas = ({ x, y }, orig, dest) => {
     };
 };
 
+/**
+ *
+ * @param {*} param0
+ * @param {number} phi Angle in degrees
+ * @returns {Vector3}
+ */
 const rotateVectorAroundXAxis = ({ x, y, z }, phi) => {
+    phi = (phi / 180) * Math.PI;
     const rotationMatrix = [
         [1, 0, 0],
         [0, Math.cos(phi), -Math.sin(phi)],
@@ -71,7 +78,14 @@ const rotateVectorAroundXAxis = ({ x, y, z }, phi) => {
     });
 };
 
+/**
+ *
+ * @param {*} param0
+ * @param {number} phi Angle in degrees
+ * @returns {Vector3}
+ */
 const rotateVectorAroundYAxis = ({ x, y, z }, phi) => {
+    phi = (phi / 180) * Math.PI;
     const rotationMatrix = [
         [Math.cos(phi), 0, Math.sin(phi)],
         [0, 1, 0],

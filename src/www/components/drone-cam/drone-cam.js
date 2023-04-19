@@ -126,8 +126,8 @@ function estimateMarkerPosition(marker, id) {
     const x0 = linInterp(dx, -mx, mx, -xFov / 2, xFov / 2);
     const y0 = -linInterp(dy, -my, my, -yFov / 2, yFov / 2);
 
-    const x1 = x0 * dist;
-    const y1 = y0 * dist;
+    const x1 = Math.sin(x0) * dist;
+    const y1 = Math.sin(y0) * dist;
 
     /* Extrapolate the z angle from based on the distance to the marker */
     let z0 = x1 ** 2 / dist ** 2 + y1 ** 2 / dist ** 2 + 1;
@@ -138,14 +138,14 @@ function estimateMarkerPosition(marker, id) {
     /* Adjust for camera tilt, estimated 15degrees */
     const cameraAdjusted = rotateVectorAroundXAxis(
         markerRelativePosition,
-        /*Degrees recalculated to radians*/
-        Math.PI / 12 - droneState.pitch
+
+        13.5 - droneState.pitch
     );
 
     /* Adjust for rotation of drone */
     const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState.yaw);
 
-    return { relative: adjustedPosition, id: marker.id };
+    return { relative: adjustedPosition, id: marker.id, dist };
 }
 
 /**
