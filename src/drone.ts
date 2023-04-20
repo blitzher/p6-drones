@@ -32,7 +32,13 @@ export class Drone extends sdk.Drone {
         }),
     };
 
-    constructor({ ip, port }: { ip: string; port?: { state: number; video: number } }) {
+    constructor({
+        ip,
+        port,
+    }: {
+        ip: string;
+        port?: { state: number; video: number };
+    }) {
         super(ip, port);
 
         /* Add drone object reference to arrays */

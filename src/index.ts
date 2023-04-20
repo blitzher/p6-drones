@@ -9,6 +9,7 @@ import { dronePath } from "./environment";
 import { Drone } from "./drone";
 import { initialiseWebSocket } from "./frontend-com";
 import logger from "../tellojs-sdk30/src/log";
+import { commander } from "./src";
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -16,18 +17,17 @@ const HTTP_PORT = 42069;
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 
-/* 
-const droneOne = new Drone({ ip: "192.168.1.141" });
-const droneTwo = new Drone({ ip: "192.168.1.174" });
-const droneThree = new Drone({ ip: "192.168.1.191" });
-const droneFour = new Drone({ ip: "192.168.1.130" });
+// const droneOne = new Drone({ ip: "192.168.1.141" });
+// const droneTwo = new Drone({ ip: "192.168.1.174" });
+new Drone({ ip: "192.168.1.191" });
+// const droneFour = new Drone({ ip: "192.168.1.130" });
 
-console.table([
-    droneOne.data(),
-    droneTwo.data(),
-    droneThree.data(),
-    droneFour.data(),
-]);
+// console.table([
+//     droneOne.data(),
+//     droneTwo.data(),
+//     droneThree.data(),
+//     droneFour.data(),
+// ]);
 
 /* Setup web server */
 app.use(express.json());
@@ -63,6 +63,8 @@ app.listen(HTTP_PORT, async () => {
         drone.connect().then(async () => {
             await drone.set.mon();
             drone.startVideoStream();
+
+            dronePath.Fly(drone);
         });
     }
 
