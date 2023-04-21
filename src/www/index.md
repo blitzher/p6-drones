@@ -31,6 +31,5 @@ This is my _very cool_ website, very nice
 #mdinclude<components/bottom-bar/bottom-bar.md>
 
 </div>
-#mdinclude<components/state-window/state-window.md>
 
 </div>

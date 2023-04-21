@@ -1,10 +1,10 @@
 import { relative } from "path";
 import { EventEmitter } from "stream";
-
-import { Vector3 } from "./linerAlgebra";
 import { Drone, DroneId } from "./drone";
 import { env } from "process";
 import { commander } from "../tellojs-sdk30/src";
+
+const BOX_RADIUS = 10;
 
 export class Object3D {
     x: number;
@@ -19,45 +19,14 @@ export class Object3D {
         this.radius = radius;
     }
 
-    //Returns true if it doesnt collide
-    //public collidesWith(other: Object3D): boolean;
-    public collidesWith(
-        other: Object3D,
-        checkX?: number,
-        checkY?: number,
-        checkZ?: number
-    ): boolean {
-        if (checkX != undefined && checkY != undefined && checkZ != undefined) {
-            const distance = Math.sqrt(
-                (other.x - this.x + checkX) ** 2 +
-                    (other.y - this.y + checkY) ** 2 +
-                    (other.z - this.z + checkZ) ** 2
-            );
-
-            return distance < this.radius + other.radius;
-        } else {
-            const distance = Math.sqrt(
-                (other.x - this.x) ** 2 +
-                    (other.y - this.y) ** 2 +
-                    (other.z - this.z) ** 2
-            );
-
-            return distance < this.radius + other.radius;
-        }
-    }
-
-    public serialize() {
-        return JSON.stringify({
-            x: this.x,
-            y: this.y,
-            z: this.z,
-            radius: this.radius,
-        });
+    collidesWith(other: Object3D): boolean {
+        const distance = Math.sqrt((other.x - this.x) ** 2 + (other.y - this.y) ** 2 + (other.z - this.z) ** 2);
+        return distance < this.radius + other.radius;
     }
 }
 
 class Environment extends EventEmitter {
-    public objects: Object3D[] = [];
+    public objects: { [key: number]: Object3D } = {};
     private dronePositionHistory: Object3D[] = [];
     private borderLength = 200;
     private drones: { [key: string]: Drone } = {};
@@ -77,27 +46,32 @@ class Environment extends EventEmitter {
         this.drones[drone.id] = drone;
     }
 
-    public addObject(arg: {
-        pos?: { x: number; y: number; z: number; r: number };
-        obj?: Object3D;
-        id: number;
-    }) {
+    public getDrone(key: string) {
+        return this.drones[key];
+    }
+
+    /**
+     *
+     * @param arg Combined argument, must include either a position or object.
+     * @param id The internal `id` of the object.
+     */
+    public addObject(arg: { pos?: { x: number; y: number; z: number; r?: number }; obj?: Object3D }, id: number) {
         let obj;
-        if (arg.pos)
-            obj = new Object3D(arg.pos.x, arg.pos.y, arg.pos.z, arg.pos.r);
+        if (arg.pos) obj = new Object3D(arg.pos.x, arg.pos.y, arg.pos.z, arg.pos.r || BOX_RADIUS);
         else if (arg.obj) obj = arg.obj;
         else
             throw new Error(
                 `Invalid object passed to environment.addObject: ${arg}`
             );
 
-        this.objects.push(obj);
+        this.objects[id] = obj;
         this.emit("objects", this.objects);
     }
 
     public updateDronePosition(id: string) {
         const drone = this.drones[id];
         this.emit("drone", {
+            droneId: id,
             dronePosition: drone.state.position,
             dronePositionHistory: this.dronePositionHistory,
         });
@@ -116,7 +90,7 @@ class Environment extends EventEmitter {
     }
 
     public serialize() {
-        return JSON.stringify(this.objects.map((object) => object.serialize()));
+        return JSON.stringify(this.objects);
     }
 
     public listen(
@@ -125,7 +99,7 @@ class Environment extends EventEmitter {
             | [
                   event: "drone",
                   listener: (data: {
-                      id: DroneId;
+                      droneId: DroneId;
                       dronePosition: Object3D;
                       dronePositionHistory: Object3D[];
                   }) => void
@@ -303,5 +277,3 @@ class DronePath {
 // };
 
 export const environment = new Environment();
-export const BOX_RADIUS = 10;
-export const dronePath = new DronePath(60, 60, 1);

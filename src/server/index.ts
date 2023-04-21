@@ -7,9 +7,8 @@ import * as env from "./environment";
 import { Object3D } from "./environment";
 import { dronePath } from "./environment";
 import { Drone } from "./drone";
-import { initialiseWebSocket } from "./frontend-com";
-import logger from "../tellojs-sdk30/src/log";
-import { commander } from "./src";
+import { com, initialiseWebSocket } from "./frontend-com";
+import logger from "../log";
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -17,17 +16,11 @@ const HTTP_PORT = 42069;
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 
-// const droneOne = new Drone({ ip: "192.168.1.141" });
-// const droneTwo = new Drone({ ip: "192.168.1.174" });
-new Drone({ ip: "192.168.1.191" });
-// const droneFour = new Drone({ ip: "192.168.1.130" });
-
-// console.table([
-//     droneOne.data(),
-//     droneTwo.data(),
-//     droneThree.data(),
-//     droneFour.data(),
-// ]);
+/* Instantiate drones */
+// new Drone({ ip: "192.168.1.130" });
+// new Drone({ ip: "192.168.1.141" });
+new Drone({ ip: "192.168.1.174" });
+// new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());
@@ -47,8 +40,7 @@ function startTest() {
         let z = Math.sin(time) * time * 30;
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
-        env.environment.addObject({ obj: obstacle, id: time });
-
+        env.environment.addObject({ obj: obstacle }, time);
         if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
     }, 1000);
 }
@@ -61,7 +53,8 @@ app.listen(HTTP_PORT, async () => {
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
-            await drone.set.mon();
+            env.environment.addDrone(drone);
+            // await drone.set.mon();
             drone.startVideoStream();
 
             dronePath.Fly(drone);
@@ -69,13 +62,13 @@ app.listen(HTTP_PORT, async () => {
     }
 
     /* Listen for environment updates, and send to frontend */
-    // env.environment.listen("objects", (data: Object3D[]) => {
-    //     com.environment(data);
-    // });
-    // env.environment.listen(
-    //     "drone",
-    //     (data: { id: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
-    //         com.drone(data);
-    //     }
-    // );
+    env.environment.listen("objects", (data: Object3D[]) => {
+        com.environment(data);
+    });
+    env.environment.listen(
+        "drone",
+        (data: { droneId: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+            com.drone(data);
+        }
+    );
 });

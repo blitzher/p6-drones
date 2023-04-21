@@ -6,9 +6,7 @@ function initBB() {
 
     /* Add event listener to toggle camera switch */
     switchElem.addEventListener("click", () => {
-        const newCameraMode = switchElem.checked
-            ? map3d.CAMERA_MODE.DRONE
-            : map3d.CAMERA_MODE.ORBIT;
+        const newCameraMode = switchElem.checked ? map3d.CAMERA_MODE.DRONE : map3d.CAMERA_MODE.ORBIT;
 
         map3d.setCameraMode(newCameraMode);
     });

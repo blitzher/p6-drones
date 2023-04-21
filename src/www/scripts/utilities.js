@@ -1,5 +1,9 @@
 const $ = (q) => document.querySelector(q);
 
+/**
+ * @typedef {{pitch: number,roll: number,yaw: number,speed: { x: number; y: number; z: number },temperature: { low: number; high: number },tof: number,height: number,battery: number,barometer: number,time: number,acceleration: { x: number; y: number; z: number }}} StateInfo
+ */
+
 class Vector3 {
     x;
     y;
@@ -47,6 +51,7 @@ const linInterp2d = ({ x, y }, a, b, c, d) => {
         x: linInterp(x, a, b, c, d),
         y: linInterp(y, a, b, c, d),
     };
+    4;
 };
 
 const linInterpCanvas = ({ x, y }, orig, dest) => {
@@ -56,13 +61,14 @@ const linInterpCanvas = ({ x, y }, orig, dest) => {
     };
 };
 
-const quadInterp = (v, a, b, c, d) => {
-    const p = (v - a) / (b - a);
-
-    return c + p ** 2 * (d - c);
-};
-
+/**
+ *
+ * @param {*} param0
+ * @param {number} phi Angle in degrees
+ * @returns {Vector3}
+ */
 const rotateVectorAroundXAxis = ({ x, y, z }, phi) => {
+    phi = (phi / 180) * Math.PI;
     const rotationMatrix = [
         [1, 0, 0],
         [0, Math.cos(phi), -Math.sin(phi)],
@@ -76,7 +82,14 @@ const rotateVectorAroundXAxis = ({ x, y, z }, phi) => {
     });
 };
 
+/**
+ *
+ * @param {*} param0
+ * @param {number} phi Angle in degrees
+ * @returns {Vector3}
+ */
 const rotateVectorAroundYAxis = ({ x, y, z }, phi) => {
+    phi = (phi / 180) * Math.PI;
     const rotationMatrix = [
         [Math.cos(phi), 0, Math.sin(phi)],
         [0, 1, 0],

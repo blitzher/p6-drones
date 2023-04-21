@@ -1,12 +1,17 @@
 /*drone-cam.js*/
 import { droneState } from "../communication/communication.js";
 
+/**
+ * @typedef {number} Millimeter
+ */
+
 /* Declare global variables for use in component */
 let ctx = {},
     canvas = {},
-    detector = {},
+    detector,
     jmuxer = {},
-    vcanvas = {};
+    vcanvas = {},
+    videoElems = {};
 /**
  * @type {{[key:string]:CanvasRenderingContext2D}}
  */
@@ -28,15 +33,19 @@ const yFov = 0.865;
  */
 
 function init() {
+    detector = new AR.Detector();
     initMulticam($("#camera0"), 130);
     initMulticam($("#camera1"), 141);
     initMulticam($("#camera2"), 174);
     initMulticam($("#camera3"), 191);
     /* initMulticam($("camera0"), 130)
     initMulticam($("camera0"), 130) */
+
+    return [130, 141, 174, 191];
 }
 
 function initMulticam(videoElem, id) {
+    videoElems[id] = videoElem;
     /* Setup jmuxer on video element */
     jmuxer[id] = new JMuxer({
         node: videoElem,
@@ -46,7 +55,6 @@ function initMulticam(videoElem, id) {
     });
 
     /* Initialise ARuco detector */
-    detector[id] = new AR.Detector();
 
     /* Create canvas for extracting video data */
     canvas[id] = document.createElement("canvas");
@@ -66,9 +74,9 @@ function initMulticam(videoElem, id) {
     vctx[id].lineWidth = 2;
 }
 
-function extractImgData() {
-    ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
-    return ctx.getImageData(0, 0, canvas.width, canvas.height);
+function extractImgData(id) {
+    ctx[id].drawImage(videoElems[id], 0, 0, canvas[id].width, canvas[id].height);
+    return ctx[id].getImageData(0, 0, canvas[id].width, canvas[id].height);
 }
 
 /**
@@ -89,12 +97,12 @@ function ARReader(imgData) {
  * @param {Marker} marker
  * @returns
  */
-function estimateDistance(marker) {
+function estimateDistance(marker, id) {
     const FOCAL_LENGTH = 25; /* mm */
     const MARKER_HEIGHT = 140; /* mm */
     const APPARENT_HEIGHT =
         (marker.corners[3].y - marker.corners[0].y + marker.corners[2].y - marker.corners[1].y) / 2; /* pixels */
-    const IMAGE_HEIGHT = canvas.height; /* pixels */
+    const IMAGE_HEIGHT = canvas[id].height; /* pixels */
     const SENSOR_HEIGHT = 2.0775; /* mm */
     return (
         ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) / (APPARENT_HEIGHT * SENSOR_HEIGHT)) * 0.1
@@ -104,17 +112,18 @@ function estimateDistance(marker) {
 /**
  *
  * @param {Marker} marker
- * @returns {{relative: {x: number, y:number, z:number}}}
+ * @returns {{relative: {x: Millimeter, y:Millimeter, z:Millimeter}, id: number, dist: Millimeter, isValid: boolean, droneId: number }}
  */
-function estimateMarkerPosition(marker) {
-    const dist = estimateDistance(marker);
+function estimateMarkerPosition(marker, id) {
+    const dist = estimateDistance(marker, id);
+    if (Math.abs(dist) > 10000) return { isValid: false };
 
     /* Find center of the marker */
     const x = (marker.corners[0].x + marker.corners[1].x + marker.corners[2].x + marker.corners[3].x) / 4;
     const y = (marker.corners[0].y + marker.corners[1].y + marker.corners[2].y + marker.corners[3].y) / 4;
 
     /* Find the relative screen position of the marker */
-    const [mx, my] = [canvas.width / 2, canvas.height / 2];
+    const [mx, my] = [canvas[id].width / 2, canvas[id].height / 2];
     const [dx, dy] = [x - mx, y - my];
 
     /* Find the angle to the point on the screen,
@@ -122,8 +131,8 @@ function estimateMarkerPosition(marker) {
     const x0 = linInterp(dx, -mx, mx, -xFov / 2, xFov / 2);
     const y0 = -linInterp(dy, -my, my, -yFov / 2, yFov / 2);
 
-    const x1 = x0 * dist;
-    const y1 = y0 * dist;
+    const x1 = Math.sin(x0) * dist;
+    const y1 = Math.sin(y0) * dist;
 
     /* Extrapolate the z angle from based on the distance to the marker */
     let z0 = x1 ** 2 / dist ** 2 + y1 ** 2 / dist ** 2 + 1;
@@ -134,14 +143,14 @@ function estimateMarkerPosition(marker) {
     /* Adjust for camera tilt, estimated 15degrees */
     const cameraAdjusted = rotateVectorAroundXAxis(
         markerRelativePosition,
-        /*Degrees recalculated to radians*/
-        Math.PI / 12 - droneState.pitch
+
+        13.5 - droneState[id].pitch
     );
 
     /* Adjust for rotation of drone */
-    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState.yaw);
+    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState[id].yaw);
 
-    return { relative: adjustedPosition, id: marker.id };
+    return { relative: adjustedPosition, id: marker.id, dist, isValid: true, droneId: id };
 }
 
 /**
@@ -160,26 +169,14 @@ function feed(data, id) {
  *
  * @returns {Marker[]} markers
  */
-function findMarkers() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    vctx.clearRect(0, 0, vcanvas.width, vcanvas.height);
-    const imgData = extractImgData();
+function findMarkers(id) {
+    ctx[id].clearRect(0, 0, canvas[id].width, canvas[id].height);
+    vctx[id].clearRect(0, 0, vcanvas[id].width, vcanvas[id].height);
+    const imgData = extractImgData(id);
     let markers = ARReader(imgData);
 
-    if (markers.length == 0) {
-        let marker = {};
-
-        marker.corners = [
-            { x: 125, y: 45 },
-            { x: 269, y: 39 },
-            { x: 282, y: 180 },
-            { x: 125, y: 187 },
-        ];
-        marker.id = -1;
-
-        //markers.push(marker);
-    }
-
+    if (!markers || markers.length == 0) return;
+    /* Filter out the weird marker that appears randomly */
     markers = markers.filter((marker) => marker.id != 97);
     return markers;
 }
@@ -188,19 +185,20 @@ function findMarkers() {
  *
  * @param {Marker[]} markers
  */
-function renderMarkers(markers) {
-    vctx.beginPath();
+function renderMarkers(markers, id) {
+    vctx[id].beginPath();
+    if (!markers || markers.length == 0) return;
     for (let marker of markers) {
-        const start = linInterpCanvas(marker.corners[0], canvas, vcanvas);
-        vctx.moveTo(start.x, start.y);
+        const start = linInterpCanvas(marker.corners[0], canvas[id], vcanvas[id]);
+        vctx[id].moveTo(start.x, start.y);
 
         for (let corner of marker.corners) {
-            const c = linInterpCanvas(corner, canvas, vcanvas);
-            vctx.lineTo(c.x, c.y);
+            const c = linInterpCanvas(corner, canvas[id], vcanvas[id]);
+            vctx[id].lineTo(c.x, c.y);
         }
-        vctx.lineTo(start.x, start.y);
+        vctx[id].lineTo(start.x, start.y);
     }
-    vctx.stroke();
+    vctx[id].stroke();
 }
 
 export default {

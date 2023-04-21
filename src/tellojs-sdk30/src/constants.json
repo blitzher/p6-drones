@@ -1,0 +1,16 @@
+{
+    "client": {
+        "address": "192.168.10.1",
+        "port": 8889
+    },
+    "locals": ["192.168.1.141", "192.168.1.174"],
+    "ports": {
+        "state": 9000,
+        "video": 10000
+    },
+    "timeouts": {
+        "rejectTimeout": 7500,
+        "retryConnectTimeout": 5000,
+        "droneDisconnectTimeout": 2500
+    }
+}
