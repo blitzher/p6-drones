@@ -168,7 +168,6 @@ class DronePath {
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.clockwise(90);
             } else {
-                console.log(index);
                 flyDestination.x = moveLength;
                 this.destinationArray.push(flyDestination);
                 yield drone.control.go(flyDestination, 100);
@@ -225,27 +224,16 @@ class DronePath {
         commander.socket.on("message", (msg) => {
             if (msg.toString().includes("ok")) {
                 console.log(drone.state.position);
-                snake.next();
+                boxes = this.getRelevantBoxes(this.destinationArray[j], drone);
+                if (boxes.length != 0) {
+                    //gotoclosestbox + undvigelse skal rykkes in foran her i snake array
+                    this.Maneuver(boxes, this.destinationArray[j], drone);
+                } else {
+                    snake.next();
+                }
             }
             if (snake.next().done) drone.control.land();
         });
-
-        // for (let i = 0; i < snake.length; i++) {
-        //     if (i % 2 == 0) {
-        //         boxes = this.getRelevantBoxes(this.destinationArray[j], drone);
-        //         if (boxes.length != 0) {
-        //             //gotoclosesbox + undvigelse skal rykkes in foran her i snake array
-        //             snake.splice(
-        //                 i,
-        //                 0,
-        //                 ...this.Maneuver(boxes, this.destinationArray[j], drone)
-        //             );
-
-        //             j++;
-        //         }
-        //     }
-        //     await snake[i];
-        // }
     }
     public Maneuver(
         obstacles: Object3D[],
