@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as os from "os";
 
 const GetDateFormat = () => {
     const d = new Date();
@@ -13,17 +14,26 @@ const GetDateFormat = () => {
 class Logger {
     private logBuffer: string[] = [];
     private incrementals: { [key: string]: number } = {};
+    private concurrents: { [key: string]: string } = {};
     private stats: string[] = [];
     private startTime = new Date().getTime();
 
-    private _file = `logs/drone-flight-${GetDateFormat()}.log`;
+    private _folder = "logs";
+    private _file = `${this._folder}/drone-flight-${GetDateFormat()}.log`;
 
     constructor(filename?: string) {
         if (filename) this._file = filename;
 
+        try {
+            const folder = fs.statSync(this._folder);
+            if (!folder.isDirectory()) throw new Error();
+        } catch (e) {
+            this.stat(`${this._folder} does not exists, making directory.`);
+            fs.mkdirSync(this._folder);
+        }
         setInterval(() => {
             this.serialize();
-        }, 100);
+        }, 1000);
     }
 
     get file() {
@@ -34,6 +44,10 @@ class Logger {
         if (this.incrementals[argument]) {
             this.incrementals[argument] += count || 1;
         } else this.incrementals[argument] = count || 1;
+    }
+
+    concurrent(key: string, value: string) {
+        this.concurrents[key] = this.format("c", `${key}: ${value}`);
     }
 
     /**
@@ -67,7 +81,7 @@ class Logger {
         this.stats.push(this.format(".", argument));
     }
 
-    serialize() {
+    private serialize() {
         let data = `${Object.entries(this.incrementals)
             .map(([key, value]) => {
                 return `[#] ${key} : ${value}`;
@@ -75,9 +89,13 @@ class Logger {
             .join("\n")}
 ------------------------------
 ${this.stats.join("\n")}
+${Object.entries(this.concurrents)
+    .map(([k, v]) => `${v}`)
+    .join("\n")}
 ------------------------------
-${this.logBuffer.join("\n")}
-        `;
+${this.logBuffer.join("\n")}`;
+
+        /* Write file to disk */
         fs.writeFile(this._file, data, () => {});
     }
 

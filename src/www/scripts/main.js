@@ -16,15 +16,18 @@ window.addEventListener("load", (doc, ev) => {
 
             if (markers != undefined && markers.length > 0) {
                 droneCam.renderMarkers(markers, id);
+
                 markers.forEach((marker) => {
                     markerPos = droneCam.estimateMarkerPosition(marker, id);
+
+                    if (!markerPos.isValid) return;
+
                     communication.sendMarker(markerPos);
 
-                    console.log(
-                        `Relative x:${Math.round(markerPos.relative.x) / 10}cm y:${
-                            Math.round(markerPos.relative.y) / 10
-                        }cm z:${Math.round(markerPos.relative.z) / 10}cm ${markerPos.dist}`
-                    );
+                    const [rx, ry, rz] = Object.values(markerPos.relative).map((v) => Math.round(v) / 10);
+                    const rd = Math.round(markerPos.dist) / 10;
+
+                    console.log(`Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`);
                 });
             }
         }, 2500);

@@ -3,10 +3,22 @@ import { StateInfo } from "../tellojs-sdk30/src";
 import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
 import logger from "../log";
+import { CommandOptions } from "../tellojs-sdk30/src/commander";
 
+type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
 const clients: UWebSocket[] = [];
 type Package = { type: string; data: any };
+type MarkerData = {
+    relative: {
+        x: Millimeter;
+        y: Millimeter;
+        z: Millimeter;
+    };
+    id: number;
+    dist: Millimeter;
+    droneId: string;
+};
 
 /* Setup helper functions for back-front-communication */
 export const com = {
@@ -14,7 +26,7 @@ export const com = {
         const dataArray = Array.from(buffer);
 
         for (let { client } of clients) {
-            logger.increment(`Sending video stream to ${id}`);
+            logger.increment(`Sending video stream from drone ${id}`);
             client.send(
                 JSON.stringify({
                     type: "stream",
@@ -62,6 +74,7 @@ export const initialiseWebSocket = (ws: WebSocket) => {
     ws.onclose = () => {
         console.log("Client closed!");
 
+        /* Remove client from array */
         for (let i = 0; i < clients.length; i++) {
             const { uuid } = clients[i];
             if (uuid == myUuid) {
@@ -74,25 +87,24 @@ export const initialiseWebSocket = (ws: WebSocket) => {
 function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
-            const [drone_id, ...cmd] = pkg.data.split(" ");
-            Drone.allDrones[drone_id].command(cmd.join(" "), { shouldRetry: true });
+            let [drone_id, ...cmd] = pkg.data.split(" ");
+            cmd = cmd.join(" ");
+
+            const commandOptions: CommandOptions = { shouldRetry: true, overwriteQueue: cmd == "stop" };
+            Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
             console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
 
-            const marker = pkg.data.relative;
-            const id = pkg.data.id;
+            const marker: MarkerData = pkg.data.relative;
 
-            env.environment.addObject({
-                pos: {
-                    x: marker.x / 10,
-                    y: marker.y / 10,
-                    z: marker.z / 10,
-                    r: env.BOX_RADIUS,
-                },
-                id,
-            });
+            let drone = env.environment.getDrone(marker.droneId);
+            /* Relative is in mm, so convert to cm */
+            let x = marker.relative.x / 10 + drone.state.position.x;
+            let y = marker.relative.y / 10 + drone.state.position.y;
+            let z = marker.relative.z / 10 + drone.state.position.z;
 
+            env.environment.addObject({ pos: { x, y, z } }, marker.id);
             break;
     }
 }

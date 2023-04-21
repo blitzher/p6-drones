@@ -17,7 +17,7 @@ const { app } = expressWs(express());
 
 /* Instantiate drones */
 // new Drone({ ip: "192.168.1.130" });
-new Drone({ ip: "192.168.1.141" });
+// new Drone({ ip: "192.168.1.141" });
 new Drone({ ip: "192.168.1.174" });
 // new Drone({ ip: "192.168.1.191" });
 
@@ -39,7 +39,7 @@ function startTest() {
         let z = Math.sin(time) * time * 30;
         let obstacle = new Object3D(x, 0, z, 10);
         time += 0.2;
-        env.environment.addObject({ obj: obstacle, id: time });
+        env.environment.addObject({ obj: obstacle }, time);
         if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
     }, 1000);
 }
@@ -52,6 +52,7 @@ app.listen(HTTP_PORT, async () => {
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
+            env.environment.addDrone(drone);
             // await drone.set.mon();
             drone.startVideoStream();
         });

@@ -10,6 +10,7 @@ export type CommandOptions = {
     timeout?: number;
     shouldReject?: boolean;
     shouldRetry?: boolean;
+    overwriteQueue?: boolean;
 };
 export type Command = { argument: string; destination: IP; reject: (reason: string) => void; options: CommandOptions };
 
@@ -39,7 +40,6 @@ export class Commander {
         /* Find existing subcommander or create a new one */
         if (!this.subcommanders[ip]) this.subcommanders[ip] = new Subcommander(this);
         const subcommander = this.subcommanders[ip];
-
         return subcommander.enqueue(command, ip, options || {});
     }
 

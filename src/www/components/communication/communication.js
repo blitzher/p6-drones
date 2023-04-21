@@ -3,6 +3,7 @@ import droneCam from "../drone-cam/drone-cam.js";
 import environment3d from "../3d-map/3d-map.js";
 
 /* Declare global variables for use in component */
+/** @type {{[key:string]:StateInfo}} */
 export let droneState = {};
 const wsUrl = `ws:${window.location.host}`;
 let ws;
@@ -40,11 +41,11 @@ function handle(pkg, ws) {
             console.error(`Server error: ${pkg.data}`);
             break;
         case "state":
-            Object.assign(droneState, pkg.data);
+            droneState[pkg.id] = pkg.data;
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
-            for (let marker of pkg.data) {
+            for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
                     { x: 10, y: 10, z: 10 },
                     { x: marker.x, y: marker.y, z: marker.z },

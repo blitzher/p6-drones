@@ -1,6 +1,10 @@
 /*drone-cam.js*/
 import { droneState } from "../communication/communication.js";
 
+/**
+ * @typedef {number} Millimeter
+ */
+
 /* Declare global variables for use in component */
 let ctx = {},
     canvas = {},
@@ -108,10 +112,11 @@ function estimateDistance(marker, id) {
 /**
  *
  * @param {Marker} marker
- * @returns {{relative: {x: number, y:number, z:number}}}
+ * @returns {{relative: {x: Millimeter, y:Millimeter, z:Millimeter}, id: number, dist: Millimeter, isValid: boolean, droneId: number }}
  */
 function estimateMarkerPosition(marker, id) {
     const dist = estimateDistance(marker, id);
+    if (Math.abs(dist) > 10000) return { isValid: false };
 
     /* Find center of the marker */
     const x = (marker.corners[0].x + marker.corners[1].x + marker.corners[2].x + marker.corners[3].x) / 4;
@@ -139,13 +144,13 @@ function estimateMarkerPosition(marker, id) {
     const cameraAdjusted = rotateVectorAroundXAxis(
         markerRelativePosition,
 
-        13.5 - droneState.pitch
+        13.5 - droneState[id].pitch
     );
 
     /* Adjust for rotation of drone */
-    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState.yaw);
+    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState[id].yaw);
 
-    return { relative: adjustedPosition, id: marker.id, dist };
+    return { relative: adjustedPosition, id: marker.id, dist, isValid: true, droneId: id };
 }
 
 /**

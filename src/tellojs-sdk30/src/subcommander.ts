@@ -43,6 +43,12 @@ export class Subcommander {
     public async enqueue(command: string, ip: IP, options: CommandOptions) {
         return new Promise<string>(async (resolve, reject) => {
             const cmd = { argument: command, destination: ip, reject, options };
+
+            if (options.overwriteQueue) {
+                this.commandQueue = [];
+                this.busy = false;
+            }
+
             this.commandQueue.push(cmd);
             this.callbackFunction = resolve;
             this.emitter.emit("message", cmd);

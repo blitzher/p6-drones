@@ -29,11 +29,11 @@ export class Drone {
     public get stateEmitter() {
         return this.stateStream.emitter;
     }
-
     public get videoEmitter() {
         return this.videoStream.emitter;
     }
 
+    /* Timeout to signal a disconnect, when no state data is received */
     private disconnectTimeout!: NodeJS.Timeout;
 
     public data() {
