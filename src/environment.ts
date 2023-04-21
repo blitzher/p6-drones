@@ -159,25 +159,24 @@ class DronePath {
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
                 console.log(index);
-                flyDestination.x +=
-                    moveLength + DronePath.dronePathCounter * 30;
+                flyDestination.x = moveLength + DronePath.dronePathCounter * 30;
                 this.destinationArray.push(flyDestination);
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.clockwise(90);
-                flyDestination.x += moveWidth;
+                flyDestination.x = moveWidth;
                 this.destinationArray.push(flyDestination);
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.clockwise(90);
             } else {
                 console.log(index);
-                flyDestination.x += moveLength;
+                flyDestination.x = moveLength;
                 this.destinationArray.push(flyDestination);
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.counterClockwise(90);
-                flyDestination.x += moveWidth;
+                flyDestination.x = moveWidth;
                 this.destinationArray.push(flyDestination);
                 yield drone.control.go(flyDestination, 100);
-                yield drone.control.clockwise(90);
+                yield drone.control.counterClockwise(90);
             }
         }
 
@@ -224,7 +223,11 @@ class DronePath {
         //J for movements, excluding rotations
         let j: number = 0;
         commander.socket.on("message", (msg) => {
-            if (msg.toString().includes("ok")) snake.next();
+            if (msg.toString().includes("ok")) {
+                console.log(drone.state.position);
+                snake.next();
+            }
+            if (snake.next().done) drone.control.land();
         });
 
         // for (let i = 0; i < snake.length; i++) {
