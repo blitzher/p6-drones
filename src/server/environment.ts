@@ -3,6 +3,7 @@ import { EventEmitter } from "stream";
 import { Drone, DroneId } from "./drone";
 import { env } from "process";
 import { commander } from "../tellojs-sdk30/src";
+import { Vector3 } from "./linerAlgebra";
 
 const BOX_RADIUS = 10;
 
@@ -97,13 +98,13 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                  event: "drone",
-                  listener: (data: {
-                      droneId: DroneId;
-                      dronePosition: Object3D;
-                      dronePositionHistory: Object3D[];
-                  }) => void
-              ]
+                event: "drone",
+                listener: (data: {
+                    droneId: DroneId;
+                    dronePosition: Object3D;
+                    dronePositionHistory: Object3D[];
+                }) => void
+            ]
     ): this {
         return this.on(args[0], args[1]);
     }
@@ -113,7 +114,7 @@ class DronePath {
     mapLength: number;
     numberOfDrones: number;
     static dronePathCounter: number = 0;
-    destinationArray: Vector3[] = [];
+    destinationStore: Vector3 = new Vector3({ x: 0, y: 0, z: 0 });
     //static firstIteration: boolean = true;
 
     constructor(mapwidth: number, maplength: number, numberofdrones: number) {
@@ -134,20 +135,20 @@ class DronePath {
             if (index % 2 == 0) {
                 console.log(index);
                 flyDestination.x = moveLength + DronePath.dronePathCounter * 30;
-                this.destinationArray.push(flyDestination);
+                this.destinationStore = flyDestination;
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.clockwise(90);
                 flyDestination.x = moveWidth;
-                this.destinationArray.push(flyDestination);
+                this.destinationStore = flyDestination;
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.clockwise(90);
             } else {
                 flyDestination.x = moveLength;
-                this.destinationArray.push(flyDestination);
+                this.destinationStore = flyDestination;
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.counterClockwise(90);
                 flyDestination.x = moveWidth;
-                this.destinationArray.push(flyDestination);
+                this.destinationStore = flyDestination;
                 yield drone.control.go(flyDestination, 100);
                 yield drone.control.counterClockwise(90);
             }
@@ -170,7 +171,7 @@ class DronePath {
             .normalise();
         let dronePosition: Object3D = new Object3D(0, 0, 0, 20);
 
-        for (const box of environment.objects) {
+        for (const box of Object.values(environment.objects)) {
             //Checks each 5 cm. if there is a box in the path
             for (let i = 0; i < moveVector.length(); i += 5) {
                 moveVector.scale(i);
@@ -193,23 +194,20 @@ class DronePath {
     public async Fly(drone: Drone) {
         const snake = await this.SnakePattern(drone);
         let boxes: Object3D[];
-        //J for movements, excluding rotations
-        let j: number = 0;
-        commander.socket.on("message", (msg) => {
-            if (msg.toString().includes("ok")) {
-                console.log(drone.state.position);
-                boxes = this.getRelevantBoxes(this.destinationArray[j], drone);
-                if (boxes.length != 0) {
-                    //gotoclosestbox + undvigelse skal rykkes in foran her i snake array
-                    this.Maneuver(boxes, this.destinationArray[j], drone);
-                } else {
-                    snake.next();
-                }
-            }
-            if (snake.next().done) drone.control.land();
-        });
+
+        console.log(drone.state.position);
+        boxes = this.getRelevantBoxes(this.destinationStore, drone);
+        if (boxes.length != 0) {
+            //gotoclosestbox + undvigelse skal rykkes in foran her i snake array
+            this.Maneuver(boxes, this.destinationStore, drone);
+        } else {
+            snake.next();
+        }
+
+        if (snake.next().done) drone.control.land();
+
     }
-    public Maneuver(
+    public *Maneuver(
         obstacles: Object3D[],
         flyDestination: Vector3,
         drone: Drone
@@ -239,9 +237,8 @@ class DronePath {
             BOX_RADIUS
         );
 
-        maneuverCommands.push(() =>
-            drone.control.go(obstacles[nearestBoxDist], 100)
-        );
+        yield drone.control.go(obstacles[nearestBoxDist], 100)
+
 
         // Avoidance
         // TODO: Check if an obstacle is on either side of the current obstacle
@@ -251,8 +248,6 @@ class DronePath {
         // maneuverCommands.push(() => drone.control.counterClockwise(90));
         // maneuverCommands.push(() => drone.control.forward(BOX_RADIUS * 2));
         // maneuverCommands.push(() => drone.control.counterClockwise(90));
-
-        return maneuverCommands;
     }
 
     // public goToClosestBox(obstacles: Object3D[], flyDestination: Vector3) {
@@ -277,3 +272,4 @@ class DronePath {
 // };
 
 export const environment = new Environment();
+export const dronePath = new DronePath(60, 60, 1);
