@@ -29,20 +29,20 @@ class DronePath {
                 console.log(index);
                 flyDestination.x = moveLength + DronePath.dronePathCounter * 30;
                 this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
+                yield drone.control.go(flyDestination, 50, "m8");
                 yield drone.control.clockwise(90);
                 flyDestination.x = moveWidth;
                 this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
+                yield drone.control.go(flyDestination, 50, "m8");
                 yield drone.control.clockwise(90);
             } else {
                 flyDestination.x = moveLength;
                 this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
+                yield drone.control.go(flyDestination, 50, "m8");
                 yield drone.control.counterClockwise(90);
                 flyDestination.x = moveWidth;
                 this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
+                yield drone.control.go(flyDestination, 50, "m8");
                 yield drone.control.counterClockwise(90);
             }
         }
@@ -88,12 +88,12 @@ class DronePath {
         let boxes: Object3D[];
 
         for (let step of snake) {
-            await step;
             boxes = this.getRelevantBoxes(this.destinationStore, drone);
             if (boxes.length != 0) {
                 //gotoclosestbox + undvigelse skal rykkes in foran her i snake array
                 this.maneuver(boxes, this.destinationStore, drone);
             }
+            await step;
         }
 
         drone.control.land();
@@ -124,7 +124,7 @@ class DronePath {
             BOX_RADIUS
         );
 
-        yield drone.control.go(obstacles[nearestBoxDist], 100);
+        yield drone.control.go(obstacles[nearestBoxDist], 50, "m8");
 
         // Avoidance
         // TODO: Check if an obstacle is on either side of the current obstacle

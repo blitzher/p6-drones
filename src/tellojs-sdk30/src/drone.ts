@@ -134,7 +134,7 @@ export class Drone {
 
         counterClockwise: (angle: number) => this.send(`ccw ${angle}`),
 
-        go: ({ x, y, z }: Pos3D, speed: number) => this.send(`go ${x} ${y} ${z} ${speed}`),
+        go: ({ x, y, z }: Pos3D, speed: number, mid?: string) => this.send(`go ${x} ${y} ${z} ${speed} ${mid}`),
 
         curve: (start: Pos3D, end: Pos3D, speed: number) =>
             this.send(`curve ${start.x} ${start.y} ${start.z} ${end.x} ${end.y} ${end.z} ${speed}`),
