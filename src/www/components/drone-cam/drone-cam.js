@@ -138,7 +138,7 @@ function estimateMarkerPosition(marker, id) {
     let z0 = x1 ** 2 / dist ** 2 + y1 ** 2 / dist ** 2 + 1;
     let z1 = z0 * dist;
 
-    const markerRelativePosition = new Vector3({ x: x1, y: y1, z: z1 });
+    const markerRelativePosition = new Vector3({ x: -x1, y: y1, z: z1 });
 
     /* Adjust for camera tilt, estimated 15degrees */
     const cameraAdjusted = rotateVectorAroundXAxis(
@@ -148,9 +148,15 @@ function estimateMarkerPosition(marker, id) {
     );
 
     /* Adjust for rotation of drone */
-    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, droneState[id].yaw);
+    const adjustedPosition = rotateVectorAroundYAxis(cameraAdjusted, -droneState[id].yaw);
 
-    return { relative: adjustedPosition, id: marker.id, dist, isValid: true, droneId: id };
+    const droneRelativeCoordinates = {
+        x: adjustedPosition.z,
+        y: adjustedPosition.x,
+        z: adjustedPosition.y,
+    };
+
+    return { relative: droneRelativeCoordinates, id: marker.id, dist, isValid: true, droneId: id };
 }
 
 /**

@@ -11,7 +11,7 @@ import logger from "../log";
 import { dronePath } from "./dronePath";
 import * as readline from "node:readline/promises";
 
-const readlineInterface = readline.createInterface(process.stdin);
+const readlineInterface = readline.createInterface(process.stdin, process.stdout);
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -62,11 +62,11 @@ app.listen(HTTP_PORT, async () => {
     }
 
     function CLI() {
-        readlineInterface.question("Type drone id to start flying").then((msg) => {
+        readlineInterface.question("Type drone ids to start flying.\n").then((msg) => {
             const ids = msg.split(" ");
             for (let id of ids) {
                 let drone = Drone.allDrones[id];
-                if (drone) dronePath.fly(drone);
+                if (drone) drone.set.mon();
             }
             CLI();
         });

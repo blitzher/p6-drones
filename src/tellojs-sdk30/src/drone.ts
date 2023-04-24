@@ -15,7 +15,6 @@ export class Drone {
     readonly ip: IP;
     readonly id: string;
     private _connected: boolean = false;
-    private _mid: number = -1;
 
     public readonly state!: StateInfo;
 
@@ -109,43 +108,44 @@ export class Drone {
     }
 
     control = {
-        forward: (distance: number) => this.send(`${distance}`),
+        forward: (distance: number, options?: CommandOptions) => this.send(`${distance}`, options),
 
-        takeOff: () => this.send("takeoff"),
+        takeOff: (options?: CommandOptions) => this.send("takeoff", options),
 
-        land: () => this.send("land"),
+        land: (options?: CommandOptions) => this.send("land", options),
 
-        emergency: () => this.send("emergency"),
+        emergency: (options?: CommandOptions) => this.send("emergency", options),
 
-        stop: () => this.send("stop"),
+        stop: (options?: CommandOptions) => this.send("stop", options),
 
-        flip: (side: string) => this.send(`flip ${side}`),
+        flip: (side: string, options?: CommandOptions) => this.send(`flip ${side}`, options),
 
-        up: (distance: number) => this.send(`up ${distance}`),
+        up: (distance: number, options?: CommandOptions) => this.send(`up ${distance}`, options),
 
-        down: (distance: number) => this.send(`down ${distance}`),
+        down: (distance: number, options?: CommandOptions) => this.send(`down ${distance}`, options),
 
-        left: (distance: number) => this.send(`left ${distance}`),
+        left: (distance: number, options?: CommandOptions) => this.send(`left ${distance}`, options),
 
-        right: (distance: number) => this.send(`right ${distance}`),
+        right: (distance: number, options?: CommandOptions) => this.send(`right ${distance}`, options),
 
-        front: (distance: number) => this.send(`forward ${distance}`),
+        front: (distance: number, options?: CommandOptions) => this.send(`forward ${distance}`, options),
 
-        back: (distance: number) => this.send(`back ${distance}`),
+        back: (distance: number, options?: CommandOptions) => this.send(`back ${distance}`, options),
 
-        clockwise: (angle: number) => this.send(`cw ${angle}`),
+        clockwise: (angle: number, options?: CommandOptions) => this.send(`cw ${angle}`, options),
 
-        counterClockwise: (angle: number) => this.send(`ccw ${angle}`),
+        counterClockwise: (angle: number, options?: CommandOptions) => this.send(`ccw ${angle}`, options),
 
-        go: ({ x, y, z }: Pos3D, speed: number, mid?: string) => this.send(`go ${x} ${y} ${z} ${speed} ${mid}`),
+        go: ({ x, y, z }: Pos3D, speed: number, mid?: string, options?: CommandOptions) =>
+            this.send(`go ${x} ${y} ${z} ${speed} ${mid ?? ""}`, options),
 
-        curve: (start: Pos3D, end: Pos3D, speed: number) =>
-            this.send(`curve ${start.x} ${start.y} ${start.z} ${end.x} ${end.y} ${end.z} ${speed}`),
+        curve: (start: Pos3D, end: Pos3D, speed: number, options?: CommandOptions) =>
+            this.send(`curve ${start.x} ${start.y} ${start.z} ${end.x} ${end.y} ${end.z} ${speed}`, options),
 
-        jump: (start: Pos3D, speed: number, yaw: number, mid1: number, mid2: number) =>
-            this.send(`jump ${start.x} ${start.y} ${start.z} ${speed} ${yaw}${mid1} ${mid2}`),
+        jump: (start: Pos3D, speed: number, yaw: number, mid1: number, mid2: number, options?: CommandOptions) =>
+            this.send(`jump ${start.x} ${start.y} ${start.z} ${speed} ${yaw}${mid1} ${mid2}`, options),
 
-        reboot: () => this.send("reboot"),
+        reboot: (options?: CommandOptions) => this.send("reboot", options),
     };
 
     read = {

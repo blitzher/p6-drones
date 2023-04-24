@@ -44,6 +44,7 @@ export class StateStream {
         barometer: mapped.baro,
         time: mapped.time,
         acceleration: { x: mapped.agx, y: mapped.agy, z: mapped.agz },
+        mid: mapped.mid,
     });
 
     private map = (message: Buffer) => {

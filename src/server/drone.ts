@@ -78,17 +78,15 @@ export class Drone extends sdk.Drone {
         this.lastStateTime = now;
 
         /* Ensure consistent order of coordinates, and convert to cm */
-        this.state.position.y = state.height;
-        this.state.speedVector.z = state.speed.x * 10;
-        this.state.speedVector.x = state.speed.y * 10;
+        /* speed forward is negative for some reason */
+        this.state.speedVector.x = -state.speed.x * 10;
+        this.state.speedVector.y = state.speed.y * 10;
+        this.state.position.z = state.tof;
 
         this.state.position = this.state.position.add(this.state.speedVector.scale(deltaTime));
 
         const pos = this.state.position;
-        const posString = `${Math.round(pos.x * 10) / 10}, ${Math.round(pos.y * 10) / 10}, ${
-            Math.round(pos.z * 10) / 10
-        }`;
-        logger.concurrent(this.id, posString);
+        logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
 
         this.state.rotation.pitch = (state.pitch * Math.PI) / 180;
         this.state.rotation.yaw = (state.yaw * Math.PI) / 180;

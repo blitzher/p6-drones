@@ -35,10 +35,6 @@ export class Vector3 {
     }
 
     lengthToBox({ x, y, z }: { x: number; y: number; z: number }): number {
-
         return this.subtract({ x, y, z }).length();
-
-
     }
-
 }

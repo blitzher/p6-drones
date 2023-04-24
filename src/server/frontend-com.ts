@@ -84,27 +84,45 @@ export const initialiseWebSocket = (ws: WebSocket) => {
     };
 };
 
+let GoingToMarker = false;
 function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
             let [drone_id, ...cmd] = pkg.data.split(" ");
             cmd = cmd.join(" ");
 
-            const commandOptions: CommandOptions = { shouldRetry: true, overwriteQueue: cmd == "stop" };
+            const commandOptions: CommandOptions = { overwriteQueue: cmd == "stop" };
             Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
             console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
 
-            const marker: MarkerData = pkg.data.relative;
+            const marker: MarkerData = pkg.data;
 
             let drone = env.environment.getDrone(marker.droneId);
             /* Relative is in mm, so convert to cm */
-            let x = marker.relative.x / 10 + drone.state.position.x;
-            let y = marker.relative.y / 10 + drone.state.position.y;
-            let z = marker.relative.z / 10 + drone.state.position.z;
+            let x = Math.round(marker.relative.x / 10 + drone.state.position.x);
+            let y = Math.round(marker.relative.y / 10 + drone.state.position.y);
+            let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
             env.environment.addObject({ pos: { x, y, z } }, marker.id);
+
+            logger.log("Found marker");
+            logger.log(`Drone position: ${JSON.stringify(drone.state.position)}`);
+            logger.log(`Marker position: ${JSON.stringify(marker.relative)}`);
+
+            if (!GoingToMarker) {
+                GoingToMarker = true;
+                drone.control
+                    .go({ x, y, z }, 50, "m8", { shouldReject: true })
+                    .then(() => {
+                        GoingToMarker = false;
+                    })
+                    .catch(() => {
+                        GoingToMarker = false;
+                    });
+            }
+
             break;
     }
 }
