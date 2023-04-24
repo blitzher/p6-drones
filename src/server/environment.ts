@@ -5,7 +5,7 @@ import { env } from "process";
 import { commander } from "../tellojs-sdk30/src";
 import { Vector3 } from "./linerAlgebra";
 
-const BOX_RADIUS = 10;
+export const BOX_RADIUS = 10;
 
 export class Object3D {
     x: number;
@@ -33,9 +33,7 @@ class Environment extends EventEmitter {
     private drones: { [key: string]: Drone } = {};
 
     public outsideBoundary(drone: Object3D): boolean {
-        const actualLength = Math.sqrt(
-            Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2
-        );
+        const actualLength = Math.sqrt(Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2);
 
         if (actualLength > this.borderLength || drone.z > this.borderLength) {
             return true;
@@ -60,10 +58,7 @@ class Environment extends EventEmitter {
         let obj;
         if (arg.pos) obj = new Object3D(arg.pos.x, arg.pos.y, arg.pos.z, arg.pos.r || BOX_RADIUS);
         else if (arg.obj) obj = arg.obj;
-        else
-            throw new Error(
-                `Invalid object passed to environment.addObject: ${arg}`
-            );
+        else throw new Error(`Invalid object passed to environment.addObject: ${arg}`);
 
         this.objects[id] = obj;
         this.emit("objects", this.objects);
@@ -98,178 +93,16 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                event: "drone",
-                listener: (data: {
-                    droneId: DroneId;
-                    dronePosition: Object3D;
-                    dronePositionHistory: Object3D[];
-                }) => void
-            ]
+                  event: "drone",
+                  listener: (data: {
+                      droneId: DroneId;
+                      dronePosition: Object3D;
+                      dronePositionHistory: Object3D[];
+                  }) => void
+              ]
     ): this {
         return this.on(args[0], args[1]);
     }
 }
-class DronePath {
-    mapWidth: number;
-    mapLength: number;
-    numberOfDrones: number;
-    static dronePathCounter: number = 0;
-    destinationStore: Vector3 = new Vector3({ x: 0, y: 0, z: 0 });
-    //static firstIteration: boolean = true;
-
-    constructor(mapwidth: number, maplength: number, numberofdrones: number) {
-        this.mapWidth = mapwidth;
-        this.mapLength = maplength;
-        this.numberOfDrones = numberofdrones;
-    }
-
-    public *SnakePattern(drone: Drone) {
-        let iterations: number = Math.floor(this.mapWidth / 30);
-        let moveLength: number = this.mapLength;
-        let moveWidth: number = 30;
-        let flyDestination: Vector3 = new Vector3(drone.state.position);
-        const mission: (() => Promise<any>)[] = [];
-        yield drone.control.takeOff();
-
-        for (let index = 0; index < iterations; index++) {
-            if (index % 2 == 0) {
-                console.log(index);
-                flyDestination.x = moveLength + DronePath.dronePathCounter * 30;
-                this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
-                yield drone.control.clockwise(90);
-                flyDestination.x = moveWidth;
-                this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
-                yield drone.control.clockwise(90);
-            } else {
-                flyDestination.x = moveLength;
-                this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
-                yield drone.control.counterClockwise(90);
-                flyDestination.x = moveWidth;
-                this.destinationStore = flyDestination;
-                yield drone.control.go(flyDestination, 100);
-                yield drone.control.counterClockwise(90);
-            }
-        }
-
-        if (this.numberOfDrones == DronePath.dronePathCounter) {
-            DronePath.dronePathCounter = 0;
-        }
-
-        if (this.numberOfDrones > DronePath.dronePathCounter) {
-            DronePath.dronePathCounter += 1;
-        }
-    }
-
-    public getRelevantBoxes(flyDestination: Vector3, drone: Drone): Object3D[] {
-        let relevantBoxes: Object3D[] = [];
-        let positionCheck: Vector3 = drone.state.position;
-        let moveVector: Vector3 = positionCheck
-            .subtract(flyDestination)
-            .normalise();
-        let dronePosition: Object3D = new Object3D(0, 0, 0, 20);
-
-        for (const box of Object.values(environment.objects)) {
-            //Checks each 5 cm. if there is a box in the path
-            for (let i = 0; i < moveVector.length(); i += 5) {
-                moveVector.scale(i);
-                dronePosition = new Object3D(
-                    moveVector.x,
-                    moveVector.y,
-                    moveVector.z,
-                    20
-                );
-
-                if (dronePosition.collidesWith(box)) {
-                    relevantBoxes.push(box);
-                    console.log(box);
-                }
-            }
-        }
-        return relevantBoxes;
-    }
-
-    public async Fly(drone: Drone) {
-        const snake = await this.SnakePattern(drone);
-        let boxes: Object3D[];
-
-        console.log(drone.state.position);
-        boxes = this.getRelevantBoxes(this.destinationStore, drone);
-        if (boxes.length != 0) {
-            //gotoclosestbox + undvigelse skal rykkes in foran her i snake array
-            this.Maneuver(boxes, this.destinationStore, drone);
-        } else {
-            snake.next();
-        }
-
-        if (snake.next().done) drone.control.land();
-
-    }
-    public *Maneuver(
-        obstacles: Object3D[],
-        flyDestination: Vector3,
-        drone: Drone
-    ) {
-        const maneuverCommands: (() => Promise<any>)[] = [];
-
-        let lengthArray: number[] = [];
-        let nearestBoxDist: number;
-
-        // Go to position just before hitting the obstacle & locate boxes on either side of current obstacle
-        for (const obstacle of obstacles) {
-            lengthArray.push(flyDestination.lengthToBox(obstacle));
-        }
-
-        nearestBoxDist = lengthArray.indexOf(Math.min(...lengthArray));
-
-        let rightBox = new Object3D(
-            obstacles[nearestBoxDist].x + BOX_RADIUS,
-            obstacles[nearestBoxDist].y,
-            obstacles[nearestBoxDist].z,
-            BOX_RADIUS
-        );
-        let leftBox = new Object3D(
-            obstacles[nearestBoxDist].x - BOX_RADIUS,
-            obstacles[nearestBoxDist].y,
-            obstacles[nearestBoxDist].z,
-            BOX_RADIUS
-        );
-
-        yield drone.control.go(obstacles[nearestBoxDist], 100)
-
-
-        // Avoidance
-        // TODO: Check if an obstacle is on either side of the current obstacle
-
-        // maneuverCommands.push(() => drone.control.clockwise(90));
-        // maneuverCommands.push(() => drone.control.forward(BOX_RADIUS));
-        // maneuverCommands.push(() => drone.control.counterClockwise(90));
-        // maneuverCommands.push(() => drone.control.forward(BOX_RADIUS * 2));
-        // maneuverCommands.push(() => drone.control.counterClockwise(90));
-    }
-
-    // public goToClosestBox(obstacles: Object3D[], flyDestination: Vector3) {
-
-    //     let lengthArray: number[] = [];
-    //     let nearestBox: number;
-    //     for (const obstacle of obstacles) {
-    //         lengthArray.push(flyDestination.lengthToBox(obstacle));
-    //     }
-    //     nearestBox = lengthArray.indexOf(Math.min(...lengthArray));
-
-    //     return () => sdk.control.go(obstacles[nearestBox], 100);
-    // }
-}
-
-// const testEnvironment = new Environment();
-// const path = new DronePath(60, 100);
-
-// export default {
-//     testEnvironment,
-//     path,
-// };
 
 export const environment = new Environment();
-export const dronePath = new DronePath(60, 60, 1);

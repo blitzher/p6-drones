@@ -12,7 +12,6 @@ export class Subcommander {
     private busy: boolean = false;
 
     public connected: boolean;
-
     private commanderRef: Commander;
 
     constructor(commanderRef: Commander) {

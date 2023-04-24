@@ -17,6 +17,7 @@ export type StateInfo = {
     barometer: number;
     time: number;
     acceleration: { x: number; y: number; z: number };
+    mid: number;
 };
 
 export class StateStream {

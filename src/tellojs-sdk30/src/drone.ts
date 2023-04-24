@@ -15,6 +15,7 @@ export class Drone {
     readonly ip: IP;
     readonly id: string;
     private _connected: boolean = false;
+    private _mid: number = -1;
 
     public get connected() {
         return this._connected;

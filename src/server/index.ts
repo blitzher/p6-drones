@@ -5,10 +5,10 @@ import expressWs from "express-ws";
 /* Import local packages */
 import * as env from "./environment";
 import { Object3D } from "./environment";
-import { dronePath } from "./environment";
 import { Drone } from "./drone";
 import { com, initialiseWebSocket } from "./frontend-com";
 import logger from "../log";
+import { dronePath } from "./dronePath";
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -19,8 +19,8 @@ const { app } = expressWs(express());
 /* Instantiate drones */
 // new Drone({ ip: "192.168.1.130" });
 // new Drone({ ip: "192.168.1.141" });
-new Drone({ ip: "192.168.1.174" });
-// new Drone({ ip: "192.168.1.191" });
+// new Drone({ ip: "192.168.1.174" });
+new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());
@@ -57,7 +57,7 @@ app.listen(HTTP_PORT, async () => {
             // await drone.set.mon();
             drone.startVideoStream();
 
-            dronePath.Fly(drone);
+            // dronePath.fly(drone);
         });
     }
 
