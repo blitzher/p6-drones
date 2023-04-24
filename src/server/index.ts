@@ -9,6 +9,9 @@ import { Drone } from "./drone";
 import { com, initialiseWebSocket } from "./frontend-com";
 import logger from "../log";
 import { dronePath } from "./dronePath";
+import * as readline from "node:readline/promises";
+
+const readlineInterface = readline.createInterface(process.stdin);
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -54,12 +57,21 @@ app.listen(HTTP_PORT, async () => {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
             env.environment.addDrone(drone);
-            // await drone.set.mon();
             drone.startVideoStream();
-
-            // dronePath.fly(drone);
         });
     }
+
+    function CLI() {
+        readlineInterface.question("Type drone id to start flying").then((msg) => {
+            const ids = msg.split(" ");
+            for (let id of ids) {
+                let drone = Drone.allDrones[id];
+                if (drone) dronePath.fly(drone);
+            }
+            CLI();
+        });
+    }
+    CLI();
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {

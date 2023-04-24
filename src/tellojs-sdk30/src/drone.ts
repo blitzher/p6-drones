@@ -1,6 +1,6 @@
 import { IP, Port, commander } from "./index";
 import * as constants from "./constants.json";
-import { StateStream, VideoStream } from "./commands/streams";
+import { StateInfo, StateStream, VideoStream } from "./commands/streams";
 import logger from "../../log";
 import { SocketState } from "./socket";
 import { CommandOptions } from "./commander";
@@ -17,6 +17,8 @@ export class Drone {
     private _connected: boolean = false;
     private _mid: number = -1;
 
+    public readonly state!: StateInfo;
+
     public get connected() {
         return this._connected;
     }
@@ -28,10 +30,10 @@ export class Drone {
 
     /* Expose emitters */
     public get stateEmitter() {
-        return this.stateStream.emitter;
+        return this.stateStream;
     }
     public get videoEmitter() {
-        return this.videoStream.emitter;
+        return this.videoStream;
     }
 
     /* Timeout to signal a disconnect, when no state data is received */
@@ -59,8 +61,9 @@ export class Drone {
 
         /* Setup connected variable */
         this.stateStream.start();
-        this.stateStream.emitter.on("message", () => {
+        this.stateStream.on("message", (state) => {
             clearTimeout(this.disconnectTimeout);
+            Object.assign(this.state, state);
             this.disconnectTimeout = setTimeout(() => {
                 this._connected = false;
                 logger.log(`Drone ${this.id} disconnected`);

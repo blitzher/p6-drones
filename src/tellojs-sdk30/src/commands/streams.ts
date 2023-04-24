@@ -24,7 +24,7 @@ export class StateStream {
     readonly port: Port;
     readonly client: Socket;
     readonly ip: IP;
-    readonly emitter: EventEmitter;
+    private readonly emitter: EventEmitter;
 
     constructor(port: Port, ip: IP) {
         this.port = port;
@@ -67,13 +67,17 @@ export class StateStream {
             this.emitter.emit("message", this.map(message));
         });
     }
+
+    on(event: "message", cb: (stream: StateInfo) => void): void {
+        this.emitter.on(event, cb);
+    }
 }
 
 export class VideoStream {
     readonly port: Port;
     readonly client: Socket;
     readonly ip: IP;
-    readonly emitter: EventEmitter;
+    private readonly emitter: EventEmitter;
 
     constructor(port: Port, ip: IP) {
         this.port = port;
@@ -90,6 +94,10 @@ export class VideoStream {
             this.emitter.emit("message", message);
         });
         return 0;
+    }
+
+    on(event: "message", cb: (data: Uint8Array) => void): void {
+        this.emitter.on(event, cb);
     }
 
     async stop() {

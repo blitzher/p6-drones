@@ -1,5 +1,5 @@
 import { EventEmitter } from "stream";
-import sdk, { StateInfo } from "../tellojs-sdk30/src";
+import sdk, { StateInfo as sdkStateInfo } from "../tellojs-sdk30/src";
 import { H264Segmenter } from "./h264-segmenter";
 import { com } from "./frontend-com";
 import * as env from "./environment";
@@ -9,13 +9,24 @@ import logger from "../log";
 export const droneState = {};
 export type DroneId = string;
 
+interface StateInfo extends sdkStateInfo {
+    position: Vector3;
+    rotation: {
+        pitch: number;
+        yaw: number;
+        roll: number;
+    };
+    speedVector: Vector3;
+}
+
 export class Drone extends sdk.Drone {
     static allDrones: { [key: string]: Drone } = {};
 
     /* Setup public attributes */
     public readonly positionHistory: Vector3[] = [];
 
-    public readonly state = {
+    /* Set default state values */
+    public readonly state: StateInfo = {
         position: new Vector3({
             x: 0,
             y: 0,
@@ -26,11 +37,23 @@ export class Drone extends sdk.Drone {
             yaw: 0,
             roll: 0,
         },
-        speed: new Vector3({
+        speedVector: new Vector3({
             x: 0,
             y: 0,
             z: 0,
         }),
+        speed: { x: 0, y: 0, z: 0 },
+        acceleration: { x: 0, y: 0, z: 0 },
+        barometer: 0,
+        battery: 0,
+        height: 0,
+        mid: -1,
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+        temperature: { low: 0, high: 0 },
+        time: 0,
+        tof: 0,
     };
 
     private lastStateTime: number;
@@ -55,11 +78,11 @@ export class Drone extends sdk.Drone {
         this.lastStateTime = now;
 
         /* Ensure consistent order of coordinates, and convert to cm */
-        this.state.speed.y = state.height;
-        this.state.speed.z = state.speed.x * 10;
-        this.state.speed.x = state.speed.y * 10;
+        this.state.position.y = state.height;
+        this.state.speedVector.z = state.speed.x * 10;
+        this.state.speedVector.x = state.speed.y * 10;
 
-        this.state.position = this.state.position.add(this.state.speed.scale(deltaTime));
+        this.state.position = this.state.position.add(this.state.speedVector.scale(deltaTime));
 
         const pos = this.state.position;
         const posString = `${Math.round(pos.x * 10) / 10}, ${Math.round(pos.y * 10) / 10}, ${
