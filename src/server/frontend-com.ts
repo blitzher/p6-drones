@@ -111,17 +111,17 @@ function handle(pkg: Package) {
             logger.log(`Drone position: ${JSON.stringify(drone.state.position)}`);
             logger.log(`Marker position: ${JSON.stringify(marker.relative)}`);
 
-            if (!GoingToMarker) {
-                GoingToMarker = true;
-                drone.control
-                    .go({ x, y, z }, 50, "m8", { shouldReject: true })
-                    .then(() => {
-                        GoingToMarker = false;
-                    })
-                    .catch(() => {
-                        GoingToMarker = false;
-                    });
-            }
+            // if (!GoingToMarker) {
+            //     GoingToMarker = true;
+            //     drone.control
+            //         .go({ x, y, z }, 50, "m8", { shouldReject: true })
+            //         .then(() => {
+            //             GoingToMarker = false;
+            //         })
+            //         .catch(() => {
+            //             GoingToMarker = false;
+            //         });
+            // }
 
             break;
     }

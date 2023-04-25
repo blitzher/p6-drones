@@ -20,10 +20,10 @@ const HTTP_PORT = 42069;
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-// new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.130" });
 // new Drone({ ip: "192.168.1.141" });
 // new Drone({ ip: "192.168.1.174" });
-new Drone({ ip: "192.168.1.191" });
+//new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());
@@ -66,7 +66,7 @@ app.listen(HTTP_PORT, async () => {
             const ids = msg.split(" ");
             for (let id of ids) {
                 let drone = Drone.allDrones[id];
-                if (drone) drone.set.mon();
+                if (drone) dronePath.fly(drone)
             }
             CLI();
         });
