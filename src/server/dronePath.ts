@@ -1,7 +1,8 @@
+import { json } from "stream/consumers";
 import logger from "../log";
 import { Commander } from "../tellojs-sdk30/src/commander";
 import { Drone } from "./drone";
-import { BOX_RADIUS, Object3D, environment } from "./environment";
+import { BOX_RADIUS, DRONE_RADIUS, ERROR_MARGIN, Object3D, environment } from "./environment";
 import { Vector3 } from "./linerAlgebra";
 
 const speed = 25;
@@ -59,29 +60,37 @@ class DronePath {
             DronePath.dronePathCounter += 1;
         }
     }
-    public getRelevantBoxes(flyDestination: Vector3, drone: Drone): Object3D[] {
+    public getRelevantBoxes(flyDestination: Vector3, start: Vector3): Object3D[] {
         const relevantBoxes: Object3D[] = [];
-        const droneStartPosition: Vector3 = drone.state.position;
-        const deltaPosition = droneStartPosition.subtract(flyDestination);
+        const deltaPosition = flyDestination.subtract(start);
         const moveVector: Vector3 = deltaPosition.normalise();
 
         for (const box of Object.values(environment.objects)) {
             //Checks each 5 cm. if there is a box in the path
             for (let i = 0; i < deltaPosition.length(); i += 5) {
                 const positionOffset = moveVector.scale(i);
-                const prospectedPosition = droneStartPosition.add(positionOffset);
+                const prospectedPosition = start.add(positionOffset);
                 const dronePosition = new Object3D(
                     prospectedPosition.x,
                     prospectedPosition.y,
                     prospectedPosition.z,
-                    20
+                    DRONE_RADIUS
                 );
                 if (dronePosition.collidesWith(box)) {
                     relevantBoxes.push(box);
                 }
             }
         }
-        return relevantBoxes;
+
+        const foundIds: number[] = []
+        return relevantBoxes.filter(o => {
+            if (foundIds.indexOf(o.id) > -1)
+                return false;
+            else {
+                foundIds.push(o.id);
+                return true;
+            }
+        });
     }
     public async fly(drone: Drone) {
         if (drone.inFlight) return;
@@ -100,18 +109,30 @@ class DronePath {
                 return;
             }
 
-            let boxes = this.getRelevantBoxes(this.destinationStore, drone);
+            let boxes = this.getRelevantBoxes(this.destinationStore, drone.state.position);
             logger.concurrent(
                 "destination store",
                 `${JSON.stringify(this.destinationStore)}`
             );
-            if (boxes.length != 0) {
-                logger.log(`Found box ${JSON.stringify(boxes[0])}`);
-                const maneuver = this.maneuver(boxes, this.destinationStore, drone);
-                for (let manStep of maneuver) {
-                    logger.log("Performing maneuver...");
-                    await manStep();
+            if (boxes.length > 0) {
+                let closestBox: { box: Object3D, dist: number } = { box: boxes[0], dist: Infinity }
+                for (let box of boxes) {
+                    const dist = drone.state.position.lengthToBox(box)
+                    if (dist < closestBox.dist) {
+                        closestBox = { box, dist };
+                    }
                 }
+
+                if (closestBox.dist < (BOX_RADIUS + DRONE_RADIUS) * ERROR_MARGIN) {
+                    /* Box is near drone, avoid it */
+                    logger.log(`Found box ${JSON.stringify(boxes[0])} drone at ${JSON.stringify(drone.state.position)}`);
+                    const maneuver = this.maneuver(boxes, this.destinationStore, drone);
+                    for (let maneuverStep of maneuver) {
+                        logger.log("Performing maneuver...");
+                        await maneuverStep();
+                    }
+                }
+
             }
             if (!busy) {
                 step = next.value;
@@ -163,8 +184,13 @@ class DronePath {
                 forceReady: true,
             })
         );
-        maneuver.push(() => drone.control.back(100, { overwriteQueue: true }));
-        maneuver.push(() => drone.control.land({ overwriteQueue: true }));
+        maneuver.push(() => drone.control.counterClockwise(90));
+        maneuver.push(() => drone.control.forward(40));
+        maneuver.push(() => drone.control.clockwise(90));
+        maneuver.push(() => drone.control.forward(40));
+        maneuver.push(() => drone.control.clockwise(90));
+        maneuver.push(() => drone.control.forward(40));
+        maneuver.push(() => drone.control.counterClockwise(90));
 
         return maneuver;
     }

@@ -83,11 +83,13 @@ export class Drone extends sdk.Drone {
         /* speed forward is negative for some reason */
         this.state.speedVector.x = -state.speed.x * 10;
         this.state.speedVector.y = state.speed.y * 10;
-        this.state.position.z = state.tof;
+
+        /* Adjust for undershoot of speed */
+        this.state.speedVector = this.state.speedVector.scale(1.75);
 
         this.state.position = this.state.position.add(this.state.speedVector.scale(deltaTime));
+        this.state.position.z = state.tof;
 
-        const pos = this.state.position;
         logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
 
         this.state.rotation.pitch = (state.pitch * Math.PI) / 180;

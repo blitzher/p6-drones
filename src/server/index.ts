@@ -10,6 +10,7 @@ import { com, initialiseWebSocket } from "./frontend-com";
 import logger from "../log";
 import { dronePath } from "./dronePath";
 import * as readline from "node:readline/promises";
+import { Vector3 } from "./linerAlgebra";
 
 const readlineInterface = readline.createInterface(process.stdin, process.stdout);
 
@@ -20,9 +21,9 @@ const HTTP_PORT = 42069;
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-new Drone({ ip: "192.168.1.130" });
-// new Drone({ ip: "192.168.1.141" });
-// new Drone({ ip: "192.168.1.174" });
+//new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.141" });
+//new Drone({ ip: "192.168.1.174" });
 // new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
@@ -74,8 +75,9 @@ app.listen(HTTP_PORT, async () => {
     }
     CLI();
 
+
     /* Add a dummy object in environment */
-    env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
+    // env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {

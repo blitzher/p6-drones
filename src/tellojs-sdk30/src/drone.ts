@@ -108,7 +108,7 @@ export class Drone {
     }
 
     control = {
-        forward: (distance: number, options?: CommandOptions) => this.send(`${distance}`, options),
+        forward: (distance: number, options?: CommandOptions) => this.send(`forward ${distance}`, options),
 
         takeOff: (options?: CommandOptions) => this.send("takeoff", options),
 
