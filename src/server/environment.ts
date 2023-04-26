@@ -5,7 +5,7 @@ import { env } from "process";
 import { commander } from "../tellojs-sdk30/src";
 import { Vector3 } from "./linerAlgebra";
 
-export const BOX_RADIUS = 10;
+export const BOX_RADIUS = 50;
 
 export class Object3D {
     x: number;
@@ -93,13 +93,13 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                  event: "drone",
-                  listener: (data: {
-                      droneId: DroneId;
-                      dronePosition: Object3D;
-                      dronePositionHistory: Object3D[];
-                  }) => void
-              ]
+                event: "drone",
+                listener: (data: {
+                    droneId: DroneId;
+                    dronePosition: Object3D;
+                    dronePositionHistory: Object3D[];
+                }) => void
+            ]
     ): this {
         return this.on(args[0], args[1]);
     }
