@@ -101,7 +101,10 @@ class DronePath {
             }
 
             let boxes = this.getRelevantBoxes(this.destinationStore, drone);
-            logger.concurrent("destination store", `${JSON.stringify(this.destinationStore)}`);
+            logger.concurrent(
+                "destination store",
+                `${JSON.stringify(this.destinationStore)}`
+            );
             if (boxes.length != 0) {
                 logger.log(`Found box ${JSON.stringify(boxes[0])}`);
                 const maneuver = this.maneuver(boxes, this.destinationStore, drone);
@@ -131,21 +134,21 @@ class DronePath {
     }
 
     public maneuver(obstacles: Object3D[], flyDestination: Vector3, drone: Drone) {
-        let maneuver: (() => Promise<string>)[] = [];
-        let lengthArray: number[] = [];
+        const maneuver: (() => Promise<string>)[] = [];
+        const lengthArray: number[] = [];
         let nearestBoxDist: number;
         // Go to position just before hitting the obstacle & locate boxes on either side of current obstacle
         for (const obstacle of obstacles) {
             lengthArray.push(flyDestination.lengthToBox(obstacle));
         }
         nearestBoxDist = lengthArray.indexOf(Math.min(...lengthArray));
-        let rightBox = new Object3D(
+        const rightBox = new Object3D(
             obstacles[nearestBoxDist].x + BOX_RADIUS,
             obstacles[nearestBoxDist].y,
             obstacles[nearestBoxDist].z,
             BOX_RADIUS
         );
-        let leftBox = new Object3D(
+        const leftBox = new Object3D(
             obstacles[nearestBoxDist].x - BOX_RADIUS,
             obstacles[nearestBoxDist].y,
             obstacles[nearestBoxDist].z,
@@ -153,7 +156,13 @@ class DronePath {
         );
         //yield drone.control.go(obstacles[nearestBoxDist], 50, "m8");
         logger.error(`Avoiding obstacle`);
-        maneuver.push(() => drone.control.stop({ overwriteQueue: true, expectedResponse: "forced stop" }));
+        maneuver.push(() =>
+            drone.control.stop({
+                overwriteQueue: true,
+                expectedResponse: "forced stop",
+                forceReady: true,
+            })
+        );
         maneuver.push(() => drone.control.back(100, { overwriteQueue: true }));
         maneuver.push(() => drone.control.land({ overwriteQueue: true }));
 

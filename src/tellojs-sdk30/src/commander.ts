@@ -12,6 +12,7 @@ export type CommandOptions = {
     shouldRetry?: boolean;
     overwriteQueue?: boolean;
     expectedResponse?: string;
+    forceReady?: boolean;
 };
 export type Command = { argument: string; destination: IP; reject: (reason: string) => void; options: CommandOptions };
 

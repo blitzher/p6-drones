@@ -52,9 +52,9 @@ export class Subcommander {
         return new Promise<string>(async (resolve, reject) => {
             const cmd = { argument: command, destination: ip, reject, options };
 
+            if (options.forceReady) this.busy = false;
             if (options.overwriteQueue) {
                 this.commandQueue.splice(0, 0, cmd);
-                this.busy = false;
             } else {
                 this.commandQueue.push(cmd);
             }
