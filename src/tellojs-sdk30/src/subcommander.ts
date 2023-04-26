@@ -14,6 +14,8 @@ export class Subcommander {
     public connected: boolean;
     private commanderRef: Commander;
 
+    private expectedResponse?: string;
+
     constructor(commanderRef: Commander) {
         this.commanderRef = commanderRef;
         this.connected = false;
@@ -34,9 +36,16 @@ export class Subcommander {
             this.callbackFunction = undefined;
         }
         /* Clear the timeout  */
-        clearTimeout(this.rejectTimeout);
-
-        this.emitter.emit("ready");
+        logger.log(`exp_res:${this.expectedResponse}, msg:${message}`);
+        if (this.expectedResponse != undefined) {
+            if (message == this.expectedResponse) {
+                clearTimeout(this.rejectTimeout);
+                this.emitter.emit("ready");
+            }
+        } else {
+            clearTimeout(this.rejectTimeout);
+            this.emitter.emit("ready");
+        }
     }
 
     public async enqueue(command: string, ip: IP, options: CommandOptions) {
@@ -64,6 +73,7 @@ export class Subcommander {
         }
 
         this.busy = true;
+        this.expectedResponse = command.options.expectedResponse;
         this.commanderRef.dispatch(command);
 
         this.rejectTimeout = setTimeout(() => {

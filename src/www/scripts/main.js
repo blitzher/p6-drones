@@ -30,6 +30,6 @@ window.addEventListener("load", (doc, ev) => {
                     console.log(`Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`);
                 });
             }
-        }, 2500);
+        }, 250);
     }
 });

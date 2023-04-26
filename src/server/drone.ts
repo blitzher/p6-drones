@@ -56,6 +56,8 @@ export class Drone extends sdk.Drone {
         tof: 0,
     };
 
+    public inFlight: boolean = false;
+
     private lastStateTime: number;
 
     constructor({ ip, port }: { ip: string; port?: { state: number; video: number } }) {

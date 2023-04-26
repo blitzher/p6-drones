@@ -11,6 +11,7 @@ export type CommandOptions = {
     shouldReject?: boolean;
     shouldRetry?: boolean;
     overwriteQueue?: boolean;
+    expectedResponse?: string;
 };
 export type Command = { argument: string; destination: IP; reject: (reason: string) => void; options: CommandOptions };
 

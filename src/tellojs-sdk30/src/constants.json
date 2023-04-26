@@ -9,8 +9,8 @@
         "video": 10000
     },
     "timeouts": {
-        "rejectTimeout": 7500,
+        "rejectTimeout": 10000,
         "retryConnectTimeout": 5000,
-        "droneDisconnectTimeout": 2500
+        "droneDisconnectTimeout": 5000
     }
 }

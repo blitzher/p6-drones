@@ -23,7 +23,7 @@ const { app } = expressWs(express());
 new Drone({ ip: "192.168.1.130" });
 // new Drone({ ip: "192.168.1.141" });
 // new Drone({ ip: "192.168.1.174" });
-//new Drone({ ip: "192.168.1.191" });
+// new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());
@@ -58,6 +58,7 @@ app.listen(HTTP_PORT, async () => {
         drone.connect().then(async () => {
             env.environment.addDrone(drone);
             drone.startVideoStream();
+            // dronePath.fly(drone);
         });
     }
 
@@ -66,12 +67,15 @@ app.listen(HTTP_PORT, async () => {
             const ids = msg.split(" ");
             for (let id of ids) {
                 let drone = Drone.allDrones[id];
-                if (drone) dronePath.fly(drone)
+                if (drone) dronePath.fly(drone);
             }
             CLI();
         });
     }
     CLI();
+
+    /* Add a dummy object in environment */
+    env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {

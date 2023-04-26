@@ -95,7 +95,7 @@ function handle(pkg: Package) {
             Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
-            console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
+            // console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
 
             const marker: MarkerData = pkg.data;
 
@@ -106,12 +106,7 @@ function handle(pkg: Package) {
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
             env.environment.addObject({ pos: { x, y, z } }, marker.id);
-
-            logger.log("Found marker");
-            logger.log(`Drone position: ${JSON.stringify(drone.state.position)}`);
-            logger.log(`Marker position: ${JSON.stringify(marker.relative)}`);
-
-
+            logger.info(`Inserting object at (${x},${y},${z})`);
             break;
     }
 }
