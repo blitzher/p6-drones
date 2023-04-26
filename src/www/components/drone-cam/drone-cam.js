@@ -207,6 +207,32 @@ function renderMarkers(markers, id) {
     vctx[id].stroke();
 }
 
+function lookForMarkers(camIds, internal) {
+    for (let id of camIds) {
+        setInterval(() => {
+            const markers = droneCam.findMarkers(id);
+            let markerPos;
+
+            if (markers != undefined && markers.length > 0) {
+                droneCam.renderMarkers(markers, id);
+
+                markers.forEach((marker) => {
+                    markerPos = droneCam.estimateMarkerPosition(marker, id);
+
+                    if (!markerPos.isValid) return;
+
+                    communication.sendMarker(markerPos);
+
+                    const [rx, ry, rz] = Object.values(markerPos.relative).map((v) => Math.round(v) / 10);
+                    const rd = Math.round(markerPos.dist) / 10;
+
+                    console.log(`Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`);
+                });
+            }
+        }, 2500);
+    }
+}
+
 export default {
     initialise: init,
     feed,

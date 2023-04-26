@@ -44,11 +44,12 @@ export class Subcommander {
             const cmd = { argument: command, destination: ip, reject, options };
 
             if (options.overwriteQueue) {
-                this.commandQueue = [];
+                this.commandQueue.splice(0, 0, cmd);
                 this.busy = false;
+            } else {
+                this.commandQueue.push(cmd);
             }
 
-            this.commandQueue.push(cmd);
             this.callbackFunction = resolve;
             this.emitter.emit("message", cmd);
         });

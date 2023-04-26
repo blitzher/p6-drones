@@ -15,42 +15,42 @@ class DronePath {
         this.mapLength = maplength;
         this.numberOfDrones = numberofdrones;
     }
-    public async *SnakePattern(drone: Drone) {
+    public *SnakePattern(drone: Drone): Generator<() => Promise<string>> {
         const iterations: number = Math.floor(this.mapWidth / 15);
         const moveLength: number = this.mapLength;
         const moveWidth: number = 15;
         const flyDestination: Vector3 = new Vector3({ x: 0, y: 0, z: 100 });
 
-        yield drone.control.takeOff();
+        yield () => drone.control.takeOff();
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
                 flyDestination.x += moveLength + DronePath.dronePathCounter * 30;
                 this.destinationStore = flyDestination;
                 console.log(this.destinationStore);
 
-                yield drone.control.go(flyDestination, 20, "m8");
-                yield drone.control.counterClockwise(90);
+                yield () => drone.control.go(flyDestination, 20, "m8");
+                yield () => drone.control.counterClockwise(90);
 
                 flyDestination.y += moveWidth;
                 this.destinationStore = flyDestination;
                 console.log(this.destinationStore);
 
-                yield drone.control.go(flyDestination, 20, "m8");
-                yield drone.control.counterClockwise(90);
+                yield () => drone.control.go(flyDestination, 20, "m8");
+                yield () => drone.control.counterClockwise(90);
             } else {
                 flyDestination.x -= moveLength;
                 this.destinationStore = flyDestination;
                 console.log(this.destinationStore);
 
-                yield drone.control.go(flyDestination, 20, "m8");
-                yield drone.control.clockwise(90);
+                yield () => drone.control.go(flyDestination, 20, "m8");
+                yield () => drone.control.clockwise(90);
 
                 flyDestination.y += moveWidth;
                 this.destinationStore = flyDestination;
                 console.log(this.destinationStore);
 
-                yield drone.control.go(flyDestination, 20, "m8");
-                yield drone.control.clockwise(90);
+                yield () => drone.control.go(flyDestination, 20, "m8");
+                yield () => drone.control.clockwise(90);
             }
         }
         if (this.numberOfDrones == DronePath.dronePathCounter) {
@@ -88,13 +88,23 @@ class DronePath {
         const snake = this.SnakePattern(drone);
         let boxes: Object3D[];
 
-        for (let step of snake) {
+        let busy = false;
+        let next = snake.next();
+        let step: () => Promise<string>;
+
+        while (!next.done) {
             boxes = this.getRelevantBoxes(this.destinationStore, drone);
             if (boxes.length != 0) {
-                //gotoclosestbox + undvigelse skal rykkes in foran her i snake array
                 this.maneuver(boxes, this.destinationStore, drone);
             }
-            await step;
+            if (!busy) {
+                step = next.value;
+                busy = true;
+                step().then(() => {
+                    busy = false;
+                    next = snake.next();
+                });
+            }
         }
         drone.control.land();
     }
@@ -121,12 +131,9 @@ class DronePath {
             BOX_RADIUS
         );
         //yield drone.control.go(obstacles[nearestBoxDist], 50, "m8");
-        yield drone.control.land();
+        yield () => drone.control.stop({ overwriteQueue: true });
     }
 }
-
-
-
 
 // class DronePath {
 //     mapWidth: number;
@@ -152,7 +159,6 @@ class DronePath {
 //         let X: number = 0;
 //         let Y: number = 0;
 //         let Z: number = 0;
-
 
 //         mission.push(() => drone.control.takeOff());
 
