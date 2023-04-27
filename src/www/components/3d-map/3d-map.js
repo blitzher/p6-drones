@@ -59,7 +59,7 @@ function render3DCube() {
     const amb = new THREE.AmbientLight();
     amb.intensity = 1;
     scene.add(amb);
-    // scene.add(new THREE.GridHelper(100, 100));
+    scene.add(new THREE.GridHelper(1000, 50));
 
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
