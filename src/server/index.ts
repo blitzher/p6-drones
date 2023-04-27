@@ -21,10 +21,10 @@ const HTTP_PORT = 42069;
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-//new Drone({ ip: "192.168.1.130" });
-new Drone({ ip: "192.168.1.141" });
+new Drone({ ip: "192.168.1.130" });
+//new Drone({ ip: "192.168.1.141" });
 //new Drone({ ip: "192.168.1.174" });
-// new Drone({ ip: "192.168.1.191" });
+//new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());
@@ -77,7 +77,13 @@ app.listen(HTTP_PORT, async () => {
 
 
     /* Add a dummy object in environment */
-    // env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
+    //env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
+    // const box: Object3D[] = []
+    // box.push(new Object3D(0, 50, 75, 30))
+    // const currentPos: Vector3 = new Vector3({ x: 0, y: 20, z: 75 })
+    // const destination: Vector3 = new Vector3({ x: 0, y: 100, z: 75 })
+
+    // dronePath.maneuver(box, destination, currentPos);
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {
