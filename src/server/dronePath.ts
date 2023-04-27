@@ -11,56 +11,52 @@ class DronePath {
     mapWidth: number;
     mapLength: number;
     numberOfDrones: number;
-    static dronePathCounter: number = 0;
-    destinationStore: Vector3 = new Vector3({ x: 0, y: 0, z: 0 });
-    //static firstIteration: boolean = true;
+    destinationStore: { [key: string]: Vector3 } = {};
+
     constructor(mapwidth: number, maplength: number, numberofdrones: number) {
         this.mapWidth = mapwidth;
         this.mapLength = maplength;
         this.numberOfDrones = numberofdrones;
     }
+
     public *SnakePattern(drone: Drone): Generator<() => Promise<string>> {
         const iterations: number = Math.floor(this.mapWidth / 15);
         const moveLength: number = this.mapLength;
         const moveWidth: number = 15;
         const flyDestination: Vector3 = new Vector3({ x: 0, y: 0, z: 60 });
+        this.destinationStore[drone.id] = new Vector3({ x: 0, y: 0, z: 0 })
 
         yield () => drone.control.takeOff();
 
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
-                flyDestination.x += moveLength + DronePath.dronePathCounter * 30;
-                this.destinationStore = flyDestination;
+                flyDestination.x += moveLength;
+                this.destinationStore[drone.id] = flyDestination;
 
                 yield () => drone.control.go(flyDestination, speed, "m8");
                 yield () => drone.control.counterClockwise(90);
 
                 flyDestination.y += moveWidth;
-                this.destinationStore = flyDestination;
+                this.destinationStore[drone.id] = flyDestination;
 
                 yield () => drone.control.go(flyDestination, speed, "m8");
                 yield () => drone.control.counterClockwise(90);
             } else {
                 flyDestination.x -= moveLength;
-                this.destinationStore = flyDestination;
+                this.destinationStore[drone.id] = flyDestination;
 
                 yield () => drone.control.go(flyDestination, speed, "m8");
                 yield () => drone.control.clockwise(90);
 
                 flyDestination.y += moveWidth;
-                this.destinationStore = flyDestination;
+                this.destinationStore[drone.id] = flyDestination;
 
                 yield () => drone.control.go(flyDestination, speed, "m8");
                 yield () => drone.control.clockwise(90);
             }
         }
-        if (this.numberOfDrones == DronePath.dronePathCounter) {
-            DronePath.dronePathCounter = 0;
-        }
-        if (this.numberOfDrones > DronePath.dronePathCounter) {
-            DronePath.dronePathCounter += 1;
-        }
     }
+
     public getRelevantBoxes(flyDestination: Vector3, start: Vector3): Object3D[] {
         const relevantBoxes: Object3D[] = [];
         const deltaPosition = flyDestination.subtract(start);
@@ -93,6 +89,7 @@ class DronePath {
             }
         });
     }
+
     public async fly(drone: Drone) {
         if (drone.inFlight) return;
         drone.inFlight = true;
@@ -110,7 +107,7 @@ class DronePath {
                 return;
             }
 
-            let boxes = this.getRelevantBoxes(this.destinationStore, drone.state.position);
+            let boxes = this.getRelevantBoxes(this.destinationStore[drone.id], drone.state.position);
             logger.concurrent(
                 "destination store",
                 `${JSON.stringify(this.destinationStore)}`
@@ -127,7 +124,7 @@ class DronePath {
                 if (closestBox.dist < (BOX_RADIUS + DRONE_RADIUS) * ERROR_MARGIN) {
                     /* Box is near drone, avoid it */
                     logger.log(`Found box ${JSON.stringify(boxes[0])} drone at ${JSON.stringify(drone.state.position)}`);
-                    const maneuver = this.maneuver(boxes, this.destinationStore, drone);
+                    const maneuver = this.maneuver(boxes, this.destinationStore[drone.id], drone);
                     for (let maneuverStep of maneuver) {
                         logger.log("Performing maneuver...");
                         await maneuverStep();
