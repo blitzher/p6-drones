@@ -12,7 +12,10 @@ import { dronePath } from "./dronePath";
 import * as readline from "node:readline/promises";
 import { Vector3 } from "./linerAlgebra";
 
-const readlineInterface = readline.createInterface(process.stdin, process.stdout);
+const readlineInterface = readline.createInterface(
+    process.stdin,
+    process.stdout
+);
 
 /* Global constant */
 const HTTP_PORT = 42069;
@@ -64,20 +67,21 @@ app.listen(HTTP_PORT, async () => {
     }
 
     function CLI() {
-        readlineInterface.question("Type drone ids to start flying.\n").then((msg) => {
-            const ids = msg.split(" ");
-            for (let id of ids) {
-                let drone = Drone.allDrones[id];
-                if (drone) dronePath.fly(drone);
-            }
-            CLI();
-        });
+        readlineInterface
+            .question("Type drone ids to start flying.\n")
+            .then((msg) => {
+                const ids = msg.split(" ");
+                for (let id of ids) {
+                    let drone = Drone.allDrones[id];
+                    if (drone) dronePath.fly(drone);
+                }
+                CLI();
+            });
     }
     CLI();
 
-
     /* Add a dummy object in environment */
-    // env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
+    env.environment.addObject({ pos: { x: 150, y: 100, z: 0 } }, -1);
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {
@@ -85,7 +89,11 @@ app.listen(HTTP_PORT, async () => {
     });
     env.environment.listen(
         "drone",
-        (data: { droneId: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+        (data: {
+            droneId: string;
+            dronePosition: Object3D;
+            dronePositionHistory: Object3D[];
+        }) => {
             com.drone(data);
         }
     );
