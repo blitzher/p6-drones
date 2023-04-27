@@ -133,7 +133,6 @@ class DronePath {
                         await maneuverStep();
                     }
                 }
-
             }
             if (!busy) {
                 step = next.value;

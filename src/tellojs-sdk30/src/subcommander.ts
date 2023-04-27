@@ -76,13 +76,16 @@ export class Subcommander {
         this.expectedResponse = command.options.expectedResponse;
         this.commanderRef.dispatch(command);
 
-        // this.rejectTimeout = setTimeout(() => {
-        //     if (command.options.shouldReject) command.reject("No response from drone");
-        //     logger.error(
-        //         `No response from drone @'${command.destination}' on '${command.argument}'. Returning to ready state`
-        //     );
-        //     if (command.options.shouldRetry) this.commandQueue.unshift(command);
-        //     this.emitter.emit("ready");
-        // }, constants.timeouts.rejectTimeout);
+        if (command.options.timeout) {
+            this.rejectTimeout = setTimeout(() => {
+                if (command.options.shouldReject)
+                    command.reject("No response from drone");
+                logger.error(
+                    `No response from drone @'${command.destination}' on '${command.argument}'. Returning to ready state`
+                );
+                if (command.options.shouldRetry) this.commandQueue.unshift(command);
+                this.emitter.emit("ready");
+            }, command.options.timeout);
+        }
     }
 }

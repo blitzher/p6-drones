@@ -21,10 +21,17 @@ const HTTP_PORT = 42069;
 const { app } = expressWs(express());
 
 /* Instantiate drones */
+<<<<<<< HEAD
 new Drone({ ip: "192.168.1.130" });
 //new Drone({ ip: "192.168.1.141" });
 //new Drone({ ip: "192.168.1.174" });
 //new Drone({ ip: "192.168.1.191" });
+=======
+// new Drone({ ip: "192.168.1.130" });
+// new Drone({ ip: "192.168.1.141" });
+// new Drone({ ip: "192.168.1.174" });
+new Drone({ ip: "192.168.1.191" });
+>>>>>>> 2941eae (Readded connection reconnect)
 
 /* Setup web server */
 app.use(express.json());
@@ -33,21 +40,6 @@ app.use(express.static("./src/www"));
 app.ws("/", (ws) => {
     initialiseWebSocket(<WebSocket>(<any>ws));
 });
-
-function startTest() {
-    console.log(`Starting test: ${process.title}`);
-    //Position of dummy boxes for testing
-    const BOX_COUNT = 20;
-    let time = 0;
-    const addObjectInterval = setInterval(() => {
-        let x = Math.cos(time) * time * 30;
-        let z = Math.sin(time) * time * 30;
-        let obstacle = new Object3D(x, 0, z, 10);
-        time += 0.2;
-        env.environment.addObject({ obj: obstacle }, time);
-        if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
-    }, 1000);
-}
 
 /* Launch server */
 app.listen(HTTP_PORT, async () => {
@@ -75,23 +67,17 @@ app.listen(HTTP_PORT, async () => {
     }
     CLI();
 
-
-    /* Add a dummy object in environment */
-    //env.environment.addObject({ pos: { x: 150, y: 0, z: 75 } }, -1);
-    // const box: Object3D[] = []
-    // box.push(new Object3D(0, 50, 75, 30))
-    // const currentPos: Vector3 = new Vector3({ x: 0, y: 20, z: 75 })
-    // const destination: Vector3 = new Vector3({ x: 0, y: 100, z: 75 })
-
-    // dronePath.maneuver(box, destination, currentPos);
-
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {
         com.environment(data);
     });
     env.environment.listen(
         "drone",
-        (data: { droneId: string; dronePosition: Object3D; dronePositionHistory: Object3D[] }) => {
+        (data: {
+            droneId: string;
+            dronePosition: Object3D;
+            dronePositionHistory: Object3D[];
+        }) => {
             com.drone(data);
         }
     );

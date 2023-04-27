@@ -47,10 +47,15 @@ export const com = {
             );
     },
     environment: (data: env.Object3D[]) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
     },
-    drone: (data: { dronePosition: env.Object3D; dronePositionHistory: env.Object3D[] }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
+    drone: (data: {
+        dronePosition: env.Object3D;
+        dronePositionHistory: env.Object3D[];
+    }) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -84,7 +89,6 @@ export const initialiseWebSocket = (ws: WebSocket) => {
     };
 };
 
-let GoingToMarker = false;
 function handle(pkg: Package) {
     switch (pkg.type) {
         case "command":
@@ -106,7 +110,7 @@ function handle(pkg: Package) {
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
             env.environment.addObject({ pos: { x, y, z } }, marker.id);
-            const o = env.environment.objects[marker.id]
+            const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;
     }

@@ -1,0 +1,7 @@
+{
+    "env": {
+        "BOX_RADIUS": 30,
+        "DRONE_RADIUS": 30,
+        "ERROR_MARGIN": 1.5
+    }
+}
