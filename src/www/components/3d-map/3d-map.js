@@ -37,7 +37,7 @@ let loadCachedFlag = false;
 loader.load("../../resources/drone.glb", (gltf) => {
     /** @type {THREE.Object3D} */
     const obj = gltf.scene;
-    obj.scale.set(10, 10, 10);
+    obj.scale.set(5, 5, 5);
     obj.castShadow = true;
     /** @type {THREE.Mesh} */
     const mesh = obj.children[0];
