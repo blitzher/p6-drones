@@ -11,7 +11,6 @@ const CAMERA_MODE = {
     DRONE: 1,
 };
 
-let cachedCameraState = { position: {}, rotation: {} };
 const mapCanvas3D = $("#map");
 const fov = 75;
 const aspect = 4 / 3;
@@ -64,7 +63,7 @@ function render3DCube() {
 
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    scene.add(plane);
+    //scene.add(plane);
     plane.lookAt(0, 1, 0);
     plane.translateZ(-5);
 

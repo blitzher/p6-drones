@@ -6,9 +6,7 @@ function initBB() {
 
     /* Add event listener to toggle camera switch */
     switchElem.addEventListener("click", () => {
-        const newCameraMode = switchElem.checked
-            ? map3d.CAMERA_MODE.DRONE
-            : map3d.CAMERA_MODE.ORBIT;
+        const newCameraMode = switchElem.checked ? map3d.CAMERA_MODE.DRONE : map3d.CAMERA_MODE.ORBIT;
 
         map3d.setCameraMode(newCameraMode);
     });
@@ -24,9 +22,15 @@ function initBB() {
     });
 
     /* Add event listener to emergency stop button */
-    $("#button").addEventListener("click", (ev) => {
+    $("#emergency-button").addEventListener("click", (ev) => {
         const emergencyStop = "stop";
         communication.command(emergencyStop);
+        return false;
+    });
+    /* Add event listener to emergency stop button */
+    $("#init-button").addEventListener("click", (ev) => {
+        communication.command("initSearch");
+        console.log("Flight init");
         return false;
     });
 }

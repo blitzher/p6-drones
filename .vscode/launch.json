@@ -6,11 +6,25 @@
     "configurations": [
         {
             "type": "node",
+            "runtimeExecutable": "/Users/skovborg/.nvm/versions/node/v18.14.2/bin/node",
             "request": "launch",
             "name": "Launch Typescript",
-            "program": "${workspaceFolder}/src/index.ts",
+            "program": "${workspaceFolder}/src/server/index.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": ["${workspaceFolder}/build/**/*.js"]
+            "outFiles": [
+                "${workspaceFolder}/build/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "runtimeExecutable": "C:\\Users\\hmarti19\\AppData\\Roaming\\nvm\\v18.16.0\\node.exe",
+            "request": "launch",
+            "name": "(Richard) Launch Typescript",
+            "program": "${workspaceFolder}/src/server/index.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/build/**/*.js"
+            ]
         }
     ]
 }

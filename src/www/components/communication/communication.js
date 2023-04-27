@@ -1,9 +1,9 @@
 /* communication.js */
 import droneCam from "../drone-cam/drone-cam.js";
 import environment3d from "../3d-map/3d-map.js";
-import stateWindow from "../state-window/state-window.js";
 
 /* Declare global variables for use in component */
+/** @type {{[key:string]:StateInfo}} */
 export let droneState = {};
 const wsUrl = `ws:${window.location.host}`;
 let ws;
@@ -35,19 +35,17 @@ function handle(pkg, ws) {
     switch (pkg.type) {
         case "stream":
             const h264data = Uint8Array.from(pkg.data);
-            droneCam.feed(h264data);
+            droneCam.feed(h264data, pkg.id);
             break;
         case "error":
             console.error(`Server error: ${pkg.data}`);
             break;
         case "state":
-            const dataToRender = pkg.data;
-            Object.assign(droneState, pkg.data);
-            stateWindow.updateState(dataToRender);
+            droneState[pkg.id] = pkg.data;
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
-            for (let marker of pkg.data) {
+            for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
                     { x: 10, y: 10, z: 10 },
                     { x: marker.x, y: marker.y, z: marker.z },
@@ -69,7 +67,6 @@ function handle(pkg, ws) {
  */
 
 function command(cmd) {
-    console.log(ws);
     if (ws.readyState != 1) {
         console.log("Websocket is not open!");
         return;
@@ -82,8 +79,18 @@ function command(cmd) {
     );
 }
 
+function sendMarker(marker) {
+    ws.send(
+        JSON.stringify({
+            type: "marker",
+            data: marker,
+        })
+    );
+}
+
 export default {
     initialise: init,
     droneState,
     command,
+    sendMarker,
 };

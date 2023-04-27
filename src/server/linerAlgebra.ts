@@ -29,4 +29,12 @@ export class Vector3 {
         const l = this.length();
         return new Vector3({ x: this.x / l, y: this.y / l, z: this.z / l });
     }
+
+    subtract({ x, y, z }: { x: number; y: number; z: number }): Vector3 {
+        return new Vector3({ x: this.x - x, y: this.y - y, z: +this.z - z });
+    }
+
+    lengthToBox({ x, y, z }: { x: number; y: number; z: number }): number {
+        return this.subtract({ x, y, z }).length();
+    }
 }
