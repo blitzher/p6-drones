@@ -3,5 +3,12 @@
         "BOX_RADIUS": 30,
         "DRONE_RADIUS": 30,
         "ERROR_MARGIN": 1.5
+    },
+    "drone": {
+        "speed": 20,
+        "addresses": ["192.168.1.130", "192.168.1.141", "192.168.1.174", "192.168.1.191"]
+    },
+    "server": {
+        "HTTP_PORT": 42069
     }
 }

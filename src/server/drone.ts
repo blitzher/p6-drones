@@ -76,7 +76,8 @@ export class Drone extends sdk.Drone {
     private updateState(state: StateInfo) {
         /* Calculate delta time and set lastStateTime to now */
         const now = Date.now();
-        const deltaTime = (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
+        const deltaTime =
+            (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
         /* Ensure consistent order of coordinates, and convert to cm */
@@ -87,7 +88,9 @@ export class Drone extends sdk.Drone {
         /* Adjust for undershoot of speed */
         this.state.speedVector = this.state.speedVector.scale(1.75);
 
-        this.state.position = this.state.position.add(this.state.speedVector.scale(deltaTime));
+        this.state.position = this.state.position.add(
+            this.state.speedVector.scale(deltaTime)
+        );
         this.state.position.z = state.tof;
 
         logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
@@ -104,7 +107,7 @@ export class Drone extends sdk.Drone {
 
         return (...res: any[]) => {
             if (isFirst) {
-                segmenter = new H264Segmenter(res[0]);
+                segmenter = new H264Segmenter();
                 isFirst = false;
             }
 

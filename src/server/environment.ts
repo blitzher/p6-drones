@@ -1,8 +1,6 @@
 import { EventEmitter } from "stream";
 import { Drone, DroneId } from "./drone";
-export const BOX_RADIUS = 30;
-export const DRONE_RADIUS = 30;
-export const ERROR_MARGIN = 1.5;
+import * as constants from "./constants.json";
 
 export class Object3D {
     x: number;
@@ -16,12 +14,14 @@ export class Object3D {
         this.y = y;
         this.z = z;
         this.radius = radius;
-        this.id = id ?? -1
+        this.id = id ?? -1;
     }
 
     collidesWith(other: Object3D): boolean {
-        const distance = Math.sqrt((other.x - this.x) ** 2 + (other.y - this.y) ** 2 + (other.z - this.z) ** 2);
-        return distance < (this.radius + other.radius) * ERROR_MARGIN;
+        const distance = Math.sqrt(
+            (other.x - this.x) ** 2 + (other.y - this.y) ** 2 + (other.z - this.z) ** 2
+        );
+        return distance < (this.radius + other.radius) * constants.env.ERROR_MARGIN;
     }
 }
 
@@ -53,18 +53,25 @@ class Environment extends EventEmitter {
      * @param arg Combined argument, must include either a position or object.
      * @param id The internal `id` of the object.
      */
-    public addObject(arg: { pos?: { x: number; y: number; z: number; r?: number }; obj?: Object3D }, id: number) {
+    public addObject(
+        arg: { pos?: { x: number; y: number; z: number; r?: number }; obj?: Object3D },
+        id: number
+    ) {
         let obj;
-        if (arg.pos) obj = new Object3D(arg.pos.x, arg.pos.y, arg.pos.z, arg.pos.r || BOX_RADIUS, id);
+        if (arg.pos)
+            obj = new Object3D(
+                arg.pos.x,
+                arg.pos.y,
+                arg.pos.z,
+                arg.pos.r || constants.env.BOX_RADIUS,
+                id
+            );
         else if (arg.obj) {
             obj = arg.obj;
-            if (obj.id == -1 && id != -1)
-                obj.id = id
-        }
-        else throw new Error(`Invalid object passed to environment.addObject: ${arg}`);
+            if (obj.id == -1 && id != -1) obj.id = id;
+        } else throw new Error(`Invalid object passed to environment.addObject: ${arg}`);
 
-        if (this.objects[id] == undefined)
-            this.objects[id] = obj;
+        if (this.objects[id] == undefined) this.objects[id] = obj;
         this.emit("objects", this.objects);
     }
 
@@ -97,13 +104,13 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                event: "drone",
-                listener: (data: {
-                    droneId: DroneId;
-                    dronePosition: Object3D;
-                    dronePositionHistory: Object3D[];
-                }) => void
-            ]
+                  event: "drone",
+                  listener: (data: {
+                      droneId: DroneId;
+                      dronePosition: Object3D;
+                      dronePositionHistory: Object3D[];
+                  }) => void
+              ]
     ): this {
         return this.on(args[0], args[1]);
     }

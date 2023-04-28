@@ -1,3 +1,5 @@
+import logger from "../log";
+
 type h264segment = Uint8Array;
 
 /**
@@ -7,18 +9,8 @@ type h264segment = Uint8Array;
 export class H264Segmenter {
     private breaker_segment: number[] = [0, 0, 0, 1];
     private buffer: number[] = [];
-    bitrateEstimate: number;
-
-    constructor(segment: h264segment) {
-        this.bitrateEstimate = 0;
-        setTimeout(() => {
-            console.log(`Estimated Mbitrate: ${this.bitrateEstimate / 10e7}Mb/s`);
-        }, 10000);
-    }
 
     feed(segment: h264segment): void | h264segment {
-        this.bitrateEstimate += segment.length * 8;
-
         const prePushLength = this.buffer.length;
         for (let i = 0; i < segment.length; i++) this.buffer.push(segment[i]);
 
