@@ -2,6 +2,7 @@
 import * as THREE from "../../libs/three.min.js";
 import { GLTFLoader } from "../../libs/glfloader.js";
 import { OrbitControls } from "../../libs/orbitcontrols.js";
+import { droneState } from "../communication/communication.js";
 
 /* Initalise GLTF loader */
 const loader = new GLTFLoader();
@@ -59,7 +60,7 @@ function render3DCube() {
     const amb = new THREE.AmbientLight();
     amb.intensity = 1;
     scene.add(amb);
-    // scene.add(new THREE.GridHelper(100, 100));
+    scene.add(new THREE.GridHelper(100, 100));
 
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -130,6 +131,14 @@ function make3DCubeInstance(size, pos, color) {
     return cube;
 }
 
+function drawPathLine(points) {
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geometry, material);
+    scene.add(line);
+}
+
 function clearCubes() {
     for (let cube of cubes) {
         cube.pop();
@@ -137,7 +146,7 @@ function clearCubes() {
 }
 
 function updateDronePosition(x, y, z) {
-    droneObject.position.set(x, y, z);
+    droneObject.position.set(x, z, -y);
 }
 
 export default {
@@ -145,6 +154,7 @@ export default {
     clearCubes,
     make3DCubeInstance,
     updateDronePosition,
+    drawPathLine,
     CAMERA_MODE,
     setCameraMode,
 };

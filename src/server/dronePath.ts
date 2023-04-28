@@ -146,7 +146,7 @@ class DronePath {
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                        constants.env.ERROR_MARGIN
+                    constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -222,7 +222,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-                constants.env.ERROR_MARGIN -
+            constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10
@@ -254,9 +254,11 @@ class DronePath {
     }
 }
 
-export const dronePaths: { [key: string]: DronePath } = {
-    "130": new DronePath(30, 200, 1),
-    "141": new DronePath(30, 200, 1),
-    "174": new DronePath(30, 200, 1),
-    "191": new DronePath(30, 200, 1),
-};
+export const dronePaths: DronePath = new DronePath(45, 200, 1);
+
+// export const dronePaths: { [key: string]: DronePath } = {
+//     "130": new DronePath(30, 200, 1),
+//     "141": new DronePath(30, 200, 1),
+//     "174": new DronePath(30, 200, 1),
+//     "191": new DronePath(30, 200, 1),
+// };

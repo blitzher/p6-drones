@@ -1,12 +1,14 @@
 /* communication.js */
 import droneCam from "../drone-cam/drone-cam.js";
 import environment3d from "../3d-map/3d-map.js";
+import * as THREE from "../../libs/three.min.js";
 
 /* Declare global variables for use in component */
 /** @type {{[key:string]:StateInfo}} */
 export let droneState = {};
 const wsUrl = `ws:${window.location.host}`;
 let ws;
+const points = [];
 /**
  * @type {WebSocket}
  */
@@ -55,6 +57,8 @@ function handle(pkg, ws) {
             break;
         case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
             const pos = pkg.data.dronePosition;
+            points.push(new THREE.Vector3(pos.x, pos.z, -pos.y));
+            environment3d.drawPathLine(points);
             environment3d.updateDronePosition(pos.x, pos.y, pos.z);
             break;
         default:
