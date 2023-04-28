@@ -47,19 +47,32 @@ loader.load("../../resources/drone.glb", (gltf) => {
     droneObject = obj;
 });
 
-function render3DCube() {
+function render3DCube(dimensions) {
     let time = 0;
     const cameraOffset = new THREE.Vector3(0, 100, 70);
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
-
     renderer.setPixelRatio(window.devicePixelRatio * 3);
 
+    // const mapWidth = dimensions.mapWidth;
+    // const mapLength = dimensions.mapHeight;
+    const mapWidth = 200;
+    const mapLength = 200;
+    const mapHeight = 200;
     const amb = new THREE.AmbientLight();
     amb.intensity = 1;
     scene.add(amb);
     scene.add(new THREE.GridHelper(1000, 50));
+
+    const box = new THREE.Box3();
+    box.setFromCenterAndSize(
+        new THREE.Vector3(0, 100, 0),
+        new THREE.Vector3(mapWidth, mapHeight, mapLength)
+    );
+
+    const borderFrame = new THREE.Box3Helper(box, "#ff0000");
+    scene.add(borderFrame);
 
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);

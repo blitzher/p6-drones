@@ -5,7 +5,7 @@ import bottomBar from "../components/bottom-bar/bottom-bar.js";
 
 window.addEventListener("load", (doc, ev) => {
     communication.initialise();
-    map3d.render3DCube();
+    //map3d.render3DCube();
     bottomBar.initialise();
     const camIds = droneCam.initialise();
 
@@ -24,10 +24,14 @@ window.addEventListener("load", (doc, ev) => {
 
                     communication.sendMarker(markerPos);
 
-                    const [rx, ry, rz] = Object.values(markerPos.relative).map((v) => Math.round(v) / 10);
+                    const [rx, ry, rz] = Object.values(markerPos.relative).map(
+                        (v) => Math.round(v) / 10
+                    );
                     const rd = Math.round(markerPos.dist) / 10;
 
-                    console.log(`Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`);
+                    console.log(
+                        `Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`
+                    );
                 });
             }
         }, 250);

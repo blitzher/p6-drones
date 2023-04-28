@@ -45,13 +45,16 @@ function handle(pkg, ws) {
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
+            console.log(pkg.data);
             for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
                     { x: 30, y: 30, z: 30 },
                     { x: marker.x, y: marker.z, z: -marker.y },
                     0x0000ff
                 );
+                environment3d.render3DCube(pkg.data);
             }
+
             break;
         case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
             const pos = pkg.data.dronePosition;

@@ -87,6 +87,9 @@ app.listen(HTTP_PORT, async () => {
     env.environment.listen("objects", (data: Object3D[]) => {
         com.environment(data);
     });
+    env.environment.listen("dimensions", (data: Number[]) => {
+        com.dimensions([env.environment.mapWidth, env.environment.mapLength]);
+    });
     env.environment.listen(
         "drone",
         (data: {

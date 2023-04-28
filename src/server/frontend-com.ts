@@ -47,10 +47,19 @@ export const com = {
             );
     },
     environment: (data: env.Object3D[]) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
     },
-    drone: (data: { dronePosition: env.Object3D; dronePositionHistory: env.Object3D[] }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
+    dimensions: (data: Number[]) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "dimensions", data }));
+    },
+    drone: (data: {
+        dronePosition: env.Object3D;
+        dronePositionHistory: env.Object3D[];
+    }) => {
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -91,7 +100,9 @@ function handle(pkg: Package) {
             let [drone_id, ...cmd] = pkg.data.split(" ");
             cmd = cmd.join(" ");
 
-            const commandOptions: CommandOptions = { overwriteQueue: cmd == "stop" };
+            const commandOptions: CommandOptions = {
+                overwriteQueue: cmd == "stop",
+            };
             Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
@@ -106,7 +117,7 @@ function handle(pkg: Package) {
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
             env.environment.addObject({ pos: { x, y, z } }, marker.id);
-            const o = env.environment.objects[marker.id]
+            const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;
     }
