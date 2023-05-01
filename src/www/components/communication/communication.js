@@ -58,6 +58,7 @@ function handle(pkg, ws) {
         case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
             const pos = pkg.data.dronePosition;
             points.push(new THREE.Vector3(pos.x, pos.z, -pos.y));
+            environment3d.clearPathLine();
             environment3d.drawPathLine(points);
             environment3d.updateDronePosition(pos.x, pos.y, pos.z);
             break;

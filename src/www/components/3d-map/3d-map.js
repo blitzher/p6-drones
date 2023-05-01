@@ -132,12 +132,18 @@ function make3DCubeInstance(size, pos, color) {
     return cube;
 }
 
+/** @type {THREE.Line} */
+let line;
 function drawPathLine(points) {
     const material = new THREE.LineBasicMaterial({ color: 0xffffff });
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const line = new THREE.Line(geometry, material);
+    line = new THREE.Line(geometry, material);
     scene.add(line);
+}
+
+function clearPathLine() {
+    if (line) line.remove();
 }
 
 function clearCubes() {
@@ -152,6 +158,7 @@ function updateDronePosition(x, y, z) {
 
 export default {
     render3DCube,
+    clearPathLine,
     clearCubes,
     make3DCubeInstance,
     updateDronePosition,
