@@ -127,6 +127,7 @@ function make3DCubeInstance(size, pos, color) {
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
+    pos = { x: pos.x, y: pos.z, z: -pos.y };
     cube.position.set(...Object.values(pos));
     return cube;
 }

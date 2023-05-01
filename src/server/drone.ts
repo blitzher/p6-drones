@@ -5,6 +5,7 @@ import { com } from "./frontend-com";
 import * as env from "./environment";
 import { Vector3 } from "./linerAlgebra";
 import logger from "../log";
+import * as constants from "./constants.json";
 
 export const droneState = {};
 export type DroneId = string;
@@ -86,7 +87,9 @@ export class Drone extends sdk.Drone {
         this.state.speedVector.y = state.speed.y * 10;
 
         /* Adjust for undershoot of speed */
-        this.state.speedVector = this.state.speedVector.scale(1.75);
+        this.state.speedVector = this.state.speedVector.scale(
+            constants.drone.POSITION_CORRECTION_FACTOR
+        );
 
         this.state.position = this.state.position.add(
             this.state.speedVector.scale(deltaTime)

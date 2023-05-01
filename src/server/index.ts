@@ -39,7 +39,7 @@ app.listen(constants.server.HTTP_PORT, async () => {
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
-            drone.set.speed(constants.drone.speed);
+            drone.set.speed(constants.drone.SPEED);
             env.environment.addDrone(drone);
             drone.startVideoStream();
             // dronePath.fly(drone);

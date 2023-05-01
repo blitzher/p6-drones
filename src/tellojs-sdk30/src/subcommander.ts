@@ -53,7 +53,10 @@ export class Subcommander {
             const cmd = { argument: command, destination: ip, reject, options };
 
             if (options.forceReady) this.busy = false;
-            if (options.overwriteQueue) {
+
+            if (options.clearQueue) {
+                this.commandQueue = [cmd];
+            } else if (options.overwriteQueue) {
                 this.commandQueue.splice(0, 0, cmd);
             } else {
                 this.commandQueue.push(cmd);

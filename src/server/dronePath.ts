@@ -33,7 +33,7 @@ class DronePath {
                 yield () =>
                     drone.control.go(
                         flyDestination,
-                        constants.drone.speed,
+                        constants.drone.SPEED,
                         `m${drone.state.mid}`
                     );
                 yield () => drone.control.counterClockwise(90);
@@ -44,7 +44,7 @@ class DronePath {
                 yield () =>
                     drone.control.go(
                         flyDestination,
-                        constants.drone.speed,
+                        constants.drone.SPEED,
                         `m${drone.state.mid}`
                     );
                 yield () => drone.control.counterClockwise(90);
@@ -55,7 +55,7 @@ class DronePath {
                 yield () =>
                     drone.control.go(
                         flyDestination,
-                        constants.drone.speed,
+                        constants.drone.SPEED,
                         `m${drone.state.mid}`
                     );
                 yield () => drone.control.clockwise(90);
@@ -66,7 +66,7 @@ class DronePath {
                 yield () =>
                     drone.control.go(
                         flyDestination,
-                        constants.drone.speed,
+                        constants.drone.SPEED,
                         `m${drone.state.mid}`
                     );
                 yield () => drone.control.clockwise(90);

@@ -94,7 +94,7 @@ function handle(pkg: Package) {
     switch (pkg.type) {
         case "emergencyStop":
             for (let drone of Object.values(Drone.allDrones)) {
-                drone.control.stop({ forceReady: true, overwriteQueue: true });
+                drone.control.stop({ forceReady: true, clearQueue: true });
             }
             break;
         case "initSearch":
@@ -106,7 +106,11 @@ function handle(pkg: Package) {
             let [drone_id, ...cmd] = pkg.data.split(" ");
             cmd = cmd.join(" ");
 
-            const commandOptions: CommandOptions = { overwriteQueue: cmd == "stop" };
+            const isStop = cmd == "stop";
+            const commandOptions: CommandOptions = {
+                clearQueue: isStop,
+                forceReady: isStop,
+            };
             Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
