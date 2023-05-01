@@ -61,12 +61,24 @@ export class Drone extends sdk.Drone {
 
     private lastStateTime: number;
 
-    constructor({ ip, port }: { ip: string; port?: { state: number; video: number } }) {
+    /**
+     *
+     * @param param0
+     * @param param1 Starting position of drone
+     */
+    constructor(
+        { ip, port }: { ip: string; port?: { state: number; video: number } },
+        startingPostition?: { x: number; y: number; z: number }
+    ) {
         super(ip, port);
 
         /* Add drone object reference to arrays */
         Drone.allDrones[this.id] = this;
         env.environment.addDrone(this);
+
+        if (startingPostition) {
+            this.state.position = new Vector3(startingPostition);
+        }
 
         this.lastStateTime = Date.now();
 
