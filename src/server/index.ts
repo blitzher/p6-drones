@@ -9,7 +9,6 @@ import { Object3D } from "./environment";
 import { Drone } from "./drone";
 import { com, initialiseWebSocket } from "./frontend-com";
 import logger from "../log";
-import { dronePaths } from "./dronePath";
 import * as constants from "./constants.json";
 
 const readlineInterface = readline.createInterface(process.stdin, process.stdout);
@@ -42,21 +41,8 @@ app.listen(constants.server.HTTP_PORT, async () => {
             drone.set.speed(constants.drone.SPEED);
             env.environment.addDrone(drone);
             drone.startVideoStream();
-            // dronePath.fly(drone);
         });
     }
-
-    function CLI() {
-        readlineInterface.question("Type drone ids to start flying.\n").then((msg) => {
-            const ids = msg.split(" ");
-            for (let id of ids) {
-                let drone = Drone.allDrones[id];
-                if (drone) dronePaths.fly(drone);
-            }
-            CLI();
-        });
-    }
-    CLI();
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {
