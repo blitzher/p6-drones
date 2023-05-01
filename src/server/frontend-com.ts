@@ -4,6 +4,7 @@ import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
 import logger from "../log";
 import { CommandOptions } from "../tellojs-sdk30/src/commander";
+import { dronePaths } from "./dronePath";
 
 type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
@@ -91,6 +92,16 @@ export const initialiseWebSocket = (ws: WebSocket) => {
 
 function handle(pkg: Package) {
     switch (pkg.type) {
+        case "emergencyStop":
+            for (let drone of Object.values(Drone.allDrones)) {
+                drone.control.stop({ forceReady: true, overwriteQueue: true });
+            }
+            break;
+        case "initSearch":
+            for (let drone of Object.values(Drone.allDrones)) {
+                dronePaths.fly(drone);
+            }
+            break;
         case "command":
             let [drone_id, ...cmd] = pkg.data.split(" ");
             cmd = cmd.join(" ");

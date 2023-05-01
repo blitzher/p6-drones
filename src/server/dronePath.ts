@@ -112,11 +112,13 @@ class DronePath {
 
         const snake = this.SnakePattern(drone);
 
+        logger.log(`Starting snake pattern on ${drone.id}`);
+
         let busy = false;
         let next = snake.next();
         let step: () => Promise<string>;
 
-        let loop_p = async () => {
+        let flightStep = async () => {
             if (next.done) {
                 drone.control.land();
                 drone.inFlight = false;
@@ -127,15 +129,12 @@ class DronePath {
                 this.destinationStore[drone.id],
                 drone.state.position
             );
-            logger.concurrent(
-                "destination store",
-                `${JSON.stringify(this.destinationStore)}`
-            );
             if (boxes.length > 0) {
                 let closestBox: { box: Object3D; dist: number } = {
                     box: boxes[0],
                     dist: Infinity,
                 };
+
                 for (let box of boxes) {
                     const dist = drone.state.position.lengthToBox(box);
                     if (dist < closestBox.dist) {
@@ -146,7 +145,7 @@ class DronePath {
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                    constants.env.ERROR_MARGIN
+                        constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -163,6 +162,7 @@ class DronePath {
                         logger.log("Performing maneuver...");
                         await maneuverStep();
                     }
+                    busy = false;
                 }
             }
             if (!busy) {
@@ -176,7 +176,7 @@ class DronePath {
         };
 
         const loop = async () => {
-            loop_p().then(() => {
+            flightStep().then(() => {
                 if (!next.done) {
                     setTimeout(loop, 100);
                 }
@@ -222,7 +222,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-            constants.env.ERROR_MARGIN -
+                constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10
@@ -243,8 +243,9 @@ class DronePath {
             maneuver.push(() => drone.control.left(avoidanceDistance));
             maneuver.push(() => drone.control.forward(boxOffset * 2));
             maneuver.push(() => drone.control.right(avoidanceDistance));
-        } else {
-            //Box is to the left
+        }
+        //Box is to the left
+        else {
             maneuver.push(() => drone.control.right(avoidanceDistance));
             maneuver.push(() => drone.control.forward(boxOffset * 2));
             maneuver.push(() => drone.control.left(avoidanceDistance));
