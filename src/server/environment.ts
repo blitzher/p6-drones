@@ -8,13 +8,15 @@ export class Object3D {
     z: number;
     radius: number;
     id: number;
+    whoScanned?: string
 
-    constructor(x: number, y: number, z: number, radius: number, id?: number) {
+    constructor(x: number, y: number, z: number, radius: number, id?: number, whoScanned?: string) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.radius = radius;
         this.id = id ?? -1;
+        this.whoScanned = whoScanned;
     }
 
     collidesWith(other: Object3D): boolean {
@@ -55,7 +57,8 @@ class Environment extends EventEmitter {
      */
     public addObject(
         arg: { pos?: { x: number; y: number; z: number; r?: number }; obj?: Object3D },
-        id: number
+        id: number,
+        whoScanned: string
     ) {
         let obj;
         if (arg.pos)
@@ -64,7 +67,8 @@ class Environment extends EventEmitter {
                 arg.pos.y,
                 arg.pos.z,
                 arg.pos.r || constants.env.BOX_RADIUS,
-                id
+                id,
+                whoScanned
             );
         else if (arg.obj) {
             obj = arg.obj;
@@ -104,13 +108,13 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                  event: "drone",
-                  listener: (data: {
-                      droneId: DroneId;
-                      dronePosition: Object3D;
-                      dronePositionHistory: Object3D[];
-                  }) => void
-              ]
+                event: "drone",
+                listener: (data: {
+                    droneId: DroneId;
+                    dronePosition: Object3D;
+                    dronePositionHistory: Object3D[];
+                }) => void
+            ]
     ): this {
         return this.on(args[0], args[1]);
     }

@@ -2,16 +2,31 @@
     "env": {
         "BOX_RADIUS": 30,
         "DRONE_RADIUS": 30,
-        "ERROR_MARGIN": 1.5
+        "ERROR_MARGIN": 1.5,
+        "TARGET_ID": 2
     },
     "drone": {
         "SPEED": 20,
-        "ADDRESSES": ["192.168.1.130", "192.168.1.141", "192.168.1.174", "192.168.1.191"],
-        "POSITION_CORRECTION_FACTOR": 1.75
+        "ADDRESSES": [
+            "192.168.1.130",
+            "192.168.1.141",
+            "192.168.1.174",
+            "192.168.1.191"
+        ],
+        "POSITION_CORRECTION_FACTOR": 1.75,
+        "TARGET_FLIGHT_HEIGHT": 150
     },
     "server": {
         "HTTP_PORT": 42069,
         "BITRATE_TIMESAMPLE_MS": 2500
     },
-    "validIds": [2, 3, 4, 5, 6, 7, 8]
+    "validIds": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ]
 }

@@ -120,7 +120,19 @@ class DronePath {
 
         let flightStep = async () => {
             if (next.done) {
-                drone.control.land();
+                let goBack: boolean = true;
+
+                for (const box of Object.values(environment.objects)) {
+                    if (box.id == constants.env.TARGET_ID && box.whoScanned == drone.id) {
+                        drone.control.go({ x: box.x, y: box.y, z: constants.drone.TARGET_FLIGHT_HEIGHT }, constants.drone.SPEED, `m${drone.state.mid}`)
+                        goBack = false;
+                    }
+                }
+
+                if (goBack) {
+                    drone.control.go({ x: 0, y: 0, z: 0 }, constants.drone.SPEED, `m${drone.state.mid}`)
+                    drone.control.land();
+                }
                 drone.inFlight = false;
                 return;
             }
@@ -145,7 +157,7 @@ class DronePath {
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                        constants.env.ERROR_MARGIN
+                    constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -222,7 +234,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-                constants.env.ERROR_MARGIN -
+            constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10
@@ -256,10 +268,3 @@ class DronePath {
 }
 
 export const dronePaths: DronePath = new DronePath(45, 200, 1);
-
-// export const dronePaths: { [key: string]: DronePath } = {
-//     "130": new DronePath(30, 200, 1),
-//     "141": new DronePath(30, 200, 1),
-//     "174": new DronePath(30, 200, 1),
-//     "191": new DronePath(30, 200, 1),
-// };

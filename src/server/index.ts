@@ -18,10 +18,10 @@ const readlineInterface = readline.createInterface(process.stdin, process.stdout
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-//new Drone({ ip: "192.168.1.130" });
+new Drone({ ip: "192.168.1.130" });
 new Drone({ ip: "192.168.1.141" });
-//new Drone({ ip: "192.168.1.174" });
-//new Drone({ ip: "192.168.1.191" });
+new Drone({ ip: "192.168.1.174" });
+new Drone({ ip: "192.168.1.191" });
 
 /* Setup web server */
 app.use(express.json());

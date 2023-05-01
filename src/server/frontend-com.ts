@@ -124,7 +124,7 @@ function handle(pkg: Package) {
             let y = Math.round(marker.relative.y / 10 + drone.state.position.y);
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
-            env.environment.addObject({ pos: { x, y, z } }, marker.id);
+            env.environment.addObject({ pos: { x, y, z } }, marker.id, marker.droneId);
             const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;
