@@ -130,7 +130,7 @@ class DronePath {
                 }
 
                 if (goBack) {
-                    drone.control.go({ x: 0, y: 0, z: 0 }, constants.drone.SPEED, `m${drone.state.mid}`)
+                    drone.control.go({ x: 0, y: 0, z: 0 }, constants.drone.SPEED, `m${drone.state.mid}`);
                     drone.control.land();
                 }
                 drone.inFlight = false;
