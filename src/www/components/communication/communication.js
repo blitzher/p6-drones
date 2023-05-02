@@ -8,7 +8,7 @@ import * as THREE from "../../libs/three.min.js";
 export let droneState = {};
 const wsUrl = `ws:${window.location.host}`;
 let ws;
-const points = { "130": [], "141": [], "174": [], "191": [] };
+const points = { 130: [], 141: [], 174: [], 191: [] };
 /**
  * @type {WebSocket}
  */
@@ -55,12 +55,19 @@ function handle(pkg, ws) {
                 );
             }
             break;
-        case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
-            const pos = pkg.data.dronePosition;
-            points[pkg.data.droneId].push(new THREE.Vector3(pos.x, pos.z, -pos.y));
-            environment3d.drawPathLine(points[pkg.data.droneId], pkg.data.droneId);
-            environment3d.clearPathLine(pkg.data.droneId);
-            environment3d.updateDronePosition(pos.x, pos.y, pos.z, pkg.data.droneId);
+        /* 
+        {
+            droneId: string, 
+            dronePosition: Object3D, 
+            droneYaw: number, 
+            dronePositionHistory: Object3D[]
+        } */
+        case "drone":
+            const { droneId, dronePosition, droneYaw, dronePositionHistory } = pkg.data;
+
+            environment3d.drawPathLine(dronePositionHistory, droneId);
+            environment3d.clearPathLine(droneId);
+            environment3d.addDroneOrUpdatePosition(droneId, droneYaw, dronePosition);
             break;
         default:
             console.error(`Unknown package type: ${pkg.type}`);

@@ -92,7 +92,8 @@ class Environment extends EventEmitter {
         this.emit("drone", {
             droneId: id,
             dronePosition: drone.state.position,
-            dronePositionHistory: this.dronePositionHistory,
+            droneYaw: drone.state.rotation.yaw,
+            dronePositionHistory: drone.positionHistory,
         });
     }
 
@@ -102,8 +103,9 @@ class Environment extends EventEmitter {
 
         for (let drone of Object.values(this.drones)) {
             this.emit("drone", {
-                id: drone.id,
+                droneId: drone.id,
                 dronePosition: drone.state.position,
+                droneYaw: drone.state.rotation.yaw,
                 dronePositionHistory: drone.positionHistory,
             });
         }
@@ -125,6 +127,7 @@ class Environment extends EventEmitter {
                   listener: (data: {
                       droneId: DroneId;
                       dronePosition: Object3D;
+                      droneYaw: number;
                       dronePositionHistory: Object3D[];
                   }) => void
               ]

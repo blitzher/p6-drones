@@ -95,7 +95,8 @@ export class Drone extends sdk.Drone {
             (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
-        /* Convert to cm, speed forward is negative for some reason */
+        /* Convert from dm to cm.
+         * Speed forward is negative for some reason */
         this.state.speedVector.x = -state.speed.x * 10;
         this.state.speedVector.y = state.speed.y * 10;
 
@@ -108,14 +109,20 @@ export class Drone extends sdk.Drone {
             this.state.speedVector.scale(deltaTime)
         );
         this.state.position.z = state.tof;
-
         logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
 
         this.state.rotation.pitch = (state.pitch * Math.PI) / 180;
         this.state.rotation.yaw = (state.yaw * Math.PI) / 180;
         this.state.rotation.roll = (state.roll * Math.PI) / 180;
 
-        this.positionHistory.push(new Vector3(this.state.position));
+        const lastEntryInHistory = this.positionHistory[this.positionHistory.length - 1];
+        const deltaPosition = this.state.position.subtract(lastEntryInHistory);
+        if (
+            !lastEntryInHistory ||
+            deltaPosition.length() > constants.drone.POSITION_HISTORY_RESOLUTION
+        ) {
+            this.positionHistory.push(new Vector3(this.state.position));
+        }
     }
     private onvideo() {
         let isFirst = true;

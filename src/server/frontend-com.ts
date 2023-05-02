@@ -58,7 +58,9 @@ export const com = {
             client.send(JSON.stringify({ type: "environment", data }));
     },
     drone: (data: {
+        droneId: string;
         dronePosition: env.Object3D;
+        droneYaw: number;
         dronePositionHistory: env.Object3D[];
     }) => {
         for (let { client } of clients)

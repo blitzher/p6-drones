@@ -20,7 +20,7 @@ const { app } = expressWs(express());
 new Drone({ ip: "192.168.1.130" }, constants.drone.START_POS[130]);
 // new Drone({ ip: "192.168.1.141" }, constants.drone.START_POS[141]);
 // new Drone({ ip: "192.168.1.174" }, constants.drone.START_POS[174]);
-// new Drone({ ip: "192.168.1.191" }, constants.drone.START_POS[191]);
+new Drone({ ip: "192.168.1.191" }, constants.drone.START_POS[191]);
 
 /* Setup web server */
 app.use(express.json());
@@ -59,6 +59,7 @@ const server = app.listen(constants.server.HTTP_PORT, async () => {
         (data: {
             droneId: string;
             dronePosition: Object3D;
+            droneYaw: number;
             dronePositionHistory: Object3D[];
         }) => {
             frontendCom.com.drone(data);

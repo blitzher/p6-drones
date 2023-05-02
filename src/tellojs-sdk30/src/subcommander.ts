@@ -41,7 +41,6 @@ export class Subcommander {
             this.callbackFunction = undefined;
         }
         /* Clear the timeout  */
-        logger.log(`exp_res:${this.expectedResponse}, msg:${message}`);
         if (this.expectedResponse != undefined) {
             if (message == this.expectedResponse) {
                 clearTimeout(this.rejectTimeout);
