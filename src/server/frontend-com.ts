@@ -21,6 +21,12 @@ type MarkerData = {
     droneId: string;
 };
 
+export const close = () => {
+    for (let { client } of clients) {
+        client.close();
+    }
+};
+
 /* Setup helper functions for back-front-communication */
 export const com = {
     video: (buffer: Uint8Array, id: DroneId) => {
@@ -37,12 +43,12 @@ export const com = {
             );
         }
     },
-    state: (state: StateInfo, id: DroneId) => {
+    state: (data: StateInfo, id: DroneId) => {
         for (let { client } of clients)
             client.send(
                 JSON.stringify({
                     type: "state",
-                    data: state,
+                    data,
                     id,
                 })
             );
@@ -111,11 +117,15 @@ function handle(pkg: Package) {
                 clearQueue: isStop,
                 forceReady: isStop,
             };
+
+            if (cmd == "streamon") {
+                Drone.allDrones[drone_id].startVideoStream();
+                break;
+            }
+
             Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
-            // console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
-
             const marker: MarkerData = pkg.data;
 
             let drone = env.environment.getDrone(marker.droneId);

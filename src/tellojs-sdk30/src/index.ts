@@ -8,8 +8,13 @@ export type Port = number;
 export type StateInfo = _StateInfo;
 
 export const commander = new Commander();
+export const close = () => {
+    commander.close();
+    for (let drone of Drone._allDrones) drone.close();
+};
 
 export default {
     Drone,
     commander,
+    close,
 };

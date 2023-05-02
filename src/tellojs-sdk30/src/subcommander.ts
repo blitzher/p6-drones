@@ -30,6 +30,11 @@ export class Subcommander {
         });
     }
 
+    public close() {
+        this.commandQueue = [];
+        clearTimeout(this.rejectTimeout);
+    }
+
     public receive(message: string) {
         if (this.callbackFunction) {
             this.callbackFunction(message);

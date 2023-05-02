@@ -55,6 +55,11 @@ export class Commander {
         this.subcommanders[drone.ip].connected = drone.connected;
     }
 
+    close() {
+        for (let ip in this.subcommanders) this.subcommanders[ip].close();
+        this.socket.close();
+    }
+
     dispatch(command: Command) {
         if (this.socket.socketState == SocketState.CLOSED) {
             logger.error("Dispatching to closed socket.");

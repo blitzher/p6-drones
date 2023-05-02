@@ -88,7 +88,6 @@ function render3DCube() {
 }
 
 /**
- *
  * @param {OrbitControls} controls
  */
 function cameraControls() {

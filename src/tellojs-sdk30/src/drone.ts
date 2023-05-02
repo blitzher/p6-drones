@@ -15,6 +15,7 @@ export class Drone {
     readonly ip: IP;
     readonly id: string;
     private _connected: boolean = false;
+    static _allDrones: Drone[] = [];
 
     public readonly state!: StateInfo;
 
@@ -71,6 +72,14 @@ export class Drone {
                 commander.relayConnected(this);
             }, 1000);
         });
+
+        Drone._allDrones.push(this);
+    }
+
+    public close() {
+        clearTimeout(this.disconnectTimeout);
+        this.stateStream.client.close();
+        this.videoStream.client.close();
     }
 
     async connect() {
@@ -218,8 +227,11 @@ export class Drone {
 
         port: (info: Port, video: Port) => this.send(`port ${info} ${video}`),
 
-        setfps: (fps: number) => this.send(`setfps ${fps}`),
+        fps: (fps: "low" | "middle" | "high") => this.send(`setfps ${fps}`),
 
-        setbitrate: (bitrate: number) => this.send(`setbitrate ${bitrate}`),
+        bitrate: (bitrate: 0 | 1 | 2 | 3 | 4 | 5) => this.send(`setbitrate ${bitrate}`),
+
+        resolution: (resolution: "low" | "high") =>
+            this.send(`setresolution ${resolution}`),
     };
 }

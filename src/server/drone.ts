@@ -57,6 +57,8 @@ export class Drone extends sdk.Drone {
         tof: 0,
     };
 
+    /* Used to ensure that a drone can only be
+     * on a single 'mission' at a time */
     public inFlight: boolean = false;
 
     private lastStateTime: number;
@@ -93,8 +95,7 @@ export class Drone extends sdk.Drone {
             (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
-        /* Ensure consistent order of coordinates, and convert to cm */
-        /* speed forward is negative for some reason */
+        /* Convert to cm, speed forward is negative for some reason */
         this.state.speedVector.x = -state.speed.x * 10;
         this.state.speedVector.y = state.speed.y * 10;
 

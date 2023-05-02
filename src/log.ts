@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as os from "os";
 
 const GetDateFormat = () => {
     const d = new Date();
@@ -18,6 +17,8 @@ class Logger {
     private stats: string[] = [];
     private startTime = new Date().getTime();
 
+    private writeInterval: NodeJS.Timer;
+
     private _folder = "logs";
     private _file = `${this._folder}/drone-flight-${GetDateFormat()}.log`;
 
@@ -31,9 +32,13 @@ class Logger {
             this.stat(`${this._folder} does not exists, making directory.`);
             fs.mkdirSync(this._folder);
         }
-        setInterval(() => {
+        this.writeInterval = setInterval(() => {
             this.serialize();
         }, 1000);
+    }
+
+    public close() {
+        clearInterval(this.writeInterval);
     }
 
     get file() {

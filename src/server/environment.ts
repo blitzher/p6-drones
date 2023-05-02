@@ -1,6 +1,7 @@
 import { EventEmitter } from "stream";
 import { Drone, DroneId } from "./drone";
 import * as constants from "./constants.json";
+import * as fs from "fs";
 
 export class Object3D {
     x: number;
@@ -8,9 +9,16 @@ export class Object3D {
     z: number;
     radius: number;
     id: number;
-    whoScanned?: string
+    whoScanned?: string;
 
-    constructor(x: number, y: number, z: number, radius: number, id?: number, whoScanned?: string) {
+    constructor(
+        x: number,
+        y: number,
+        z: number,
+        radius: number,
+        id?: number,
+        whoScanned?: string
+    ) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -88,6 +96,7 @@ class Environment extends EventEmitter {
         });
     }
 
+    /* Emit the environment to be sent to the frontend */
     public emitEnvironment() {
         this.emit("objects", this.objects);
 
@@ -101,20 +110,24 @@ class Environment extends EventEmitter {
     }
 
     public serialize() {
-        return JSON.stringify(this.objects);
+        const data = {
+            objects: this.objects,
+            drones: this.drones,
+        };
+        fs.writeFileSync("environment.json", JSON.stringify(data));
     }
 
     public listen(
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                event: "drone",
-                listener: (data: {
-                    droneId: DroneId;
-                    dronePosition: Object3D;
-                    dronePositionHistory: Object3D[];
-                }) => void
-            ]
+                  event: "drone",
+                  listener: (data: {
+                      droneId: DroneId;
+                      dronePosition: Object3D;
+                      dronePositionHistory: Object3D[];
+                  }) => void
+              ]
     ): this {
         return this.on(args[0], args[1]);
     }
