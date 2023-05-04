@@ -278,4 +278,4 @@ class DronePath {
     }
 }
 
-export const dronePaths: DronePath = new DronePath(45, 200, 1);
+export const dronePaths: DronePath = new DronePath(15, 150, 1);

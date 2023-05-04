@@ -115,14 +115,7 @@ export class Drone extends sdk.Drone {
         this.state.rotation.yaw = (state.yaw * Math.PI) / 180;
         this.state.rotation.roll = (state.roll * Math.PI) / 180;
 
-        const lastEntryInHistory = this.positionHistory[this.positionHistory.length - 1];
-        const deltaPosition = this.state.position.subtract(lastEntryInHistory);
-        if (
-            !lastEntryInHistory ||
-            deltaPosition.length() > constants.drone.POSITION_HISTORY_RESOLUTION
-        ) {
-            this.positionHistory.push(new Vector3(this.state.position));
-        }
+        //
     }
     private onvideo() {
         let isFirst = true;
