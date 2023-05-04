@@ -40,6 +40,8 @@ class Environment extends EventEmitter {
     private dronePositionHistory: Object3D[] = [];
     private borderLength = 200;
     private drones: { [key: string]: Drone } = {};
+    public mapWidth: number = 200;
+    public mapLength: number = 200; //200 x 200 cm default environment
 
     public outsideBoundary(drone: Object3D): boolean {
         const actualLength = Math.sqrt(Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2);
@@ -100,6 +102,7 @@ class Environment extends EventEmitter {
     /* Emit the environment to be sent to the frontend */
     public emitEnvironment() {
         this.emit("objects", this.objects);
+        this.emit("dimensions", this.mapWidth, this.mapLength);
 
         for (let drone of Object.values(this.drones)) {
             this.emit("drone", {

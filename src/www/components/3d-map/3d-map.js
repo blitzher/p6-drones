@@ -94,9 +94,13 @@ function render3DCube() {
     camera.position.x = cameraOffset.x;
     camera.position.y = cameraOffset.y;
     camera.position.z = cameraOffset.z;
-
     renderer.setPixelRatio(window.devicePixelRatio * 3);
 
+    // const mapWidth = dimensions.mapWidth;
+    // const mapLength = dimensions.mapHeight;
+    const mapWidth = 200;
+    const mapLength = 200;
+    const mapHeight = 200;
     const amb = new THREE.AmbientLight();
     amb.intensity = 1;
     scene.add(amb);

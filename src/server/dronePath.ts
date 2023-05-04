@@ -1,18 +1,28 @@
 import logger from "../log";
 import { Drone } from "./drone";
+<<<<<<< HEAD
 import { Object3D, environment } from "./environment";
+=======
+import {
+    BOX_RADIUS,
+    DRONE_RADIUS,
+    ERROR_MARGIN,
+    Object3D,
+    environment,
+} from "./environment";
+>>>>>>> master
 import { Vector3 } from "./linerAlgebra";
 import * as constants from "./constants.json";
 
 class DronePath {
-    mapWidth: number;
-    mapLength: number;
+    mapWidth;
+    mapLength;
     numberOfDrones: number;
     destinationStore: { [key: string]: Vector3 } = {};
 
     constructor(mapwidth: number, maplength: number, numberofdrones: number) {
-        this.mapWidth = mapwidth;
-        this.mapLength = maplength;
+        this.mapWidth = environment.mapWidth;
+        this.mapLength = environment.mapLength;
         this.numberOfDrones = numberofdrones;
     }
 
@@ -27,8 +37,14 @@ class DronePath {
 
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
+<<<<<<< HEAD
                 flyDestination.x += moveLength;
                 this.destinationStore[drone.id] = flyDestination;
+=======
+                flyDestination.x +=
+                    moveLength + DronePath.dronePathCounter * 30;
+                this.destinationStore = flyDestination;
+>>>>>>> master
 
                 yield () =>
                     drone.control.go(
@@ -73,8 +89,15 @@ class DronePath {
             }
         }
     }
+<<<<<<< HEAD
 
     public getRelevantBoxes(flyDestination: Vector3, start: Vector3): Object3D[] {
+=======
+    public getRelevantBoxes(
+        flyDestination: Vector3,
+        start: Vector3
+    ): Object3D[] {
+>>>>>>> master
         const relevantBoxes: Object3D[] = [];
         const deltaPosition = flyDestination.subtract(start);
         const moveVector: Vector3 = deltaPosition.normalise();
@@ -138,15 +161,27 @@ class DronePath {
             }
 
             let boxes = this.getRelevantBoxes(
+<<<<<<< HEAD
                 this.destinationStore[drone.id],
                 drone.state.position
+=======
+                this.destinationStore,
+                drone.state.position
+            );
+            logger.concurrent(
+                "destination store",
+                `${JSON.stringify(this.destinationStore)}`
+>>>>>>> master
             );
             if (boxes.length > 0) {
                 let closestBox: { box: Object3D; dist: number } = {
                     box: boxes[0],
                     dist: Infinity,
                 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
                 for (let box of boxes) {
                     const dist = drone.state.position.lengthToBox(box);
                     if (dist < closestBox.dist) {
@@ -156,6 +191,7 @@ class DronePath {
 
                 if (
                     closestBox.dist <
+<<<<<<< HEAD
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
                     constants.env.ERROR_MARGIN
                 ) {
@@ -168,6 +204,19 @@ class DronePath {
                     const maneuver = this.maneuver(
                         boxes,
                         this.destinationStore[drone.id],
+=======
+                    (BOX_RADIUS + DRONE_RADIUS) * ERROR_MARGIN
+                ) {
+                    /* Box is near drone, avoid it */
+                    logger.log(
+                        `Found box ${JSON.stringify(
+                            boxes[0]
+                        )} drone at ${JSON.stringify(drone.state.position)}`
+                    );
+                    const maneuver = this.maneuver(
+                        boxes,
+                        this.destinationStore,
+>>>>>>> master
                         drone
                     );
                     for (let maneuverStep of maneuver) {
@@ -197,7 +246,11 @@ class DronePath {
         loop();
     }
 
-    public maneuver(obstacles: Object3D[], flyDestination: Vector3, drone: Drone) {
+    public maneuver(
+        obstacles: Object3D[],
+        flyDestination: Vector3,
+        drone: Drone
+    ) {
         const maneuver: (() => Promise<string>)[] = [];
         const lengthArray: number[] = [];
         let nearestBoxDist: number;

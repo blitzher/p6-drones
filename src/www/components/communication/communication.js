@@ -47,13 +47,16 @@ function handle(pkg, ws) {
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
+            console.log(pkg.data);
             for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
-                    { x: 10, y: 10, z: 10 },
-                    { x: marker.x, y: marker.y, z: marker.z },
+                    { x: 30, y: 30, z: 30 },
+                    { x: marker.x, y: marker.z, z: -marker.y },
                     0x0000ff
                 );
+                environment3d.render3DCube(pkg.data);
             }
+
             break;
         /* 
         {
