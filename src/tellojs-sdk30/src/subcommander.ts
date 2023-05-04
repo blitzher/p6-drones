@@ -30,13 +30,17 @@ export class Subcommander {
         });
     }
 
+    public close() {
+        this.commandQueue = [];
+        clearTimeout(this.rejectTimeout);
+    }
+
     public receive(message: string) {
         if (this.callbackFunction) {
             this.callbackFunction(message);
             this.callbackFunction = undefined;
         }
         /* Clear the timeout  */
-        logger.log(`exp_res:${this.expectedResponse}, msg:${message}`);
         if (this.expectedResponse != undefined) {
             if (message == this.expectedResponse) {
                 clearTimeout(this.rejectTimeout);
@@ -53,7 +57,10 @@ export class Subcommander {
             const cmd = { argument: command, destination: ip, reject, options };
 
             if (options.forceReady) this.busy = false;
-            if (options.overwriteQueue) {
+
+            if (options.clearQueue) {
+                this.commandQueue = [cmd];
+            } else if (options.overwriteQueue) {
                 this.commandQueue.splice(0, 0, cmd);
             } else {
                 this.commandQueue.push(cmd);
@@ -76,13 +83,16 @@ export class Subcommander {
         this.expectedResponse = command.options.expectedResponse;
         this.commanderRef.dispatch(command);
 
-        // this.rejectTimeout = setTimeout(() => {
-        //     if (command.options.shouldReject) command.reject("No response from drone");
-        //     logger.error(
-        //         `No response from drone @'${command.destination}' on '${command.argument}'. Returning to ready state`
-        //     );
-        //     if (command.options.shouldRetry) this.commandQueue.unshift(command);
-        //     this.emitter.emit("ready");
-        // }, constants.timeouts.rejectTimeout);
+        if (command.options.timeout) {
+            this.rejectTimeout = setTimeout(() => {
+                if (command.options.shouldReject)
+                    command.reject("No response from drone");
+                logger.error(
+                    `No response from drone @'${command.destination}' on '${command.argument}'. Returning to ready state`
+                );
+                if (command.options.shouldRetry) this.commandQueue.unshift(command);
+                this.emitter.emit("ready");
+            }, command.options.timeout);
+        }
     }
 }

@@ -99,13 +99,19 @@ function ARReader(imgData) {
  */
 function estimateDistance(marker, id) {
     const FOCAL_LENGTH = 25; /* mm */
-    const MARKER_HEIGHT = 140; /* mm */
+    const MARKER_HEIGHT = 95; /* mm */
     const APPARENT_HEIGHT =
-        (marker.corners[3].y - marker.corners[0].y + marker.corners[2].y - marker.corners[1].y) / 2; /* pixels */
+        (marker.corners[3].y -
+            marker.corners[0].y +
+            marker.corners[2].y -
+            marker.corners[1].y) /
+        2; /* pixels */
     const IMAGE_HEIGHT = canvas[id].height; /* pixels */
     const SENSOR_HEIGHT = 2.0775; /* mm */
     return (
-        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) / (APPARENT_HEIGHT * SENSOR_HEIGHT)) * 0.1
+        ((FOCAL_LENGTH * MARKER_HEIGHT * IMAGE_HEIGHT) /
+            (APPARENT_HEIGHT * SENSOR_HEIGHT)) *
+        0.1
     ); /* Divide by 10 because ¯\_(ツ)_/¯ */
 }
 
@@ -119,8 +125,18 @@ function estimateMarkerPosition(marker, id) {
     if (Math.abs(dist) > 10000) return { isValid: false };
 
     /* Find center of the marker */
-    const x = (marker.corners[0].x + marker.corners[1].x + marker.corners[2].x + marker.corners[3].x) / 4;
-    const y = (marker.corners[0].y + marker.corners[1].y + marker.corners[2].y + marker.corners[3].y) / 4;
+    const x =
+        (marker.corners[0].x +
+            marker.corners[1].x +
+            marker.corners[2].x +
+            marker.corners[3].x) /
+        4;
+    const y =
+        (marker.corners[0].y +
+            marker.corners[1].y +
+            marker.corners[2].y +
+            marker.corners[3].y) /
+        4;
 
     /* Find the relative screen position of the marker */
     const [mx, my] = [canvas[id].width / 2, canvas[id].height / 2];
@@ -156,7 +172,13 @@ function estimateMarkerPosition(marker, id) {
         z: adjustedPosition.y,
     };
 
-    return { relative: droneRelativeCoordinates, id: marker.id, dist, isValid: true, droneId: id };
+    return {
+        relative: droneRelativeCoordinates,
+        id: marker.id,
+        dist,
+        isValid: true,
+        droneId: id,
+    };
 }
 
 /**
@@ -182,8 +204,7 @@ function findMarkers(id) {
     let markers = ARReader(imgData);
 
     if (!markers || markers.length == 0) return;
-    /* Filter out the weird marker that appears randomly */
-    markers = markers.filter((marker) => marker.id != 97);
+
     return markers;
 }
 
@@ -223,10 +244,14 @@ function lookForMarkers(camIds, internal) {
 
                     communication.sendMarker(markerPos);
 
-                    const [rx, ry, rz] = Object.values(markerPos.relative).map((v) => Math.round(v) / 10);
+                    const [rx, ry, rz] = Object.values(markerPos.relative).map(
+                        (v) => Math.round(v) / 10
+                    );
                     const rd = Math.round(markerPos.dist) / 10;
 
-                    console.log(`Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`);
+                    console.log(
+                        `Relative x:${rx}cm y:${ry}cm z:${rz}cm dist:${rd}cm id:${markerPos.id}`
+                    );
                 });
             }
         }, 2500);
@@ -238,5 +263,6 @@ export default {
     feed,
     findMarkers,
     estimateMarkerPosition,
+    estimateDistance,
     renderMarkers,
 };

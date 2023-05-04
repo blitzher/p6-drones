@@ -37,4 +37,12 @@ export class Vector3 {
     lengthToBox({ x, y, z }: { x: number; y: number; z: number }): number {
         return this.subtract({ x, y, z }).length();
     }
+
+    crossProduct({ x, y, z }: { x: number; y: number; z: number }): Vector3 {
+        return new Vector3({ x: (this.y * z) - (this.z * y), y: (this.z * x) - (this.x * z), z: (this.x * y) - (this.y * x) })
+    }
+
+    dotP({ x, y, z }: { x: number; y: number; z: number }): number {
+        return (this.x * x) + (this.y * y) + (this.z * z);
+    }
 }

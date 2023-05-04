@@ -11,10 +11,14 @@ window.addEventListener("load", (doc, ev) => {
 
     for (let id of camIds) {
         setInterval(() => {
-            const markers = droneCam.findMarkers(id);
+            let markers = droneCam.findMarkers(id);
+
             let markerPos;
 
             if (markers != undefined && markers.length > 0) {
+                markers = markers.filter(
+                    (marker) => Math.abs(droneCam.estimateDistance(marker, id)) < 5000
+                );
                 droneCam.renderMarkers(markers, id);
 
                 markers.forEach((marker) => {

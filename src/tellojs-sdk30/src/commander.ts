@@ -13,8 +13,14 @@ export type CommandOptions = {
     overwriteQueue?: boolean;
     expectedResponse?: string;
     forceReady?: boolean;
+    clearQueue?: boolean;
 };
-export type Command = { argument: string; destination: IP; reject: (reason: string) => void; options: CommandOptions };
+export type Command = {
+    argument: string;
+    destination: IP;
+    reject: (reason: string) => void;
+    options: CommandOptions;
+};
 
 export class Commander {
     private socket = new Socket();
@@ -49,6 +55,11 @@ export class Commander {
         this.subcommanders[drone.ip].connected = drone.connected;
     }
 
+    close() {
+        for (let ip in this.subcommanders) this.subcommanders[ip].close();
+        this.socket.close();
+    }
+
     dispatch(command: Command) {
         if (this.socket.socketState == SocketState.CLOSED) {
             logger.error("Dispatching to closed socket.");
@@ -57,7 +68,11 @@ export class Commander {
         /* logger.info(`Dispatching [${command.argument}, ${command.destination}]`); */
         if (this.socket.socketState == SocketState.OPEN) {
             logger.info(`Dispatching '${command.argument}' to '${command.destination}'`);
-            this.socket.send(command.argument, constants.client.port, command.destination);
+            this.socket.send(
+                command.argument,
+                constants.client.port,
+                command.destination
+            );
         }
     }
 }

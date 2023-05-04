@@ -1,8 +1,7 @@
 import { EventEmitter } from "stream";
 import { Drone, DroneId } from "./drone";
-export const BOX_RADIUS = 30;
-export const DRONE_RADIUS = 30;
-export const ERROR_MARGIN = 1.5;
+import * as constants from "./constants.json";
+import * as fs from "fs";
 
 export class Object3D {
     x: number;
@@ -10,22 +9,29 @@ export class Object3D {
     z: number;
     radius: number;
     id: number;
+    whoScanned?: string;
 
-    constructor(x: number, y: number, z: number, radius: number, id?: number) {
+    constructor(
+        x: number,
+        y: number,
+        z: number,
+        radius: number,
+        id?: number,
+        whoScanned?: string
+    ) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.radius = radius;
         this.id = id ?? -1;
+        this.whoScanned = whoScanned;
     }
 
     collidesWith(other: Object3D): boolean {
         const distance = Math.sqrt(
-            (other.x - this.x) ** 2 +
-                (other.y - this.y) ** 2 +
-                (other.z - this.z) ** 2
+            (other.x - this.x) ** 2 + (other.y - this.y) ** 2 + (other.z - this.z) ** 2
         );
-        return distance < (this.radius + other.radius) * ERROR_MARGIN;
+        return distance < (this.radius + other.radius) * constants.env.ERROR_MARGIN;
     }
 }
 
@@ -38,9 +44,7 @@ class Environment extends EventEmitter {
     public mapLength: number = 200; //200 x 200 cm default environment
 
     public outsideBoundary(drone: Object3D): boolean {
-        const actualLength = Math.sqrt(
-            Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2
-        );
+        const actualLength = Math.sqrt(Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2);
 
         if (actualLength > this.borderLength || drone.z > this.borderLength) {
             return true;
@@ -62,11 +66,9 @@ class Environment extends EventEmitter {
      * @param id The internal `id` of the object.
      */
     public addObject(
-        arg: {
-            pos?: { x: number; y: number; z: number; r?: number };
-            obj?: Object3D;
-        },
-        id: number
+        arg: { pos?: { x: number; y: number; z: number; r?: number }; obj?: Object3D },
+        id: number,
+        whoScanned: string
     ) {
         let obj;
         if (arg.pos)
@@ -74,16 +76,14 @@ class Environment extends EventEmitter {
                 arg.pos.x,
                 arg.pos.y,
                 arg.pos.z,
-                arg.pos.r || BOX_RADIUS,
-                id
+                arg.pos.r || constants.env.BOX_RADIUS,
+                id,
+                whoScanned
             );
         else if (arg.obj) {
             obj = arg.obj;
             if (obj.id == -1 && id != -1) obj.id = id;
-        } else
-            throw new Error(
-                `Invalid object passed to environment.addObject: ${arg}`
-            );
+        } else throw new Error(`Invalid object passed to environment.addObject: ${arg}`);
 
         if (this.objects[id] == undefined) this.objects[id] = obj;
         this.emit("objects", this.objects);
@@ -94,25 +94,32 @@ class Environment extends EventEmitter {
         this.emit("drone", {
             droneId: id,
             dronePosition: drone.state.position,
-            dronePositionHistory: this.dronePositionHistory,
+            droneYaw: drone.state.rotation.yaw,
+            dronePositionHistory: drone.positionHistory,
         });
     }
 
+    /* Emit the environment to be sent to the frontend */
     public emitEnvironment() {
         this.emit("objects", this.objects);
         this.emit("dimensions", this.mapWidth, this.mapLength);
 
         for (let drone of Object.values(this.drones)) {
             this.emit("drone", {
-                id: drone.id,
+                droneId: drone.id,
                 dronePosition: drone.state.position,
+                droneYaw: drone.state.rotation.yaw,
                 dronePositionHistory: drone.positionHistory,
             });
         }
     }
 
     public serialize() {
-        return JSON.stringify(this.objects);
+        const data = {
+            objects: this.objects,
+            drones: this.drones,
+        };
+        fs.writeFileSync("environment.json", JSON.stringify(data));
     }
 
     public listen(
@@ -123,10 +130,10 @@ class Environment extends EventEmitter {
                   listener: (data: {
                       droneId: DroneId;
                       dronePosition: Object3D;
+                      droneYaw: number;
                       dronePositionHistory: Object3D[];
                   }) => void
               ]
-            | [event: "dimensions", listener: (data: Number[]) => void]
     ): this {
         return this.on(args[0], args[1]);
     }

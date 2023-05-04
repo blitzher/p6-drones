@@ -5,6 +5,7 @@ import { com } from "./frontend-com";
 import * as env from "./environment";
 import { Vector3 } from "./linerAlgebra";
 import logger from "../log";
+import * as constants from "./constants.json";
 
 export const droneState = {};
 export type DroneId = string;
@@ -56,16 +57,30 @@ export class Drone extends sdk.Drone {
         tof: 0,
     };
 
+    /* Used to ensure that a drone can only be
+     * on a single 'mission' at a time */
     public inFlight: boolean = false;
 
     private lastStateTime: number;
 
-    constructor({ ip, port }: { ip: string; port?: { state: number; video: number } }) {
+    /**
+     *
+     * @param param0
+     * @param param1 Starting position of drone
+     */
+    constructor(
+        { ip, port }: { ip: string; port?: { state: number; video: number } },
+        startingPostition?: { x: number; y: number; z: number }
+    ) {
         super(ip, port);
 
         /* Add drone object reference to arrays */
         Drone.allDrones[this.id] = this;
         env.environment.addDrone(this);
+
+        if (startingPostition) {
+            this.state.position = new Vector3(startingPostition);
+        }
 
         this.lastStateTime = Date.now();
 
@@ -76,27 +91,38 @@ export class Drone extends sdk.Drone {
     private updateState(state: StateInfo) {
         /* Calculate delta time and set lastStateTime to now */
         const now = Date.now();
-        const deltaTime = (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
+        const deltaTime =
+            (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
-        /* Ensure consistent order of coordinates, and convert to cm */
-        /* speed forward is negative for some reason */
+        /* Convert from dm to cm.
+         * Speed forward is negative for some reason */
         this.state.speedVector.x = -state.speed.x * 10;
         this.state.speedVector.y = state.speed.y * 10;
 
         /* Adjust for undershoot of speed */
-        this.state.speedVector = this.state.speedVector.scale(1.75);
+        this.state.speedVector = this.state.speedVector.scale(
+            constants.drone.POSITION_CORRECTION_FACTOR
+        );
 
-        this.state.position = this.state.position.add(this.state.speedVector.scale(deltaTime));
+        this.state.position = this.state.position.add(
+            this.state.speedVector.scale(deltaTime)
+        );
         this.state.position.z = state.tof;
-
         logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
 
         this.state.rotation.pitch = (state.pitch * Math.PI) / 180;
         this.state.rotation.yaw = (state.yaw * Math.PI) / 180;
         this.state.rotation.roll = (state.roll * Math.PI) / 180;
 
-        this.positionHistory.push(new Vector3(this.state.position));
+        const lastEntryInHistory = this.positionHistory[this.positionHistory.length - 1];
+        const deltaPosition = this.state.position.subtract(lastEntryInHistory);
+        if (
+            !lastEntryInHistory ||
+            deltaPosition.length() > constants.drone.POSITION_HISTORY_RESOLUTION
+        ) {
+            this.positionHistory.push(new Vector3(this.state.position));
+        }
     }
     private onvideo() {
         let isFirst = true;
@@ -104,7 +130,7 @@ export class Drone extends sdk.Drone {
 
         return (...res: any[]) => {
             if (isFirst) {
-                segmenter = new H264Segmenter(res[0]);
+                segmenter = new H264Segmenter();
                 isFirst = false;
             }
 

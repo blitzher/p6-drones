@@ -4,6 +4,7 @@ import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
 import logger from "../log";
 import { CommandOptions } from "../tellojs-sdk30/src/commander";
+import { dronePaths } from "./dronePath";
 
 type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
@@ -18,6 +19,12 @@ type MarkerData = {
     id: number;
     dist: Millimeter;
     droneId: string;
+};
+
+export const close = () => {
+    for (let { client } of clients) {
+        client.close();
+    }
 };
 
 /* Setup helper functions for back-front-communication */
@@ -36,12 +43,12 @@ export const com = {
             );
         }
     },
-    state: (state: StateInfo, id: DroneId) => {
+    state: (data: StateInfo, id: DroneId) => {
         for (let { client } of clients)
             client.send(
                 JSON.stringify({
                     type: "state",
-                    data: state,
+                    data,
                     id,
                 })
             );
@@ -50,12 +57,10 @@ export const com = {
         for (let { client } of clients)
             client.send(JSON.stringify({ type: "environment", data }));
     },
-    dimensions: (data: Number[]) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "dimensions", data }));
-    },
     drone: (data: {
+        droneId: string;
         dronePosition: env.Object3D;
+        droneYaw: number;
         dronePositionHistory: env.Object3D[];
     }) => {
         for (let { client } of clients)
@@ -93,21 +98,36 @@ export const initialiseWebSocket = (ws: WebSocket) => {
     };
 };
 
-let GoingToMarker = false;
 function handle(pkg: Package) {
     switch (pkg.type) {
+        case "emergencyStop":
+            for (let drone of Object.values(Drone.allDrones)) {
+                drone.control.stop({ forceReady: true, clearQueue: true });
+            }
+            break;
+        case "initSearch":
+            for (let drone of Object.values(Drone.allDrones)) {
+                dronePaths.fly(drone);
+            }
+            break;
         case "command":
             let [drone_id, ...cmd] = pkg.data.split(" ");
             cmd = cmd.join(" ");
 
+            const isStop = cmd == "stop";
             const commandOptions: CommandOptions = {
-                overwriteQueue: cmd == "stop",
+                clearQueue: isStop,
+                forceReady: isStop,
             };
+
+            if (cmd == "streamon") {
+                Drone.allDrones[drone_id].startVideoStream();
+                break;
+            }
+
             Drone.allDrones[drone_id].command(cmd, commandOptions);
             break;
         case "marker":
-            // console.log(`Found marker {${JSON.stringify(pkg.data, undefined, 2)}}`);
-
             const marker: MarkerData = pkg.data;
 
             let drone = env.environment.getDrone(marker.droneId);
@@ -116,7 +136,7 @@ function handle(pkg: Package) {
             let y = Math.round(marker.relative.y / 10 + drone.state.position.y);
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
-            env.environment.addObject({ pos: { x, y, z } }, marker.id);
+            env.environment.addObject({ pos: { x, y, z } }, marker.id, marker.droneId);
             const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;

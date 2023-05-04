@@ -1,103 +1,85 @@
 /* Import npm packages */
 import express from "express";
 import expressWs from "express-ws";
+import * as readline from "node:readline/promises";
 
 /* Import local packages */
 import * as env from "./environment";
 import { Object3D } from "./environment";
 import { Drone } from "./drone";
-import { com, initialiseWebSocket } from "./frontend-com";
+import * as frontendCom from "./frontend-com";
 import logger from "../log";
-import { dronePath } from "./dronePath";
-import * as readline from "node:readline/promises";
-import { Vector3 } from "./linerAlgebra";
+import * as constants from "./constants.json";
 
-const readlineInterface = readline.createInterface(
-    process.stdin,
-    process.stdout
-);
-
-/* Global constant */
-const HTTP_PORT = 42069;
+import * as tellojs from "../tellojs-sdk30/src";
 
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-//new Drone({ ip: "192.168.1.130" });
-new Drone({ ip: "192.168.1.141" });
-//new Drone({ ip: "192.168.1.174" });
-// new Drone({ ip: "192.168.1.191" });
+new Drone({ ip: "192.168.1.130" }, constants.drone.START_POS[130]);
+// new Drone({ ip: "192.168.1.141" }, constants.drone.START_POS[141]);
+// new Drone({ ip: "192.168.1.174" }, constants.drone.START_POS[174]);
+new Drone({ ip: "192.168.1.191" }, constants.drone.START_POS[191]);
 
 /* Setup web server */
 app.use(express.json());
 app.use(express.static("./src/www"));
 
 app.ws("/", (ws) => {
-    initialiseWebSocket(<WebSocket>(<any>ws));
+    frontendCom.initialiseWebSocket(<WebSocket>(<any>ws));
 });
 
-function startTest() {
-    console.log(`Starting test: ${process.title}`);
-    //Position of dummy boxes for testing
-    const BOX_COUNT = 20;
-    let time = 0;
-    const addObjectInterval = setInterval(() => {
-        let x = Math.cos(time) * time * 30;
-        let z = Math.sin(time) * time * 30;
-        let obstacle = new Object3D(x, 0, z, 10);
-        time += 0.2;
-        env.environment.addObject({ obj: obstacle }, time);
-        if (time > 0.2 * BOX_COUNT) clearInterval(addObjectInterval);
-    }, 1000);
-}
-
-/* Launch server */
-app.listen(HTTP_PORT, async () => {
-    console.log(`Listening on ${HTTP_PORT}...`);
-    logger.log(`Listening on ${HTTP_PORT}...`);
-
+const connectDrones = () => {
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
+            drone.set.speed(constants.drone.SPEED);
+            drone.set.bitrate(5);
             env.environment.addDrone(drone);
-            drone.startVideoStream();
-            // dronePath.fly(drone);
+            // drone.startVideoStream();
         });
     }
+};
 
-    function CLI() {
-        readlineInterface
-            .question("Type drone ids to start flying.\n")
-            .then((msg) => {
-                const ids = msg.split(" ");
-                for (let id of ids) {
-                    let drone = Drone.allDrones[id];
-                    if (drone) dronePath.fly(drone);
-                }
-                CLI();
-            });
-    }
-    CLI();
+/* Launch server */
+const server = app.listen(constants.server.HTTP_PORT, async () => {
+    console.log(`Listening on ${constants.server.HTTP_PORT}...`);
+    logger.log(`Listening on ${constants.server.HTTP_PORT}...`);
 
-    /* Add a dummy object in environment */
-    env.environment.addObject({ pos: { x: 150, y: 100, z: 0 } }, -1);
+    /* Establish connection to drones */
+    connectDrones();
 
     /* Listen for environment updates, and send to frontend */
     env.environment.listen("objects", (data: Object3D[]) => {
-        com.environment(data);
-    });
-    env.environment.listen("dimensions", (data: Number[]) => {
-        com.dimensions([env.environment.mapWidth, env.environment.mapLength]);
+        frontendCom.com.environment(data);
     });
     env.environment.listen(
         "drone",
         (data: {
             droneId: string;
             dronePosition: Object3D;
+            droneYaw: number;
             dronePositionHistory: Object3D[];
         }) => {
-            com.drone(data);
+            frontendCom.com.drone(data);
         }
     );
 });
+
+const cleanup = () => {
+    /* Close sockets and log */
+    server.close();
+    tellojs.close();
+    frontendCom.close();
+    logger.error("Closed server");
+
+    /* Serialize environment to disk */
+    env.environment.serialize();
+
+    logger.close();
+};
+
+/* Setup signal listener  */
+const EXIT_SIGNALS = ["SIGTERM", "SIGINT", "SIGQUIT", "SIGABRT", "SIGHUP"];
+for (let signal of EXIT_SIGNALS) process.on(signal, cleanup);

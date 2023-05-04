@@ -15,6 +15,7 @@ export class Drone {
     readonly ip: IP;
     readonly id: string;
     private _connected: boolean = false;
+    static _allDrones: Drone[] = [];
 
     public readonly state!: StateInfo;
 
@@ -62,6 +63,8 @@ export class Drone {
         this.stateStream.start();
         this.stateStream.on("message", (state) => {
             clearTimeout(this.disconnectTimeout);
+            /* Only read ini */
+            if (this.state.mid != -1) state.mid = this.state.mid;
             Object.assign(this.state, state);
             this.disconnectTimeout = setTimeout(() => {
                 this._connected = false;
@@ -69,6 +72,14 @@ export class Drone {
                 commander.relayConnected(this);
             }, 1000);
         });
+
+        Drone._allDrones.push(this);
+    }
+
+    public close() {
+        clearTimeout(this.disconnectTimeout);
+        this.stateStream.client.close();
+        this.videoStream.client.close();
     }
 
     async connect() {
@@ -76,7 +87,10 @@ export class Drone {
             logger.log(`Establishing connection to ${this.id}`);
 
             /* Enter command mode */
-            await this.send("command", { timeout: constants.timeouts.retryConnectTimeout, shouldRetry: true });
+            await this.send("command", {
+                timeout: constants.timeouts.retryConnectTimeout,
+                shouldRetry: true,
+            });
             const sdk = await this.read.sdk();
             const bat = await this.read.battery();
             await this.set.port(this.ports.state, this.ports.video);
@@ -108,7 +122,8 @@ export class Drone {
     }
 
     control = {
-        forward: (distance: number, options?: CommandOptions) => this.send(`forward ${distance}`, options),
+        forward: (distance: number, options?: CommandOptions) =>
+            this.send(`forward ${distance}`, options),
 
         takeOff: (options?: CommandOptions) => this.send("takeoff", options),
 
@@ -118,32 +133,54 @@ export class Drone {
 
         stop: (options?: CommandOptions) => this.send("stop", options),
 
-        flip: (side: string, options?: CommandOptions) => this.send(`flip ${side}`, options),
+        flip: (side: string, options?: CommandOptions) =>
+            this.send(`flip ${side}`, options),
 
-        up: (distance: number, options?: CommandOptions) => this.send(`up ${distance}`, options),
+        up: (distance: number, options?: CommandOptions) =>
+            this.send(`up ${distance}`, options),
 
-        down: (distance: number, options?: CommandOptions) => this.send(`down ${distance}`, options),
+        down: (distance: number, options?: CommandOptions) =>
+            this.send(`down ${distance}`, options),
 
-        left: (distance: number, options?: CommandOptions) => this.send(`left ${distance}`, options),
+        left: (distance: number, options?: CommandOptions) =>
+            this.send(`left ${distance}`, options),
 
-        right: (distance: number, options?: CommandOptions) => this.send(`right ${distance}`, options),
+        right: (distance: number, options?: CommandOptions) =>
+            this.send(`right ${distance}`, options),
 
-        front: (distance: number, options?: CommandOptions) => this.send(`forward ${distance}`, options),
+        front: (distance: number, options?: CommandOptions) =>
+            this.send(`forward ${distance}`, options),
 
-        back: (distance: number, options?: CommandOptions) => this.send(`back ${distance}`, options),
+        back: (distance: number, options?: CommandOptions) =>
+            this.send(`back ${distance}`, options),
 
-        clockwise: (angle: number, options?: CommandOptions) => this.send(`cw ${angle}`, options),
+        clockwise: (angle: number, options?: CommandOptions) =>
+            this.send(`cw ${angle}`, options),
 
-        counterClockwise: (angle: number, options?: CommandOptions) => this.send(`ccw ${angle}`, options),
+        counterClockwise: (angle: number, options?: CommandOptions) =>
+            this.send(`ccw ${angle}`, options),
 
         go: ({ x, y, z }: Pos3D, speed: number, mid?: string, options?: CommandOptions) =>
             this.send(`go ${x} ${y} ${z} ${speed} ${mid ?? ""}`, options),
 
         curve: (start: Pos3D, end: Pos3D, speed: number, options?: CommandOptions) =>
-            this.send(`curve ${start.x} ${start.y} ${start.z} ${end.x} ${end.y} ${end.z} ${speed}`, options),
+            this.send(
+                `curve ${start.x} ${start.y} ${start.z} ${end.x} ${end.y} ${end.z} ${speed}`,
+                options
+            ),
 
-        jump: (start: Pos3D, speed: number, yaw: number, mid1: number, mid2: number, options?: CommandOptions) =>
-            this.send(`jump ${start.x} ${start.y} ${start.z} ${speed} ${yaw}${mid1} ${mid2}`, options),
+        jump: (
+            start: Pos3D,
+            speed: number,
+            yaw: number,
+            mid1: number,
+            mid2: number,
+            options?: CommandOptions
+        ) =>
+            this.send(
+                `jump ${start.x} ${start.y} ${start.z} ${speed} ${yaw}${mid1} ${mid2}`,
+                options
+            ),
 
         reboot: (options?: CommandOptions) => this.send("reboot", options),
     };
@@ -175,7 +212,8 @@ export class Drone {
     set = {
         speed: (speed: number) => this.send(`speed ${speed}`),
 
-        rc: (x: number, y: number, z: number, yaw: number) => this.send(`rc ${x} ${y} ${z} ${yaw}`),
+        rc: (x: number, y: number, z: number, yaw: number) =>
+            this.send(`rc ${x} ${y} ${z} ${yaw}`),
 
         wifi: (ssid: string, password: string) => this.send(`wifi ${ssid} ${password}`),
 
@@ -189,8 +227,11 @@ export class Drone {
 
         port: (info: Port, video: Port) => this.send(`port ${info} ${video}`),
 
-        setfps: (fps: number) => this.send(`setfps ${fps}`),
+        fps: (fps: "low" | "middle" | "high") => this.send(`setfps ${fps}`),
 
-        setbitrate: (bitrate: number) => this.send(`setbitrate ${bitrate}`),
+        bitrate: (bitrate: 0 | 1 | 2 | 3 | 4 | 5) => this.send(`setbitrate ${bitrate}`),
+
+        resolution: (resolution: "low" | "high") =>
+            this.send(`setresolution ${resolution}`),
     };
 }

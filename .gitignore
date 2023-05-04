@@ -7,3 +7,4 @@ build/*
 
 # Ignore compiled html
 src/www/index.html
+environment.json

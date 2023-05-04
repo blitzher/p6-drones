@@ -1,12 +1,14 @@
 /* communication.js */
 import droneCam from "../drone-cam/drone-cam.js";
 import environment3d from "../3d-map/3d-map.js";
+import * as THREE from "../../libs/three.min.js";
 
 /* Declare global variables for use in component */
 /** @type {{[key:string]:StateInfo}} */
 export let droneState = {};
 const wsUrl = `ws:${window.location.host}`;
 let ws;
+const points = { 130: [], 141: [], 174: [], 191: [] };
 /**
  * @type {WebSocket}
  */
@@ -56,9 +58,19 @@ function handle(pkg, ws) {
             }
 
             break;
-        case "drone" /* {dronePosition: Object3D, dronePositionHistory: Object3D[]} */:
-            const pos = pkg.data.dronePosition;
-            environment3d.updateDronePosition(pos.x, pos.y, pos.z);
+        /* 
+        {
+            droneId: string, 
+            dronePosition: Object3D, 
+            droneYaw: number, 
+            dronePositionHistory: Object3D[]
+        } */
+        case "drone":
+            const { droneId, dronePosition, droneYaw, dronePositionHistory } = pkg.data;
+
+            environment3d.drawPathLine(dronePositionHistory, droneId);
+            environment3d.clearPathLine(droneId);
+            environment3d.addDroneOrUpdatePosition(droneId, droneYaw, dronePosition);
             break;
         default:
             console.error(`Unknown package type: ${pkg.type}`);
@@ -69,17 +81,28 @@ function handle(pkg, ws) {
  * Temporary function for sending raw command to the drone;
  */
 
-function command(cmd) {
+function trySend(obj) {
+    const str = JSON.stringify(obj);
     if (ws.readyState != 1) {
-        console.log("Websocket is not open!");
+        console.log(`Could not send ${str}. Websocket is not open!`);
         return;
     }
-    ws.send(
-        JSON.stringify({
-            type: "command",
-            data: cmd,
-        })
-    );
+    ws.send(str);
+}
+
+function command(cmd) {
+    trySend({
+        type: "command",
+        data: cmd,
+    });
+}
+
+function emergencyStop() {
+    trySend({ type: "emergencyStop" });
+}
+
+function initSearch() {
+    trySend({ type: "initSearch" });
 }
 
 function sendMarker(marker) {
@@ -95,5 +118,7 @@ export default {
     initialise: init,
     droneState,
     command,
+    emergencyStop,
+    initSearch,
     sendMarker,
 };
