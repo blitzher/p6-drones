@@ -38,7 +38,7 @@ After this is done, the drone(s) can now be connected by turning them on, and st
 
 Then place the drone on a mission pad.
 
-To initiate a search, press the green ``ìnitiate search```button on http://localhost:42069.
+To initiate a search, press the green ```ìnitiate search``` button on http://localhost:42069.
 
 The drone(s) will now initiate a search of the area.
 
