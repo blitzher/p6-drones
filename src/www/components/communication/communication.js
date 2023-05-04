@@ -54,7 +54,6 @@ function handle(pkg, ws) {
                     { x: marker.x, y: marker.z, z: -marker.y },
                     0x0000ff
                 );
-                environment3d.render3DCube(pkg.data);
             }
 
             break;

@@ -63,7 +63,6 @@ loader.load("../../resources/drone.glb", (gltf) => {
 
 function addDroneOrUpdatePosition(droneId, droneYaw, position) {
     /* If model data is not yet loaded, don't do anything */
-    console.log(droneYaw);
     if (droneModelGeometry == undefined) return;
     if (droneObjects[droneId] == undefined) {
         /** @type {THREE.Object3D} */
@@ -88,7 +87,7 @@ function addDroneOrUpdatePosition(droneId, droneYaw, position) {
     }
 }
 
-function render3DCube() {
+function initialise() {
     let time = 0;
     const cameraOffset = new THREE.Vector3(0, 100, 70);
     camera.position.x = cameraOffset.x;
@@ -199,7 +198,7 @@ function clearCubes() {
 }
 
 export default {
-    render3DCube,
+    initialise,
     clearPathLine,
     clearCubes,
     make3DCubeInstance,

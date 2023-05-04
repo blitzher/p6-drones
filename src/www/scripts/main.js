@@ -5,7 +5,7 @@ import bottomBar from "../components/bottom-bar/bottom-bar.js";
 
 window.addEventListener("load", (doc, ev) => {
     communication.initialise();
-    //map3d.render3DCube();
+    map3d.initialise();
     bottomBar.initialise();
     const camIds = droneCam.initialise();
 
