@@ -28,5 +28,5 @@ First navigate to the project folder and through a terminal write ```yarn``` thi
 
 Then navigate to the "www" folder and write ```mdparse``` to parse the .md file to the HTML file and press ```ctrl + c``` to exit markdownmaker.
 
-Then write yarn start to start up the program, and using your favourite web-browser, navigate to http://localhost:42069 to view the front end of the program.
+Then write ```yarn start``` to start up the program, and using your favourite web-browser, navigate to http://localhost:42069 to view the front end of the program.
 
