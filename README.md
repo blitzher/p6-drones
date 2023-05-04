@@ -30,3 +30,18 @@ Then navigate to the "www" folder and write ```mdparse``` to parse the .md file 
 
 Then write ```yarn start``` to start up the program, and using your favourite web-browser, navigate to http://localhost:42069 to view the front end of the program.
 
+## To Fly the drone(s)
+
+First you need to connect to each drone individually by connecting to their respective wifi and get the drone to enter ap-mode. See tello-sdk30 for more information about this.
+
+After this is done, the drone(s) can now be connected by turning them on, and starting up the program.
+
+Then place the drone on a mission pad.
+
+To initiate a search, press the green ``ìnitiate search```button on http://localhost:42069.
+
+The drone(s) will now initiate a search of the area.
+
+
+
+
