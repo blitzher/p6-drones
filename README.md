@@ -2,7 +2,7 @@
 
 This is a project about drones and flying them, then creating a 3D environment from videodata so that search and rescue missions would be easier.
 
-##To run the program:
+## To run the program:
 
 Install Node.JS and NPM with the following command:
 
