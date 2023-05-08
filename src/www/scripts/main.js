@@ -17,7 +17,9 @@ window.addEventListener("load", (doc, ev) => {
 
             if (markers != undefined && markers.length > 0) {
                 markers = markers.filter(
-                    (marker) => Math.abs(droneCam.estimateDistance(marker, id)) < 5000
+                    (marker) =>
+                        marker.id <= 10 &&
+                        Math.abs(droneCam.estimateDistance(marker, id)) < 5000
                 );
                 droneCam.renderMarkers(markers, id);
 

@@ -34,10 +34,10 @@ let loadCachedFlag = false;
 
 const droneObjects = {};
 const droneColours = {
-    130: new THREE.Color(0xff, 0, 0),
-    141: new THREE.Color(0, 0xff, 0),
-    174: new THREE.Color(0xff, 0xff, 0),
-    191: new THREE.Color(0xaa, 0, 0xff),
+    130: new THREE.Color(0xff, 0, 0) /* red */,
+    141: new THREE.Color(0, 0xff, 0) /* green */,
+    174: new THREE.Color(0xff, 0xff, 0) /* orange */,
+    191: new THREE.Color(0xaa, 0, 0xff) /* purple */,
 };
 const droneLines = {};
 
@@ -45,7 +45,7 @@ const droneLines = {};
 // loader.load("../../resources/drone.glb", (gltf) => {
 //     /** @type {THREE.Object3D} */
 //     const obj = gltf.scene;
-//     obj.scale.set(10, 10, 10);
+//     obj.scale.set(20, 20, 20);
 //     obj.castShadow = true;
 //     /** @type {THREE.Mesh} */
 //     const mesh = obj.children[0];
@@ -73,16 +73,14 @@ function addDroneOrUpdatePosition(droneId, droneYaw, position) {
 
         new THREE.MeshPhongMaterial();
 
-        obj.translateX(-position.x);
-        obj.translateY(position.z);
-        obj.translateZ(position.y);
+        obj.position.set(position.x, position.z, -position.y);
 
         obj.setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
 
         droneObjects[droneId] = obj;
         scene.add(obj);
     } else {
-        droneObjects[droneId].position.set(-position.x, position.z, position.y);
+        droneObjects[droneId].position.set(position.x, position.z, -position.y);
         droneObjects[droneId].setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
     }
 }

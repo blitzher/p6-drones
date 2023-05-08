@@ -7,19 +7,17 @@ import * as constants from "./constants.json";
 class DronePath {
     mapWidth;
     mapLength;
-    numberOfDrones: number;
     destinationStore: { [key: string]: Vector3 } = {};
 
-    constructor(mapwidth: number, maplength: number, numberofdrones: number) {
-        this.mapWidth = environment.mapWidth;
-        this.mapLength = environment.mapLength;
-        this.numberOfDrones = numberofdrones;
+    constructor(mapWidth: number, mapLength: number) {
+        this.mapWidth = mapWidth;
+        this.mapLength = mapLength;
     }
 
     public *SnakePattern(drone: Drone): Generator<() => Promise<string>> {
-        const iterations: number = Math.floor(this.mapWidth / 15);
+        const moveWidth: number = 30;
+        const iterations: number = Math.floor(this.mapWidth / moveWidth);
         const moveLength: number = this.mapLength;
-        const moveWidth: number = 15;
         const flyDestination: Vector3 = new Vector3({ x: 0, y: 0, z: 60 });
         this.destinationStore[drone.id] = new Vector3({ x: 0, y: 0, z: 0 });
 
@@ -278,4 +276,4 @@ class DronePath {
     }
 }
 
-export const dronePaths: DronePath = new DronePath(15, 150, 1);
+export const dronePaths: DronePath = new DronePath(90, 300);

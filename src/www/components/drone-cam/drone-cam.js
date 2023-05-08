@@ -100,12 +100,13 @@ function ARReader(imgData) {
 function estimateDistance(marker, id) {
     const FOCAL_LENGTH = 25; /* mm */
     const MARKER_HEIGHT = 95; /* mm */
-    const APPARENT_HEIGHT =
+    const APPARENT_HEIGHT = Math.abs(
         (marker.corners[3].y -
             marker.corners[0].y +
             marker.corners[2].y -
             marker.corners[1].y) /
-        2; /* pixels */
+            2
+    ); /* pixels */
     const IMAGE_HEIGHT = canvas[id].height; /* pixels */
     const SENSOR_HEIGHT = 2.0775; /* mm */
     return (

@@ -70,7 +70,8 @@ export class Drone extends sdk.Drone {
      */
     constructor(
         { ip, port }: { ip: string; port?: { state: number; video: number } },
-        startingPostition?: { x: number; y: number; z: number }
+        startingPostition?: { x: number; y: number; z: number },
+        startingRotation?: { pitch: number; yaw: number; roll: number }
     ) {
         super(ip, port);
 

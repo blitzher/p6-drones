@@ -51,7 +51,7 @@ function handle(pkg, ws) {
             for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
                     { x: 30, y: 30, z: 30 },
-                    { x: marker.x, y: marker.z, z: -marker.y },
+                    { x: marker.x, y: -marker.z, z: marker.y },
                     0x0000ff
                 );
             }

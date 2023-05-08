@@ -18,8 +18,8 @@ import { dronePaths } from "./dronePath";
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-new Drone({ ip: "192.168.1.130" }, constants.drone.START_POS[130]);
-// new Drone({ ip: "192.168.1.141" }, constants.drone.START_POS[141]);
+// new Drone({ ip: "192.168.1.130" }, constants.drone.START_POS[130]);
+new Drone({ ip: "192.168.1.141" }, constants.drone.START_POS[141]);
 // new Drone({ ip: "192.168.1.174" }, constants.drone.START_POS[174]);
 // new Drone({ ip: "192.168.1.191" }, constants.drone.START_POS[191]);
 
@@ -35,9 +35,9 @@ const connectDrones = () => {
     for (let droneId in Drone.allDrones) {
         let drone = Drone.allDrones[droneId];
         drone.connect().then(async () => {
-            await drone.set.mon();
+            // await drone.set.mon();
             await drone.set.speed(constants.drone.SPEED);
-            await drone.set.bitrate(5);
+            // await drone.set.bitrate(5);
             env.environment.addDrone(drone);
             drone.startVideoStream();
             // await dronePaths.fly(drone);
