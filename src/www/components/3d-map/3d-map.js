@@ -81,7 +81,9 @@ function addDroneOrUpdatePosition(droneId, droneYaw, position) {
         scene.add(obj);
     } else {
         droneObjects[droneId].position.set(position.x, position.z, -position.y);
-        droneObjects[droneId].setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
+        droneObjects[droneId].setRotationFromEuler(
+            new THREE.Euler(0, droneYaw, 0)
+        );
     }
 }
 
@@ -101,7 +103,7 @@ function initialise() {
     const amb = new THREE.AmbientLight();
     amb.intensity = 1;
     scene.add(amb);
-    scene.add(new THREE.GridHelper(100, 100));
+    scene.add(new THREE.GridHelper(1000, 100));
 
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);

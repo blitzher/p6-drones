@@ -72,7 +72,10 @@ class DronePath {
         }
     }
 
-    public getRelevantBoxes(flyDestination: Vector3, start: Vector3): Object3D[] {
+    public getRelevantBoxes(
+        flyDestination: Vector3,
+        start: Vector3
+    ): Object3D[] {
         const relevantBoxes: Object3D[] = [];
         const deltaPosition = flyDestination.subtract(start);
         const moveVector: Vector3 = deltaPosition.normalise();
@@ -121,7 +124,10 @@ class DronePath {
                 let goBack: boolean = true;
 
                 for (const box of Object.values(environment.objects)) {
-                    if (box.id == constants.env.TARGET_ID && box.whoScanned == drone.id) {
+                    if (
+                        box.id == constants.env.TARGET_ID &&
+                        box.whoScanned == drone.id
+                    ) {
                         drone.control.go(
                             {
                                 x: box.x,
@@ -170,9 +176,9 @@ class DronePath {
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
-                        `Found box ${JSON.stringify(boxes[0])} drone at ${JSON.stringify(
-                            drone.state.position
-                        )}`
+                        `Found box ${JSON.stringify(
+                            boxes[0]
+                        )} drone at ${JSON.stringify(drone.state.position)}`
                     );
                     const maneuver = this.maneuver(
                         boxes,
@@ -206,7 +212,11 @@ class DronePath {
         loop();
     }
 
-    public maneuver(obstacles: Object3D[], flyDestination: Vector3, drone: Drone) {
+    public maneuver(
+        obstacles: Object3D[],
+        flyDestination: Vector3,
+        drone: Drone
+    ) {
         const maneuver: (() => Promise<string>)[] = [];
         const lengthArray: number[] = [];
         let nearestBoxDist: number;
@@ -221,16 +231,20 @@ class DronePath {
         //Position of the drone
         const currentPosition: Vector3 = new Vector3(drone.state.position);
         //Vector of the distance from current position to the distanation
-        const currentToDestination: Vector3 = flyDestination.subtract(currentPosition);
+        const currentToDestination: Vector3 =
+            flyDestination.subtract(currentPosition);
         //Vector of the distance from current position to the box
         const currentToBox: Vector3 = boxPosition.subtract(currentPosition);
 
-        const crossProduct: Vector3 = currentToDestination.crossProduct(currentToBox);
+        const crossProduct: Vector3 =
+            currentToDestination.crossProduct(currentToBox);
 
         //vector of the distance flydestination to currentposition
         const moveVector: Vector3 = currentPosition.subtract(flyDestination);
         //Dot product over vectors
-        const dotAPAB: number = boxPosition.subtract(currentPosition).dotP(moveVector);
+        const dotAPAB: number = boxPosition
+            .subtract(currentPosition)
+            .dotP(moveVector);
         const dotABAB: number = moveVector.dotP(moveVector);
         //Scaling and adding the move vector with the dot product to find the projection
         const scaleVector: Vector3 = moveVector.scale(dotAPAB / dotABAB);
@@ -276,4 +290,4 @@ class DronePath {
     }
 }
 
-export const dronePaths: DronePath = new DronePath(90, 300);
+export const dronePaths: DronePath = new DronePath(60, 300);

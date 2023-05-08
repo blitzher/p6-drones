@@ -51,7 +51,7 @@ function handle(pkg, ws) {
             for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
                     { x: 30, y: 30, z: 30 },
-                    { x: marker.x, y: -marker.z, z: marker.y },
+                    { x: marker.x, y: marker.z, z: marker.y },
                     0x0000ff
                 );
             }
@@ -65,11 +65,16 @@ function handle(pkg, ws) {
             dronePositionHistory: Object3D[]
         } */
         case "drone":
-            const { droneId, dronePosition, droneYaw, dronePositionHistory } = pkg.data;
+            const { droneId, dronePosition, droneYaw, dronePositionHistory } =
+                pkg.data;
 
-            environment3d.drawPathLine(dronePositionHistory, droneId);
             environment3d.clearPathLine(droneId);
-            environment3d.addDroneOrUpdatePosition(droneId, droneYaw, dronePosition);
+            environment3d.drawPathLine(dronePositionHistory, droneId);
+            environment3d.addDroneOrUpdatePosition(
+                droneId,
+                droneYaw,
+                dronePosition
+            );
             break;
         default:
             console.error(`Unknown package type: ${pkg.type}`);
