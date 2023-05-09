@@ -18,11 +18,11 @@ import { dronePaths } from "./dronePath";
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-/* new Drone(
+new Drone(
     { ip: "192.168.1.130" },
     constants.drone.START_POS[130],
     constants.drone.START_ROT[141]
-); */
+);
 // new Drone(
 //     { ip: "192.168.1.141" },
 //     constants.drone.START_POS[141],

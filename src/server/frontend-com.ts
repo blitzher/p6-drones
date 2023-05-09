@@ -134,18 +134,14 @@ function handle(pkg: Package) {
             let drone = env.environment.getDrone(marker.droneId);
             marker.relative = linAlg.rotateVectorAroundYAxis(
                 new linAlg.Vector3(marker.relative),
-                drone.state.rotation.yaw
+                (drone.state.rotation.yaw * 180) / Math.PI
             );
             /* Relative is in mm, so convert to cm */
             let x = Math.round(marker.relative.x / 10 + drone.state.position.x);
             let y = Math.round(marker.relative.y / 10 + drone.state.position.y);
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
-            env.environment.addObject(
-                { pos: { x, y, z } },
-                marker.id,
-                marker.droneId
-            );
+            env.environment.addObject({ pos: { x, y, z } }, marker.id, marker.droneId);
             const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;
