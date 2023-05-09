@@ -57,17 +57,17 @@ export class Vector3 {
  * @param phi Angle in degrees
  * @returns
  */
-export const rotateVectorAroundYAxis = (vector: Vector3, phi: number) => {
+export const rotateVectorAroundZAxis = (vector: Vector3, phi: number) => {
     phi = (phi / 180) * Math.PI;
     const rotationMatrix = [
-        [Math.cos(phi), 0, Math.sin(phi)],
-        [0, 1, 0],
-        [-Math.sin(phi), 0, Math.cos(phi)],
+        [Math.cos(phi), -Math.sin(phi), 0],
+        [Math.sin(phi), Math.cos(phi), 0],
+        [0, 0, 1],
     ];
 
     return new Vector3({
-        x: rotationMatrix[0][0] * vector.x + rotationMatrix[0][2] * vector.z,
-        y: vector.y,
-        z: rotationMatrix[2][0] * vector.x + rotationMatrix[2][2] * vector.z,
+        x: rotationMatrix[0][0] * vector.x + rotationMatrix[0][1] * vector.y,
+        y: rotationMatrix[1][0] * vector.x + rotationMatrix[1][1] * vector.y,
+        z: vector.z,
     });
 };

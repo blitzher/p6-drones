@@ -132,7 +132,7 @@ function handle(pkg: Package) {
             const marker: MarkerData = pkg.data;
 
             let drone = env.environment.getDrone(marker.droneId);
-            marker.relative = linAlg.rotateVectorAroundYAxis(
+            marker.relative = linAlg.rotateVectorAroundZAxis(
                 new linAlg.Vector3(marker.relative),
                 (drone.state.rotation.yaw * 180) / Math.PI
             );
