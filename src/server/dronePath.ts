@@ -23,6 +23,18 @@ class DronePath {
 
         yield () => drone.control.takeOff();
 
+        if (drone.id == "141") {
+            yield () => drone.control.clockwise(90);
+        }
+
+        if (drone.id == "174") {
+            yield () => drone.control.clockwise(180);
+        }
+
+        if (drone.id == "191") {
+            yield () => drone.control.counterClockwise(90);
+        }
+
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
                 flyDestination.x += moveLength;
@@ -172,7 +184,7 @@ class DronePath {
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                        constants.env.ERROR_MARGIN
+                    constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -257,7 +269,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-                constants.env.ERROR_MARGIN -
+            constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10
