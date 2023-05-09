@@ -80,7 +80,7 @@ class DronePath {
 
         for (const box of Object.values(environment.objects)) {
             //Checks each 5 cm. if there is a box in the path
-            for (let i = 0; i < deltaPosition.length(); i += 5) {
+            for (let i = 5; i < deltaPosition.length(); i += 5) {
                 const positionOffset = moveVector.scale(i);
                 const prospectedPosition = start.add(positionOffset);
                 const dronePosition = new Object3D(
@@ -167,7 +167,7 @@ class DronePath {
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                    constants.env.ERROR_MARGIN
+                        constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -212,7 +212,10 @@ class DronePath {
         const lengthArray: number[] = [];
         let nearestBoxDist: number;
 
-        flyDestination = linAlg.rotateVectorAroundZAxis(flyDestination, drone.rotOffset.yaw);
+        flyDestination = linAlg.rotateVectorAroundZAxis(
+            flyDestination,
+            drone.rotOffset.yaw
+        );
 
         // Go to position just before hitting the obstacle & locate boxes on either side of current obstacle
         for (const obstacle of obstacles) {
@@ -247,7 +250,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-            constants.env.ERROR_MARGIN -
+                constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10
@@ -266,13 +269,13 @@ class DronePath {
         //Box is to the right
         if (crossProduct.z < 0) {
             maneuver.push(() => drone.control.left(avoidanceDistance));
-            maneuver.push(() => drone.control.forward(boxOffset * 1.5));
+            maneuver.push(() => drone.control.forward(boxOffset * 2 + 2));
             maneuver.push(() => drone.control.right(avoidanceDistance));
         }
         //Box is to the left
         else {
             maneuver.push(() => drone.control.right(avoidanceDistance));
-            maneuver.push(() => drone.control.forward(boxOffset * 1.5));
+            maneuver.push(() => drone.control.forward(boxOffset * 2 + 2));
             maneuver.push(() => drone.control.left(avoidanceDistance));
         }
 

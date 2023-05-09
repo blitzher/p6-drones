@@ -1,6 +1,6 @@
 import { IP, Port, commander } from "./index";
 import * as constants from "./constants.json";
-import { StateInfo, StateStream, VideoStream } from "./commands/streams";
+import { StateInfo, StateStream, VideoStream } from "./streams/streams";
 import logger from "../../log";
 import { SocketState } from "./socket";
 import { CommandOptions } from "./commander";

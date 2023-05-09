@@ -12,5 +12,9 @@
         "rejectTimeout": 10000,
         "retryConnectTimeout": 5000,
         "droneDisconnectTimeout": 5000
+    },
+    "virtual": {
+        "STATES_PER_SECOND": 20,
+        "MS_PER_COMMAND": 5000
     }
 }

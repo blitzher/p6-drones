@@ -18,26 +18,28 @@ import { dronePaths } from "./dronePath";
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-new Drone(
-    { ip: "192.168.1.130" },
-    constants.drone.START_POS[130],
-    constants.drone.START_ROT[141]
-);
+// new Drone(
+//     { ip: "192.168.1.130" },
+//     constants.drone.START_POS[130],
+//     constants.drone.START_ROT[141]
+// );
 // new Drone(
 //     { ip: "192.168.1.141" },
 //     constants.drone.START_POS[141],
 //     constants.drone.START_ROT[141]
 // );
-new Drone(
-    { ip: "192.168.1.174" },
-    constants.drone.START_POS[174],
-    constants.drone.START_ROT[174]
-);
+// new Drone(
+//     { ip: "192.168.1.174" },
+//     constants.drone.START_POS[174],
+//     constants.drone.START_ROT[174]
+// );
 // new Drone(
 //     { ip: "192.168.1.191" },
 //     constants.drone.START_POS[191],
 //     constants.drone.START_ROT[191]
 // );
+
+new Drone({ ip: "0.0.0.101" });
 
 /* Setup web server */
 app.use(express.json());
@@ -65,6 +67,9 @@ const connectDrones = () => {
 const server = app.listen(constants.server.HTTP_PORT, async () => {
     console.log(`Listening on ${constants.server.HTTP_PORT}...`);
     logger.log(`Listening on ${constants.server.HTTP_PORT}...`);
+
+    /* Make virtual box */
+    env.environment.addObject({ pos: { x: 150, y: 0, z: 0 } }, 1, "101");
 
     /* Establish connection to drones */
     connectDrones();

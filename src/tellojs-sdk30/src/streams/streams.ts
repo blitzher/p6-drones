@@ -24,7 +24,7 @@ export class StateStream {
     readonly port: Port;
     readonly client: Socket;
     readonly ip: IP;
-    private readonly emitter: EventEmitter;
+    public readonly emitter: EventEmitter;
 
     constructor(port: Port, ip: IP) {
         this.port = port;

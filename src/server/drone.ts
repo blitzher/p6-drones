@@ -20,7 +20,7 @@ interface StateInfo extends sdkStateInfo {
     speedVector: Vector3;
 }
 
-export class Drone extends sdk.Drone {
+export class Drone extends sdk.VirtualDrone {
     static allDrones: { [key: string]: Drone } = {};
 
     /* Setup public attributes */
@@ -111,7 +111,7 @@ export class Drone extends sdk.Drone {
         speedVector.y = state.speed.y * 10;
 
         /* Adjust for undershoot of speed and initial rotation*/
-        speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);
+        // speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);
         speedVector = rotateVectorAroundZAxis(speedVector, this.rotOffset.yaw);
 
         state.position = this.state.position.add(speedVector.scale(deltaTime));

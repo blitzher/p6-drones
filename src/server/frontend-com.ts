@@ -108,7 +108,14 @@ function handle(pkg: Package) {
             break;
         case "initSearch":
             for (let drone of Object.values(Drone.allDrones)) {
-                dronePaths.fly(drone);
+                // dronePaths.fly(drone);
+
+                drone.control.go({ x: 100, y: 0, z: 0 }, 20);
+                drone.control.go({ x: -100, y: 0, z: 0 }, 20);
+                drone.control.go({ x: 0, y: 0, z: 0 }, 20);
+                drone.control.go({ x: 0, y: 100, z: 0 }, 20);
+                drone.control.go({ x: 0, y: -100, z: 0 }, 20);
+                drone.control.go({ x: 0, y: 0, z: 0 }, 20);
             }
             break;
         case "command":
