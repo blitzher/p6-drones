@@ -28,12 +28,16 @@ const { app } = expressWs(express());
 //     constants.drone.START_POS[141],
 //     constants.drone.START_ROT[141]
 // );
-// new Drone({ ip: "192.168.1.174" }, constants.drone.START_POS[174]);
 new Drone(
-    { ip: "192.168.1.191" },
-    constants.drone.START_POS[191],
-    constants.drone.START_ROT[191]
+    { ip: "192.168.1.174" },
+    constants.drone.START_POS[174],
+    constants.drone.START_ROT[174]
 );
+// new Drone(
+//     { ip: "192.168.1.191" },
+//     constants.drone.START_POS[191],
+//     constants.drone.START_ROT[191]
+// );
 
 /* Setup web server */
 app.use(express.json());

@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import logger from "../log";
 import { CommandOptions } from "../tellojs-sdk30/src/commander";
 import { dronePaths } from "./dronePath";
+import * as linAlg from "./linerAlgebra";
 
 type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
@@ -131,12 +132,20 @@ function handle(pkg: Package) {
             const marker: MarkerData = pkg.data;
 
             let drone = env.environment.getDrone(marker.droneId);
+            marker.relative = linAlg.rotateVectorAroundYAxis(
+                new linAlg.Vector3(marker.relative),
+                drone.state.rotation.yaw
+            );
             /* Relative is in mm, so convert to cm */
             let x = Math.round(marker.relative.x / 10 + drone.state.position.x);
             let y = Math.round(marker.relative.y / 10 + drone.state.position.y);
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
-            env.environment.addObject({ pos: { x, y, z } }, marker.id, marker.droneId);
+            env.environment.addObject(
+                { pos: { x, y, z } },
+                marker.id,
+                marker.droneId
+            );
             const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;

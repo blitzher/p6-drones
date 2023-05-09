@@ -101,7 +101,8 @@ export class Drone extends sdk.Drone {
         /* Calculate delta time and set lastStateTime to now */
         const now = Date.now();
         const deltaTime =
-            (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
+            (now - this.lastStateTime) /
+            1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
         /* Convert from dm to cm.
@@ -111,7 +112,9 @@ export class Drone extends sdk.Drone {
         speedVector.y = state.speed.y * 10;
 
         /* Adjust for undershoot of speed and initial rotation*/
-        speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);
+        speedVector = speedVector.scale(
+            constants.drone.POSITION_CORRECTION_FACTOR
+        );
         speedVector = rotateVectorAroundYAxis(speedVector, this.rotOffset.yaw);
 
         state.position = this.state.position.add(speedVector.scale(deltaTime));
@@ -128,7 +131,10 @@ export class Drone extends sdk.Drone {
         state.rotation.yaw = (state.rotation.yaw * Math.PI) / 180;
         /* Assign state to drone */
         Object.assign(this.state, state);
-        logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
+        logger.concurrent(
+            `D${this.id} State`,
+            JSON.stringify(this.state, undefined, 2)
+        );
     }
     private onvideo() {
         let isFirst = true;
