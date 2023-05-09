@@ -3,6 +3,7 @@ import { Drone } from "./drone";
 import { Object3D, environment } from "./environment";
 import { Vector3 } from "./linerAlgebra";
 import * as constants from "./constants.json";
+import * as linAlg from "./linerAlgebra";
 
 class DronePath {
     mapWidth;
@@ -166,7 +167,7 @@ class DronePath {
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                        constants.env.ERROR_MARGIN
+                    constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -210,6 +211,9 @@ class DronePath {
         const maneuver: (() => Promise<string>)[] = [];
         const lengthArray: number[] = [];
         let nearestBoxDist: number;
+
+        flyDestination = linAlg.rotateVectorAroundZAxis(flyDestination, drone.rotOffset.yaw);
+
         // Go to position just before hitting the obstacle & locate boxes on either side of current obstacle
         for (const obstacle of obstacles) {
             lengthArray.push(flyDestination.lengthToBox(obstacle));
@@ -243,7 +247,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-                constants.env.ERROR_MARGIN -
+            constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10

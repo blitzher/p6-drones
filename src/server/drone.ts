@@ -62,7 +62,7 @@ export class Drone extends sdk.Drone {
     public inFlight: boolean = false;
 
     private lastStateTime: number;
-    private rotOffset: { pitch: number; yaw: number; roll: number } = {
+    public readonly rotOffset: { pitch: number; yaw: number; roll: number } = {
         pitch: 0,
         yaw: 0,
         roll: 0,
