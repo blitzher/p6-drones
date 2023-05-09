@@ -3,7 +3,7 @@ import sdk, { StateInfo as sdkStateInfo } from "../tellojs-sdk30/src";
 import { H264Segmenter } from "./h264-segmenter";
 import { com } from "./frontend-com";
 import * as env from "./environment";
-import { Vector3 } from "./linerAlgebra";
+import { Vector3, rotateVectorAroundYAxis } from "./linerAlgebra";
 import logger from "../log";
 import * as constants from "./constants.json";
 
@@ -110,10 +110,12 @@ export class Drone extends sdk.Drone {
         speedVector.x = -state.speed.x * 10;
         speedVector.y = state.speed.y * 10;
 
-        /* Adjust for undershoot of speed */
+        /* Adjust for undershoot of speed and initial rotation*/
         speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);
+        speedVector = rotateVectorAroundYAxis(speedVector, this.rotOffset.yaw);
 
         state.position = this.state.position.add(speedVector.scale(deltaTime));
+
         state.position.z = state.tof;
 
         state.rotation = {

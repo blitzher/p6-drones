@@ -39,10 +39,35 @@ export class Vector3 {
     }
 
     crossProduct({ x, y, z }: { x: number; y: number; z: number }): Vector3 {
-        return new Vector3({ x: (this.y * z) - (this.z * y), y: (this.z * x) - (this.x * z), z: (this.x * y) - (this.y * x) })
+        return new Vector3({
+            x: this.y * z - this.z * y,
+            y: this.z * x - this.x * z,
+            z: this.x * y - this.y * x,
+        });
     }
 
     dotP({ x, y, z }: { x: number; y: number; z: number }): number {
-        return (this.x * x) + (this.y * y) + (this.z * z);
+        return this.x * x + this.y * y + this.z * z;
     }
 }
+
+/**
+ *
+ * @param vector
+ * @param phi Angle in degrees
+ * @returns
+ */
+export const rotateVectorAroundYAxis = (vector: Vector3, phi: number) => {
+    phi = (phi / 180) * Math.PI;
+    const rotationMatrix = [
+        [Math.cos(phi), 0, Math.sin(phi)],
+        [0, 1, 0],
+        [-Math.sin(phi), 0, Math.cos(phi)],
+    ];
+
+    return new Vector3({
+        x: rotationMatrix[0][0] * vector.x + rotationMatrix[0][2] * vector.z,
+        y: vector.y,
+        z: rotationMatrix[2][0] * vector.x + rotationMatrix[2][2] * vector.z,
+    });
+};
