@@ -62,6 +62,11 @@ export class Drone extends sdk.Drone {
     public inFlight: boolean = false;
 
     private lastStateTime: number;
+    private rotOffset: { pitch: number; yaw: number; roll: number } = {
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+    };
 
     /**
      *
@@ -82,6 +87,9 @@ export class Drone extends sdk.Drone {
         if (startingPostition) {
             this.state.position = new Vector3(startingPostition);
         }
+        if (startingRotation) {
+            this.rotOffset = startingRotation;
+        }
 
         this.lastStateTime = Date.now();
 
@@ -98,25 +106,27 @@ export class Drone extends sdk.Drone {
 
         /* Convert from dm to cm.
          * Speed forward is negative for some reason */
-        this.state.speedVector.x = -state.speed.x * 10;
-        this.state.speedVector.y = state.speed.y * 10;
+        let speedVector = new Vector3({ x: 0, y: 0, z: 0 });
+        speedVector.x = -state.speed.x * 10;
+        speedVector.y = state.speed.y * 10;
 
         /* Adjust for undershoot of speed */
-        this.state.speedVector = this.state.speedVector.scale(
-            constants.drone.POSITION_CORRECTION_FACTOR
-        );
+        speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);
 
-        this.state.position = this.state.position.add(
-            this.state.speedVector.scale(deltaTime)
-        );
-        this.state.position.z = state.tof;
+        state.position = this.state.position.add(speedVector.scale(deltaTime));
+        state.position.z = state.tof;
+
+        state.rotation = {
+            pitch: state.pitch + this.rotOffset.pitch,
+            roll: state.roll + this.rotOffset.roll,
+            yaw: state.yaw + this.rotOffset.yaw,
+        };
+        state.rotation.pitch = (state.rotation.pitch * Math.PI) / 180;
+        state.rotation.roll = (state.rotation.roll * Math.PI) / 180;
+        state.rotation.yaw = (state.rotation.yaw * Math.PI) / 180;
+        /* Assign state to drone */
+        Object.assign(this.state, state);
         logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
-
-        this.state.rotation.pitch = (state.pitch * Math.PI) / 180;
-        this.state.rotation.yaw = (state.yaw * Math.PI) / 180;
-        this.state.rotation.roll = (state.roll * Math.PI) / 180;
-
-        //
     }
     private onvideo() {
         let isFirst = true;

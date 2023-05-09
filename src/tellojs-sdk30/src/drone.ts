@@ -65,7 +65,6 @@ export class Drone {
             clearTimeout(this.disconnectTimeout);
             /* Only read ini */
             if (this.state.mid != -1) state.mid = this.state.mid;
-            Object.assign(this.state, state);
             this.disconnectTimeout = setTimeout(() => {
                 this._connected = false;
                 logger.log(`Drone ${this.id} disconnected`);

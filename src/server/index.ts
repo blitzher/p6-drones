@@ -18,10 +18,22 @@ import { dronePaths } from "./dronePath";
 const { app } = expressWs(express());
 
 /* Instantiate drones */
-new Drone({ ip: "192.168.1.130" }, constants.drone.START_POS[130]);
-new Drone({ ip: "192.168.1.141" }, constants.drone.START_POS[141]);
+/* new Drone(
+    { ip: "192.168.1.130" },
+    constants.drone.START_POS[130],
+    constants.drone.START_ROT[141]
+); */
+// new Drone(
+//     { ip: "192.168.1.141" },
+//     constants.drone.START_POS[141],
+//     constants.drone.START_ROT[141]
+// );
 // new Drone({ ip: "192.168.1.174" }, constants.drone.START_POS[174]);
-// new Drone({ ip: "192.168.1.191" }, constants.drone.START_POS[191]);
+new Drone(
+    { ip: "192.168.1.191" },
+    constants.drone.START_POS[191],
+    constants.drone.START_ROT[191]
+);
 
 /* Setup web server */
 app.use(express.json());
