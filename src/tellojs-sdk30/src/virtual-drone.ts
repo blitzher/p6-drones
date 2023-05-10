@@ -111,11 +111,9 @@ export class VirtualDrone {
             logger.stat(`Connected to drone ${this.id}@v${sdk}_${bat}%`);
             this._connected = true;
             setInterval(() => {
-                this.position.add(
-                    new Vector3(this.state.speed).scale(
-                        1 / constants.virtual.STATES_PER_SECOND
-                    )
-                );
+                this.virtualState.tof += this.deltaTof;
+                this.virtualState.yaw +=
+                    this.deltaRot / constants.virtual.STATES_PER_SECOND;
                 this.stateEmitter.emitter.emit("message", this.virtualState);
                 this.virtualState.time++;
             }, 1000 / constants.virtual.STATES_PER_SECOND);
@@ -134,12 +132,13 @@ export class VirtualDrone {
             this.resolveNextTimeout = setTimeout(() => {
                 resolve("ok");
                 logger.log(`Virtual resolved (${command})`);
+                logger.log(`Position: ${this.position.toString()}`);
             }, constants.virtual.MS_PER_COMMAND);
         });
-
-        // return await commander.send(command, this.ip, options);
     }
 
+    private deltaRot = 0;
+    private deltaTof = 0;
     private get position(): Vector3 {
         return SRVDrone.allDrones[this.id].state.position;
     }
@@ -148,14 +147,18 @@ export class VirtualDrone {
     private async lerpToPosition(pos: Vector3) {
         this.enqueue(() => {
             return new Promise<void>((resolve) => {
-                const directionToDestination = this.position.subtract(pos);
-                directionToDestination.y = -directionToDestination.y;
+                const directionToDestination = pos.subtract(this.position);
                 this.virtualState.speed = directionToDestination.scale(
                     1000 / (constants.virtual.MS_PER_COMMAND * 10)
                 );
 
+                this.deltaTof =
+                    (this.virtualState.speed.z * 10) /
+                    constants.virtual.STATES_PER_SECOND;
+
                 setTimeout(() => {
                     this.virtualState.speed = { x: 0, y: 0, z: 0 };
+                    this.deltaTof = 0;
                     resolve();
                 }, constants.virtual.MS_PER_COMMAND);
             });
@@ -165,18 +168,21 @@ export class VirtualDrone {
     private async setRotation(amount: number, direction: number) {
         this.enqueue(() => {
             return new Promise<void>((resolve) => {
-                this.virtualState.yaw += amount * direction;
+                const deltaRotation = amount * direction;
+                const targetRotation = this.virtualState.yaw + deltaRotation;
+                this.deltaRot = deltaRotation * (1000 / constants.virtual.MS_PER_COMMAND);
+
                 while (this.virtualState.yaw > 180) {
                     this.virtualState.yaw = this.virtualState.yaw - 360;
                 }
 
                 setTimeout(() => {
+                    this.deltaRot = 0;
+                    this.virtualState.yaw = targetRotation;
                     resolve();
                 }, constants.virtual.MS_PER_COMMAND);
             });
         });
-
-        return new Promise<void>((resolve) => { });
     }
 
     /**
@@ -217,11 +223,19 @@ export class VirtualDrone {
     }
 
     control = {
-        takeOff: (options?: CommandOptions) =>
-            this.control.up(constants.virtual.FLIGHT_HEIGHT, options),
+        takeOff: (options?: CommandOptions) => {
+            const f_height = constants.virtual.FLIGHT_HEIGHT;
+            let targetPos = new Vector3({ x: 0, y: 0, z: f_height });
+            this.lerpToPosition(this.position.add(targetPos));
+            return this.send(`takeoff`, options);
+        },
 
-        land: (options?: CommandOptions) =>
-            this.control.down(constants.virtual.FLIGHT_HEIGHT, options),
+        land: (options?: CommandOptions) => {
+            const f_height = constants.virtual.FLIGHT_HEIGHT;
+            let targetPos = new Vector3({ x: 0, y: 0, z: -f_height });
+            this.lerpToPosition(this.position.add(targetPos));
+            return this.send(`land`, options);
+        },
 
         emergency: (options?: CommandOptions) => this.send("emergency", options),
 
@@ -242,14 +256,12 @@ export class VirtualDrone {
 
         up: (distance: number, options?: CommandOptions) => {
             let targetPos = new Vector3({ x: 0, y: 0, z: distance });
-            targetPos = rotateVectorAroundZAxis(targetPos, this.virtualState.yaw);
             this.lerpToPosition(this.position.add(targetPos));
             return this.send(`up ${Math.round(distance)}`, options);
         },
 
         down: (distance: number, options?: CommandOptions) => {
             let targetPos = new Vector3({ x: 0, y: 0, z: -distance });
-            targetPos = rotateVectorAroundZAxis(targetPos, this.virtualState.yaw);
             this.lerpToPosition(this.position.add(targetPos));
             return this.send(`down ${Math.round(distance)}`, options);
         },

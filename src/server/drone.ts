@@ -104,11 +104,13 @@ export class Drone extends sdk.VirtualDrone {
             (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
-        /* Convert from dm to cm.
-         * Speed forward is negative for some reason */
+        /* Convert from dm to cm */
         let speedVector = new Vector3({ x: 0, y: 0, z: 0 });
-        speedVector.x = -state.speed.x * 10;
+        speedVector.x = state.speed.x * 10;
         speedVector.y = state.speed.y * 10;
+
+        logger.concurrent("deltaTime", `${deltaTime}`);
+        logger.concurrent("speedVector", `${speedVector.toString()}`);
 
         /* Adjust for undershoot of speed and initial rotation*/
         // speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);

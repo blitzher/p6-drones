@@ -49,6 +49,10 @@ export class Vector3 {
     dotP({ x, y, z }: { x: number; y: number; z: number }): number {
         return this.x * x + this.y * y + this.z * z;
     }
+
+    toString() {
+        return `(${this.x}, ${this.y}, ${this.z})`;
+    }
 }
 
 /**
