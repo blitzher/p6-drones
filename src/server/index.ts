@@ -11,6 +11,7 @@ import logger from "../log";
 import * as constants from "./constants.json";
 
 import * as tellojs from "../tellojs-sdk30/src";
+import { Vector3, rotateVectorAroundZAxis } from "./linerAlgebra";
 
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
@@ -38,9 +39,9 @@ const { app } = expressWs(express());
 // );
 
 new Drone({ ip: "0.0.0.101" });
-// new Drone({ ip: "0.0.0.102" });
-// new Drone({ ip: "0.0.0.103" });
-// new Drone({ ip: "0.0.0.104" });
+new Drone({ ip: "0.0.0.102" });
+new Drone({ ip: "0.0.0.103" });
+new Drone({ ip: "0.0.0.104" });
 
 /* Setup web server */
 app.use(express.json());
@@ -70,11 +71,11 @@ const server = app.listen(constants.server.HTTP_PORT, async () => {
     logger.log(`Listening on ${constants.server.HTTP_PORT}...`);
 
     /* Make virtual box */
-    env.environment.addObject({ pos: { x: 120, y: 120, z: 0 } }, 1, "101");
-    env.environment.addObject({ pos: { x: 120, y: -120, z: 0 } }, 2, "102");
-    env.environment.addObject({ pos: { x: -120, y: 120, z: 0 } }, 3, "103");
-    env.environment.addObject({ pos: { x: -120, y: -120, z: 0 } }, 4, "104");
-    env.environment.addObject({ pos: { x: 75, y: 0, z: 0 } }, 1, "101");
+    env.environment.addObject({ pos: { x: 120, y: 120, z: 60 } }, 1, "101");
+    env.environment.addObject({ pos: { x: 120, y: -120, z: 60 } }, 2, "102");
+    env.environment.addObject({ pos: { x: -120, y: 120, z: 60 } }, 3, "103");
+    env.environment.addObject({ pos: { x: -120, y: -120, z: 60 } }, 4, "104");
+    env.environment.addObject({ pos: { x: 75, y: 0, z: 60 } }, 1, "101");
     env.environment.addObject({ pos: { x: 250, y: 30, z: 60 } }, 2, "101");
     env.environment.addObject({ pos: { x: 150, y: 55, z: 60 } }, 3, "101");
     /* Establish connection to drones */
@@ -86,12 +87,7 @@ const server = app.listen(constants.server.HTTP_PORT, async () => {
     });
     env.environment.listen(
         "drone",
-        (data: {
-            droneId: string;
-            dronePosition: Object3D;
-            droneYaw: number;
-            dronePositionHistory: Object3D[];
-        }) => {
+        (data: { droneId: string; dronePosition: Object3D; droneYaw: number; dronePositionHistory: Object3D[] }) => {
             frontendCom.com.drone(data);
         }
     );
