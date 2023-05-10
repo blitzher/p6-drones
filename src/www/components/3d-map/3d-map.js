@@ -17,6 +17,7 @@ const fov = 75;
 const aspect = 4 / 3;
 const near = 0.1;
 const far = 1000;
+THREE.Object3D.Default_Up = new THREE.Vector3(0, 0, 1);
 
 const scene = new THREE.Scene();
 const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
@@ -167,7 +168,7 @@ function make3DCubeInstance(size, pos, color) {
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
-    pos = { x: pos.x, y: pos.z, z: pos.y };
+    pos = { x: pos.x, y: pos.y, z: pos.z };
     cube.position.set(...Object.values(pos));
     return cube;
 }

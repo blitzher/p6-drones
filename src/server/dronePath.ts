@@ -21,12 +21,40 @@ class DronePath {
         const iterations: number = Math.floor(this.mapWidth / this.moveWidth);
         const flyDestination: Vector3 = new Vector3({ x: 0, y: 0, z: 60 });
         this.destinationStore[drone.id] = new Vector3({ x: 0, y: 0, z: 0 });
+        let X: number = 1;
+        let Y: number = 1;
+
+        //For virtual only
+        if (drone.id == "102") {
+            X = -1;
+            Y = 1;
+            yield () => drone.control.counterClockwise(90);
+        }
+        if (drone.id == "103") {
+            X = -1;
+            Y = -1;
+            yield () => drone.control.counterClockwise(180);
+        }
+        if (drone.id == "104") {
+            X = 1;
+            Y = -1;
+            yield () => drone.control.counterClockwise(270);
+
+        }
+        if (drone.id == "101") {
+            yield () => drone.control.counterClockwise(360);
+        }
+
 
         yield () => drone.control.takeOff();
 
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
-                flyDestination.x += this.mapLength;
+                if (drone.id == "102" || drone.id == "104") {
+                    flyDestination.y += this.mapLength * Y;
+                } else {
+                    flyDestination.x += this.mapLength * X;
+                }
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -37,7 +65,11 @@ class DronePath {
                     );
                 yield () => drone.control.counterClockwise(90);
 
-                flyDestination.y += this.moveWidth;
+                if (drone.id == "102" || drone.id == "104") {
+                    flyDestination.x += this.moveWidth * X;
+                } else {
+                    flyDestination.y += this.moveWidth * Y;
+                }
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -48,7 +80,12 @@ class DronePath {
                     );
                 yield () => drone.control.counterClockwise(90);
             } else {
-                flyDestination.x -= this.mapLength;
+                if (drone.id == "102" || drone.id == "104") {
+                    flyDestination.y -= this.mapLength * Y;
+                } else {
+                    flyDestination.x -= this.mapLength * X;
+                }
+                //flyDestination.x -= this.mapLength;
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -59,7 +96,12 @@ class DronePath {
                     );
                 yield () => drone.control.clockwise(90);
 
-                flyDestination.y += this.moveWidth;
+                if (drone.id == "102" || drone.id == "104") {
+                    flyDestination.x += this.moveWidth * X;
+                } else {
+                    flyDestination.y += this.moveWidth * Y;
+                }
+                //flyDestination.y += this.moveWidth;
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -154,6 +196,7 @@ class DronePath {
                 drone.state.position
             );
             if (boxes.length > 0) {
+
                 let closestBox: { box: Object3D; dist: number } = {
                     box: boxes[0],
                     dist: Infinity,
@@ -164,11 +207,10 @@ class DronePath {
                         closestBox = { box, dist };
                     }
                 }
-
                 if (
                     closestBox.dist <
                     (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                        constants.env.ERROR_MARGIN
+                    constants.env.ERROR_MARGIN
                 ) {
                     /* Box is near drone, avoid it */
                     logger.log(
@@ -213,10 +255,10 @@ class DronePath {
         const lengthArray: number[] = [];
         let nearestBoxDist: number;
 
-        flyDestination = linAlg.rotateVectorAroundZAxis(
-            flyDestination,
-            drone.rotOffset.yaw
-        );
+        // flyDestination = linAlg.rotateVectorAroundZAxis(
+        //     flyDestination,
+        //     drone.rotOffset.yaw
+        // );
 
         // Go to position just before hitting the obstacle & locate boxes on either side of current obstacle
         for (const obstacle of obstacles) {
@@ -251,7 +293,7 @@ class DronePath {
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
             (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-                constants.env.ERROR_MARGIN -
+            constants.env.ERROR_MARGIN -
             boxVector.length();
 
         //Minimum value; 10
@@ -266,7 +308,7 @@ class DronePath {
                 forceReady: true,
             })
         );
-
+        console.log(crossProduct.z);
         //Box is to the right
         if (crossProduct.z < 0) {
             maneuver.push(() => drone.control.left(avoidanceDistance));
@@ -284,9 +326,11 @@ class DronePath {
     }
 }
 
-export const dronePaths = {
-    PosPos: new DronePath(60, 300, 30),
-    PosNeg: new DronePath(60, 300, -30),
-    NegPos: new DronePath(60, -300, 30),
-    NegNeg: new DronePath(60, -300, -30),
-};
+export const dronePaths = new DronePath(300, 300, 60);
+
+// export const dronePaths = {
+//     PosPos: new DronePath(60, 300, 30),
+//     PosNeg: new DronePath(60, 300, -30),
+//     NegPos: new DronePath(60, -300, 30),
+//     NegNeg: new DronePath(60, -300, -30),
+// };

@@ -111,10 +111,16 @@ function handle(pkg: Package) {
             for (let drone of Object.values(Drone.allDrones)) {
                 switch (drone.id) {
                     case "101":
-                        dronePaths.PosPos.fly(drone);
+                        dronePaths.fly(drone);
                         break;
                     case "102":
-                        dronePaths.PosNeg.fly(drone);
+                        dronePaths.fly(drone);
+                        break;
+                    case "103":
+                        dronePaths.fly(drone);
+                        break;
+                    case "104":
+                        dronePaths.fly(drone);
                         break;
                 }
             }

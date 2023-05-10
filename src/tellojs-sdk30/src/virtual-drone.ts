@@ -176,7 +176,7 @@ export class VirtualDrone {
             });
         });
 
-        return new Promise<void>((resolve) => {});
+        return new Promise<void>((resolve) => { });
     }
 
     /**
