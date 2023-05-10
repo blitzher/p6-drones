@@ -73,15 +73,15 @@ function addDroneOrUpdatePosition(droneId, droneYaw, position) {
 
         new THREE.MeshPhongMaterial();
 
-        obj.position.set(position.x, position.z, position.y);
+        obj.position.set(position.x, position.z, -position.y);
 
-        obj.setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
+        obj.setRotationFromEuler(new THREE.Euler(0, -droneYaw, 0));
 
         droneObjects[droneId] = obj;
         scene.add(obj);
     } else {
-        droneObjects[droneId].position.set(position.x, position.z, position.y);
-        droneObjects[droneId].setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
+        droneObjects[droneId].position.set(position.x, position.z, -position.y);
+        droneObjects[droneId].setRotationFromEuler(new THREE.Euler(0, -droneYaw, 0));
     }
 }
 

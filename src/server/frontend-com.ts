@@ -100,6 +100,7 @@ export const initialiseWebSocket = (ws: WebSocket) => {
 };
 
 function handle(pkg: Package) {
+    let drone: Drone | undefined;
     switch (pkg.type) {
         case "emergencyStop":
             for (let drone of Object.values(Drone.allDrones)) {
@@ -108,37 +109,50 @@ function handle(pkg: Package) {
             break;
         case "initSearch":
             for (let drone of Object.values(Drone.allDrones)) {
-                // dronePaths.fly(drone);
-
-                drone.control.go({ x: 100, y: 0, z: 0 }, 20);
-                drone.control.go({ x: -100, y: 0, z: 0 }, 20);
-                drone.control.go({ x: 0, y: 0, z: 0 }, 20);
-                drone.control.go({ x: 0, y: 100, z: 0 }, 20);
-                drone.control.go({ x: 0, y: -100, z: 0 }, 20);
-                drone.control.go({ x: 0, y: 0, z: 0 }, 20);
+                switch (drone.id) {
+                    case "101":
+                        dronePaths.PosPos.fly(drone);
+                        break;
+                    case "102":
+                        dronePaths.PosNeg.fly(drone);
+                        break;
+                }
             }
             break;
         case "command":
             let [drone_id, ...cmd] = pkg.data.split(" ");
-            cmd = cmd.join(" ");
 
-            const isStop = cmd == "stop";
+            drone = Drone.allDrones[drone_id];
+            if (!drone) break;
+
+            const cmd_s = cmd.join(" ");
+
+            const isStop = cmd_s == "stop";
             const commandOptions: CommandOptions = {
                 clearQueue: isStop,
                 forceReady: isStop,
             };
 
-            if (cmd == "streamon") {
+            if (cmd_s == "streamon") {
                 Drone.allDrones[drone_id].startVideoStream();
                 break;
             }
 
-            Drone.allDrones[drone_id].command(cmd, commandOptions);
+            // @ts-ignore
+            const func: any = drone.control[cmd[0]];
+            if (func) {
+                if (cmd[0] == "go") {
+                    cmd[3] = { x: cmd[1], y: cmd[2], z: cmd[3] };
+                    cmd = cmd.slice(3);
+                    cmd.unshift("go");
+                }
+                func(...cmd.slice(1));
+            } else Drone.allDrones[drone_id].command(cmd_s, commandOptions);
             break;
         case "marker":
             const marker: MarkerData = pkg.data;
 
-            let drone = env.environment.getDrone(marker.droneId);
+            drone = env.environment.getDrone(marker.droneId);
             marker.relative = linAlg.rotateVectorAroundZAxis(
                 new linAlg.Vector3(marker.relative),
                 (drone.state.rotation.yaw * 180) / Math.PI

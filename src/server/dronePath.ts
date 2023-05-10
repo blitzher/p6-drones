@@ -6,19 +6,19 @@ import * as constants from "./constants.json";
 import * as linAlg from "./linerAlgebra";
 
 class DronePath {
-    mapWidth;
-    mapLength;
+    mapWidth: number;
+    mapLength: number;
+    moveWidth: number;
     destinationStore: { [key: string]: Vector3 } = {};
 
-    constructor(mapWidth: number, mapLength: number) {
+    constructor(mapWidth: number, mapLength: number, moveWidth: number) {
         this.mapWidth = mapWidth;
         this.mapLength = mapLength;
+        this.moveWidth = moveWidth;
     }
 
     public *SnakePattern(drone: Drone): Generator<() => Promise<string>> {
-        const moveWidth: number = 30;
-        const iterations: number = Math.floor(this.mapWidth / moveWidth);
-        const moveLength: number = this.mapLength;
+        const iterations: number = Math.floor(this.mapWidth / this.moveWidth);
         const flyDestination: Vector3 = new Vector3({ x: 0, y: 0, z: 60 });
         this.destinationStore[drone.id] = new Vector3({ x: 0, y: 0, z: 0 });
 
@@ -26,7 +26,7 @@ class DronePath {
 
         for (let index = 0; index < iterations; index++) {
             if (index % 2 == 0) {
-                flyDestination.x += moveLength;
+                flyDestination.x += this.mapLength;
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -37,7 +37,7 @@ class DronePath {
                     );
                 yield () => drone.control.counterClockwise(90);
 
-                flyDestination.y += moveWidth;
+                flyDestination.y += this.moveWidth;
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -48,7 +48,7 @@ class DronePath {
                     );
                 yield () => drone.control.counterClockwise(90);
             } else {
-                flyDestination.x -= moveLength;
+                flyDestination.x -= this.mapLength;
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -59,7 +59,7 @@ class DronePath {
                     );
                 yield () => drone.control.clockwise(90);
 
-                flyDestination.y += moveWidth;
+                flyDestination.y += this.moveWidth;
                 this.destinationStore[drone.id] = flyDestination;
 
                 yield () =>
@@ -77,10 +77,11 @@ class DronePath {
         const relevantBoxes: Object3D[] = [];
         const deltaPosition = flyDestination.subtract(start);
         const moveVector: Vector3 = deltaPosition.normalise();
-
+        const checkInterval = constants.env.DRONE_RADIUS;
         for (const box of Object.values(environment.objects)) {
             //Checks each 5 cm. if there is a box in the path
-            for (let i = 5; i < deltaPosition.length(); i += 5) {
+
+            for (let i = checkInterval; i < deltaPosition.length(); i += checkInterval) {
                 const positionOffset = moveVector.scale(i);
                 const prospectedPosition = start.add(positionOffset);
                 const dronePosition = new Object3D(
@@ -269,13 +270,13 @@ class DronePath {
         //Box is to the right
         if (crossProduct.z < 0) {
             maneuver.push(() => drone.control.left(avoidanceDistance));
-            maneuver.push(() => drone.control.forward(boxOffset * 2 + 2));
+            maneuver.push(() => drone.control.forward(boxOffset * 2));
             maneuver.push(() => drone.control.right(avoidanceDistance));
         }
         //Box is to the left
         else {
             maneuver.push(() => drone.control.right(avoidanceDistance));
-            maneuver.push(() => drone.control.forward(boxOffset * 2 + 2));
+            maneuver.push(() => drone.control.forward(boxOffset * 2));
             maneuver.push(() => drone.control.left(avoidanceDistance));
         }
 
@@ -283,4 +284,9 @@ class DronePath {
     }
 }
 
-export const dronePaths: DronePath = new DronePath(60, 300);
+export const dronePaths = {
+    PosPos: new DronePath(60, 300, 30),
+    PosNeg: new DronePath(60, 300, -30),
+    NegPos: new DronePath(60, -300, 30),
+    NegNeg: new DronePath(60, -300, -30),
+};

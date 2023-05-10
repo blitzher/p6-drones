@@ -15,6 +15,7 @@
     },
     "virtual": {
         "STATES_PER_SECOND": 20,
-        "MS_PER_COMMAND": 5000
+        "MS_PER_COMMAND": 5000,
+        "FLIGHT_HEIGHT": 30
     }
 }

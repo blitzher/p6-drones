@@ -40,6 +40,9 @@ const { app } = expressWs(express());
 // );
 
 new Drone({ ip: "0.0.0.101" });
+new Drone({ ip: "0.0.0.102" });
+new Drone({ ip: "0.0.0.103" });
+new Drone({ ip: "0.0.0.104" });
 
 /* Setup web server */
 app.use(express.json());

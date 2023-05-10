@@ -124,15 +124,16 @@ export class VirtualDrone {
     }
 
     public startVideoStream() {
-        /* logger.info(`Starting video stream on ${this.id}`); */
+        logger.info(`Starting video stream on ${this.id}`);
         /* this.videoStream.start(); */
     }
 
     private async send(command: string, options?: CommandOptions): Promise<string> {
         return new Promise((resolve) => {
             logger.log(`Sending ${this.id}:${command}`);
-            setTimeout(() => {
+            this.resolveNextTimeout = setTimeout(() => {
                 resolve("ok");
+                logger.log(`Virtual resolved (${command})`);
             }, constants.virtual.MS_PER_COMMAND);
         });
 
@@ -142,10 +143,13 @@ export class VirtualDrone {
     private get position(): Vector3 {
         return SRVDrone.allDrones[this.id].state.position;
     }
+    private resolveNextTimeout: NodeJS.Timeout | undefined;
+
     private async lerpToPosition(pos: Vector3) {
         this.enqueue(() => {
             return new Promise<void>((resolve) => {
                 const directionToDestination = this.position.subtract(pos);
+                directionToDestination.y = -directionToDestination.y;
                 this.virtualState.speed = directionToDestination.scale(
                     1000 / (constants.virtual.MS_PER_COMMAND * 10)
                 );
@@ -187,17 +191,22 @@ export class VirtualDrone {
 
     private busy = false;
     private queue: (() => Promise<void>)[] = [];
-    async enqueue(func: () => Promise<void>, options?: CommandOptions) {
+    private async enqueue(func: () => Promise<void>, options?: CommandOptions) {
         if (!options) options = {};
 
-        if (options.overwriteQueue) this.queue.splice(0, 0, func);
-        else this.queue.push(func);
+        if (options.overwriteQueue) {
+            this.queue.splice(0, 0, func);
+        } else this.queue.push(func);
+
+        if (options.overwriteQueue && options.forceReady) {
+            clearTimeout(this.resolveNextTimeout);
+        }
 
         if (options.forceReady) this.busy = false;
         if (!this.busy) this.runNextInQueue();
     }
 
-    async runNextInQueue() {
+    private async runNextInQueue() {
         const next = this.queue.shift();
         if (next) {
             this.busy = true;
@@ -208,9 +217,11 @@ export class VirtualDrone {
     }
 
     control = {
-        takeOff: (options?: CommandOptions) => this.send("takeoff", options),
+        takeOff: (options?: CommandOptions) =>
+            this.control.up(constants.virtual.FLIGHT_HEIGHT, options),
 
-        land: (options?: CommandOptions) => this.send("land", options),
+        land: (options?: CommandOptions) =>
+            this.control.down(constants.virtual.FLIGHT_HEIGHT, options),
 
         emergency: (options?: CommandOptions) => this.send("emergency", options),
 
