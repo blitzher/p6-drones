@@ -116,7 +116,8 @@ function initialise() {
         orbitControls.update();
 
         renderer.render(scene, camera);
-        requestAnimationFrame(mainLoop, 1000 / 60);
+        setTimeout(requestAnimationFrame(mainLoop), 1000 / 60)
+
     }
     mainLoop();
 }
