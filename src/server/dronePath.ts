@@ -39,12 +39,10 @@ class DronePath {
             X = 1;
             Y = -1;
             yield () => drone.control.counterClockwise(270);
-
         }
         if (drone.id == "101") {
             yield () => drone.control.counterClockwise(360);
         }
-
 
         yield () => drone.control.takeOff();
 
@@ -57,12 +55,7 @@ class DronePath {
                 }
                 this.destinationStore[drone.id] = flyDestination;
 
-                yield () =>
-                    drone.control.go(
-                        flyDestination,
-                        constants.drone.SPEED,
-                        `m${drone.state.mid}`
-                    );
+                yield () => drone.control.go(flyDestination, constants.drone.SPEED, `m${drone.state.mid}`);
                 yield () => drone.control.counterClockwise(90);
 
                 if (drone.id == "102" || drone.id == "104") {
@@ -72,12 +65,7 @@ class DronePath {
                 }
                 this.destinationStore[drone.id] = flyDestination;
 
-                yield () =>
-                    drone.control.go(
-                        flyDestination,
-                        constants.drone.SPEED,
-                        `m${drone.state.mid}`
-                    );
+                yield () => drone.control.go(flyDestination, constants.drone.SPEED, `m${drone.state.mid}`);
                 yield () => drone.control.counterClockwise(90);
             } else {
                 if (drone.id == "102" || drone.id == "104") {
@@ -88,12 +76,7 @@ class DronePath {
                 //flyDestination.x -= this.mapLength;
                 this.destinationStore[drone.id] = flyDestination;
 
-                yield () =>
-                    drone.control.go(
-                        flyDestination,
-                        constants.drone.SPEED,
-                        `m${drone.state.mid}`
-                    );
+                yield () => drone.control.go(flyDestination, constants.drone.SPEED, `m${drone.state.mid}`);
                 yield () => drone.control.clockwise(90);
 
                 if (drone.id == "102" || drone.id == "104") {
@@ -104,12 +87,7 @@ class DronePath {
                 //flyDestination.y += this.moveWidth;
                 this.destinationStore[drone.id] = flyDestination;
 
-                yield () =>
-                    drone.control.go(
-                        flyDestination,
-                        constants.drone.SPEED,
-                        `m${drone.state.mid}`
-                    );
+                yield () => drone.control.go(flyDestination, constants.drone.SPEED, `m${drone.state.mid}`);
                 yield () => drone.control.clockwise(90);
             }
         }
@@ -150,8 +128,6 @@ class DronePath {
 
     public async fly(drone: Drone) {
         return new Promise<void>((resolve) => {
-
-
             if (drone.inFlight) return;
             drone.inFlight = true;
 
@@ -169,12 +145,8 @@ class DronePath {
                     return;
                 }
 
-                let boxes = this.getRelevantBoxes(
-                    this.destinationStore[drone.id],
-                    drone.state.position
-                );
+                let boxes = this.getRelevantBoxes(this.destinationStore[drone.id], drone.state.position);
                 if (boxes.length > 0) {
-
                     let closestBox: { box: Object3D; dist: number } = {
                         box: boxes[0],
                         dist: Infinity,
@@ -187,20 +159,13 @@ class DronePath {
                     }
                     if (
                         closestBox.dist <
-                        (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) *
-                        constants.env.ERROR_MARGIN
+                        (constants.env.BOX_RADIUS + constants.env.DRONE_RADIUS) * constants.env.ERROR_MARGIN
                     ) {
                         /* Box is near drone, avoid it */
                         logger.log(
-                            `Found box ${JSON.stringify(boxes[0])} drone at ${JSON.stringify(
-                                drone.state.position
-                            )}`
+                            `Found box ${JSON.stringify(boxes[0])} drone at ${JSON.stringify(drone.state.position)}`
                         );
-                        const maneuver = this.maneuver(
-                            boxes,
-                            this.destinationStore[drone.id],
-                            drone
-                        );
+                        const maneuver = this.maneuver(boxes, this.destinationStore[drone.id], drone);
                         for (let maneuverStep of maneuver) {
                             logger.log("Performing maneuver...");
                             await maneuverStep();
@@ -226,7 +191,7 @@ class DronePath {
                 });
             };
             loop();
-        })
+        });
     }
 
     public maneuver(obstacles: Object3D[], flyDestination: Vector3, drone: Drone) {
@@ -271,9 +236,7 @@ class DronePath {
         const boxVector = boxProjection.subtract(boxPosition);
         //Giving the drone plenty of room to avoid the box.
         let avoidanceDistance: number =
-            (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) *
-            constants.env.ERROR_MARGIN -
-            boxVector.length();
+            (constants.env.DRONE_RADIUS + constants.env.BOX_RADIUS) * constants.env.ERROR_MARGIN - boxVector.length();
 
         //Minimum value; 10
         boxOffset = boxOffset < 10 ? 10 : boxOffset;
@@ -287,7 +250,6 @@ class DronePath {
                 forceReady: true,
             })
         );
-        console.log(crossProduct.z);
         //Box is to the right
         if (crossProduct.z < 0) {
             maneuver.push(() => drone.control.left(avoidanceDistance));

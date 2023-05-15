@@ -6,7 +6,7 @@ import logger from "../log";
 import { CommandOptions } from "../tellojs-sdk30/src/commander";
 import { dronePaths } from "./dronePath";
 import * as linAlg from "./linerAlgebra";
-import * as constants from "./constants.json"
+import * as constants from "./constants.json";
 
 type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
@@ -56,8 +56,7 @@ export const com = {
             );
     },
     environment: (data: env.Object3D[]) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
     },
     drone: (data: {
         droneId: string;
@@ -65,8 +64,7 @@ export const com = {
         droneYaw: number;
         dronePositionHistory: env.Object3D[];
     }) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "drone", data }));
+        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -114,13 +112,13 @@ function handle(pkg: Package) {
                     const targetBox = Object.values(env.environment.objects).filter((o) => o.isTarget)[0];
                     const { x, y, z } = targetBox;
                     if (drone.id == targetBox.whoScanned) {
-                        drone.control.go({ x, y, z: z + constants.drone.TARGET_HOVER_HEIGHT }, 50)
-                    }
-                    else {
+                        drone.control.go({ x, y, z: z + constants.drone.TARGET_HOVER_HEIGHT }, 50);
+                    } else {
+                        drone.control.up(60);
                         drone.control.go({ x: 0, y: 0, z: 60 }, 50);
-                        drone.control.land()
+                        drone.control.land();
                     }
-                    logger.info(`Virtual:${drone.id} done flight`)
+                    logger.info(`Virtual:${drone.id} done flight`);
                 });
             }
             break;

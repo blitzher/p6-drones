@@ -17,8 +17,8 @@
         "droneDisconnectTimeout": 5000
     },
     "virtual": {
-        "STATES_PER_SECOND": 20,
-        "MS_PER_COMMAND": 3000,
+        "STATES_PER_SECOND": 40,
+        "MS_PER_COMMAND": 2000,
         "FLIGHT_HEIGHT": 60
     }
 }

@@ -113,7 +113,7 @@ export class VirtualDrone {
             logger.stat(`Connected to drone ${this.id}@v${sdk}_${bat}%`);
             this._connected = true;
             setInterval(() => {
-                this.virtualState.tof += this.deltaTof / constants.virtual.STATES_PER_SECOND;
+                this.virtualState.tof += this.deltaTof;
                 this.virtualState.yaw += this.deltaRot / constants.virtual.STATES_PER_SECOND;
                 this.stateEmitter.emitter.emit("message", this.virtualState);
                 this.virtualState.time++;
@@ -151,7 +151,7 @@ export class VirtualDrone {
                 const directionToDestination = pos.subtract(this.position);
                 this.virtualState.speed = directionToDestination.scale(1000 / (constants.virtual.MS_PER_COMMAND * 10));
 
-                this.deltaTof = (this.virtualState.speed.z) * constants.virtual.STATES_PER_SECOND;
+                this.deltaTof = (this.virtualState.speed.z * 10) / constants.virtual.STATES_PER_SECOND;
 
                 setTimeout(() => {
                     this.virtualState.speed = { x: 0, y: 0, z: 0 };
@@ -165,10 +165,10 @@ export class VirtualDrone {
     private async lerpToRelative(pos: Vector3) {
         this.enqueue(() => {
             return new Promise<void>((resolve) => {
-                const directionToDestination = pos
+                const directionToDestination = pos;
                 this.virtualState.speed = directionToDestination.scale(1000 / (constants.virtual.MS_PER_COMMAND * 10));
 
-                this.deltaTof = this.virtualState.speed.z * constants.virtual.STATES_PER_SECOND / 2;
+                this.deltaTof = (this.virtualState.speed.z * 10) / constants.virtual.STATES_PER_SECOND;
 
                 setTimeout(() => {
                     this.virtualState.speed = { x: 0, y: 0, z: 0 };
