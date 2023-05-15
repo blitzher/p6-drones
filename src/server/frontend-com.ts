@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import logger from "../log";
 import { CommandOptions } from "../tellojs-sdk30/src/commander";
 import { dronePaths } from "./dronePath";
+import * as linAlg from "./linerAlgebra";
+import * as constants from "./constants.json";
 
 type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
@@ -54,8 +56,7 @@ export const com = {
             );
     },
     environment: (data: env.Object3D[]) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
     },
     drone: (data: {
         droneId: string;
@@ -63,8 +64,7 @@ export const com = {
         droneYaw: number;
         dronePositionHistory: env.Object3D[];
     }) => {
-        for (let { client } of clients)
-            client.send(JSON.stringify({ type: "drone", data }));
+        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -99,6 +99,7 @@ export const initialiseWebSocket = (ws: WebSocket) => {
 };
 
 function handle(pkg: Package) {
+    let drone: Drone | undefined;
     switch (pkg.type) {
         case "emergencyStop":
             for (let drone of Object.values(Drone.allDrones)) {
@@ -107,30 +108,58 @@ function handle(pkg: Package) {
             break;
         case "initSearch":
             for (let drone of Object.values(Drone.allDrones)) {
-                dronePaths.fly(drone);
+                dronePaths.fly(drone).then(() => {
+                    const targetBox = Object.values(env.environment.objects).filter((o) => o.isTarget)[0];
+                    const { x, y, z } = targetBox;
+                    if (drone.id == targetBox.whoScanned) {
+                        drone.control.go({ x, y, z: z + constants.drone.TARGET_HOVER_HEIGHT }, 50);
+                    } else {
+                        drone.control.up(60);
+                        drone.control.go({ x: 0, y: 0, z: 60 }, 50);
+                        drone.control.land();
+                    }
+                    logger.info(`Virtual:${drone.id} done flight`);
+                });
             }
             break;
         case "command":
             let [drone_id, ...cmd] = pkg.data.split(" ");
-            cmd = cmd.join(" ");
 
-            const isStop = cmd == "stop";
+            drone = Drone.allDrones[drone_id];
+            if (!drone) break;
+
+            const cmd_s = cmd.join(" ");
+
+            const isStop = cmd_s == "stop";
             const commandOptions: CommandOptions = {
                 clearQueue: isStop,
                 forceReady: isStop,
             };
 
-            if (cmd == "streamon") {
+            if (cmd_s == "streamon") {
                 Drone.allDrones[drone_id].startVideoStream();
                 break;
             }
 
-            Drone.allDrones[drone_id].command(cmd, commandOptions);
+            // @ts-ignore
+            const func: any = drone.control[cmd[0]];
+            if (func) {
+                if (cmd[0] == "go") {
+                    cmd[3] = { x: cmd[1], y: cmd[2], z: cmd[3] };
+                    cmd = cmd.slice(3);
+                    cmd.unshift("go");
+                }
+                func(...cmd.slice(1));
+            } else Drone.allDrones[drone_id].command(cmd_s, commandOptions);
             break;
         case "marker":
             const marker: MarkerData = pkg.data;
 
-            let drone = env.environment.getDrone(marker.droneId);
+            drone = env.environment.getDrone(marker.droneId);
+            marker.relative = linAlg.rotateVectorAroundZAxis(
+                new linAlg.Vector3(marker.relative),
+                (drone.state.rotation.yaw * 180) / Math.PI
+            );
             /* Relative is in mm, so convert to cm */
             let x = Math.round(marker.relative.x / 10 + drone.state.position.x);
             let y = Math.round(marker.relative.y / 10 + drone.state.position.y);

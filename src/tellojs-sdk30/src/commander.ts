@@ -19,6 +19,7 @@ export type Command = {
     argument: string;
     destination: IP;
     reject: (reason: string) => void;
+    id: number;
     options: CommandOptions;
 };
 

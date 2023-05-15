@@ -47,14 +47,12 @@ function handle(pkg, ws) {
             break;
         case "environment" /* [Object3D] */:
             environment3d.clearCubes();
-            console.log(pkg.data);
             for (let marker of Object.values(pkg.data)) {
                 environment3d.make3DCubeInstance(
                     { x: 30, y: 30, z: 30 },
-                    { x: marker.x, y: marker.z, z: -marker.y },
-                    0x0000ff
+                    { x: marker.x, y: marker.y, z: marker.z },
+                    marker.isTarget ? 0xff0000 : 0x0000ff
                 );
-                environment3d.render3DCube(pkg.data);
             }
 
             break;
@@ -68,8 +66,8 @@ function handle(pkg, ws) {
         case "drone":
             const { droneId, dronePosition, droneYaw, dronePositionHistory } = pkg.data;
 
-            environment3d.drawPathLine(dronePositionHistory, droneId);
             environment3d.clearPathLine(droneId);
+            environment3d.drawPathLine(dronePositionHistory, droneId);
             environment3d.addDroneOrUpdatePosition(droneId, droneYaw, dronePosition);
             break;
         default:

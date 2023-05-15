@@ -1,26 +1,82 @@
 {
     "env": {
-        "BOX_RADIUS": 30,
-        "DRONE_RADIUS": 30,
+        "BOX_RADIUS": 15,
+        "DRONE_RADIUS": 15,
         "ERROR_MARGIN": 1.5,
-        "TARGET_ID": 2
+        "TARGET_ID": 100,
+        "VIRTUAL_TARGET_POSITION": {
+            "x": 100,
+            "y": 100,
+            "z": 60
+        }
     },
     "drone": {
         "POSITION_HISTORY_RESOLUTION": 10,
         "SPEED": 20,
         "POSITION_CORRECTION_FACTOR": 1.75,
-        "TARGET_FLIGHT_HEIGHT": 150,
-        "ADDRESSES": ["192.168.1.130", "192.168.1.141", "192.168.1.174", "192.168.1.191"],
+        "TARGET_HOVER_HEIGHT": 30,
+        "ADDRESSES": [
+            "192.168.1.130",
+            "192.168.1.141",
+            "192.168.1.174",
+            "192.168.1.191"
+        ],
         "START_POS": {
-            "130": { "x": 0, "y": 0, "z": 0 },
-            "141": { "x": 0, "y": 10, "z": 0 },
-            "174": { "x": 0, "y": 20, "z": 0 },
-            "191": { "x": 0, "y": 30, "z": 0 }
+            "130": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "141": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "174": {
+                "x": -50,
+                "y": 0,
+                "z": 0
+            },
+            "191": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            }
+        },
+        "START_ROT": {
+            "130": {
+                "pitch": 0,
+                "yaw": 0,
+                "roll": 0
+            },
+            "141": {
+                "pitch": 0,
+                "yaw": 0,
+                "roll": 0
+            },
+            "174": {
+                "pitch": 0,
+                "yaw": 180,
+                "roll": 0
+            },
+            "191": {
+                "pitch": 0,
+                "yaw": 0,
+                "roll": 0
+            }
         }
     },
     "server": {
         "HTTP_PORT": 42069,
         "BITRATE_TIMESAMPLE_MS": 7500
     },
-    "validIds": [2, 3, 4, 5, 6, 7, 8]
+    "validIds": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+    ]
 }

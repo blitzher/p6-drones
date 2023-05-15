@@ -2,6 +2,7 @@ import { EventEmitter } from "stream";
 import { Drone, DroneId } from "./drone";
 import * as constants from "./constants.json";
 import * as fs from "fs";
+import { dist } from "./linerAlgebra";
 
 export class Object3D {
     x: number;
@@ -9,6 +10,7 @@ export class Object3D {
     z: number;
     radius: number;
     id: number;
+    isTarget: boolean;
     whoScanned?: string;
 
     constructor(
@@ -25,6 +27,7 @@ export class Object3D {
         this.radius = radius;
         this.id = id ?? -1;
         this.whoScanned = whoScanned;
+        this.isTarget = this.id === constants.env.TARGET_ID;
     }
 
     collidesWith(other: Object3D): boolean {
@@ -38,19 +41,7 @@ export class Object3D {
 class Environment extends EventEmitter {
     public objects: { [key: number]: Object3D } = {};
     private dronePositionHistory: Object3D[] = [];
-    private borderLength = 200;
     private drones: { [key: string]: Drone } = {};
-    public mapWidth: number = 200;
-    public mapLength: number = 200; //200 x 200 cm default environment
-
-    public outsideBoundary(drone: Object3D): boolean {
-        const actualLength = Math.sqrt(Math.abs(drone.x) ** 2 + Math.abs(drone.y) ** 2);
-
-        if (actualLength > this.borderLength || drone.z > this.borderLength) {
-            return true;
-        }
-        return false;
-    }
 
     public addDrone(drone: Drone) {
         this.drones[drone.id] = drone;
@@ -91,6 +82,11 @@ class Environment extends EventEmitter {
 
     public updateDronePosition(id: string) {
         const drone = this.drones[id];
+
+        if (drone.isVirtual && dist(drone.state.position, constants.env.VIRTUAL_TARGET_POSITION) < 100) {
+            this.addObject({ pos: constants.env.VIRTUAL_TARGET_POSITION }, constants.env.TARGET_ID, drone.id);
+        }
+
         this.emit("drone", {
             droneId: id,
             dronePosition: drone.state.position,
@@ -102,7 +98,6 @@ class Environment extends EventEmitter {
     /* Emit the environment to be sent to the frontend */
     public emitEnvironment() {
         this.emit("objects", this.objects);
-        this.emit("dimensions", this.mapWidth, this.mapLength);
 
         for (let drone of Object.values(this.drones)) {
             this.emit("drone", {
@@ -126,14 +121,14 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                  event: "drone",
-                  listener: (data: {
-                      droneId: DroneId;
-                      dronePosition: Object3D;
-                      droneYaw: number;
-                      dronePositionHistory: Object3D[];
-                  }) => void
-              ]
+                event: "drone",
+                listener: (data: {
+                    droneId: DroneId;
+                    dronePosition: Object3D;
+                    droneYaw: number;
+                    dronePositionHistory: Object3D[];
+                }) => void
+            ]
     ): this {
         return this.on(args[0], args[1]);
     }

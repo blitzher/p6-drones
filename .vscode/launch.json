@@ -4,17 +4,17 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "type": "node",
-            "runtimeExecutable": "/Users/skovborg/.nvm/versions/node/v18.14.2/bin/node",
-            "request": "launch",
-            "name": "Launch Typescript",
-            "program": "${workspaceFolder}/src/server/index.ts",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/build/**/*.js"
-            ]
-        },
+        // {
+        //     "type": "node",
+        //     "runtimeExecutable": "/Users/skovborg/.nvm/versions/node/v18.14.2/bin/node",
+        //     "request": "launch",
+        //     "name": "Launch Typescript",
+        //     "program": "${workspaceFolder}/src/server/index.ts",
+        //     "preLaunchTask": "tsc: build - tsconfig.json",
+        //     "outFiles": [
+        //         "${workspaceFolder}/build/**/*.js"
+        //     ]
+        // },
         {
             "type": "node",
             "runtimeExecutable": "C:\\Users\\hmarti19\\AppData\\Roaming\\nvm\\v18.16.0\\node.exe",

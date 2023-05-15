@@ -1,7 +1,8 @@
 import * as dgram from "dgram";
 import { Commander } from "./commander";
 import { Drone } from "./drone";
-import { StateInfo as _StateInfo } from "./commands/streams";
+import { VirtualDrone } from "./virtual-drone";
+import { StateInfo as _StateInfo } from "./streams/streams";
 
 export type IP = string;
 export type Port = number;
@@ -15,6 +16,7 @@ export const close = () => {
 
 export default {
     Drone,
+    VirtualDrone,
     commander,
     close,
 };

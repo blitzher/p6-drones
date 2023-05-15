@@ -5,7 +5,7 @@ import bottomBar from "../components/bottom-bar/bottom-bar.js";
 
 window.addEventListener("load", (doc, ev) => {
     communication.initialise();
-    //map3d.render3DCube();
+    map3d.initialise();
     bottomBar.initialise();
     const camIds = droneCam.initialise();
 
@@ -17,7 +17,9 @@ window.addEventListener("load", (doc, ev) => {
 
             if (markers != undefined && markers.length > 0) {
                 markers = markers.filter(
-                    (marker) => Math.abs(droneCam.estimateDistance(marker, id)) < 5000
+                    (marker) =>
+                        marker.id <= 10 &&
+                        Math.abs(droneCam.estimateDistance(marker, id)) < 5000
                 );
                 droneCam.renderMarkers(markers, id);
 

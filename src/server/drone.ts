@@ -3,7 +3,7 @@ import sdk, { StateInfo as sdkStateInfo } from "../tellojs-sdk30/src";
 import { H264Segmenter } from "./h264-segmenter";
 import { com } from "./frontend-com";
 import * as env from "./environment";
-import { Vector3 } from "./linerAlgebra";
+import { Vector3, rotateVectorAroundZAxis } from "./linerAlgebra";
 import logger from "../log";
 import * as constants from "./constants.json";
 
@@ -20,7 +20,7 @@ interface StateInfo extends sdkStateInfo {
     speedVector: Vector3;
 }
 
-export class Drone extends sdk.Drone {
+export class Drone extends sdk.VirtualDrone {
     static allDrones: { [key: string]: Drone } = {};
 
     /* Setup public attributes */
@@ -62,6 +62,11 @@ export class Drone extends sdk.Drone {
     public inFlight: boolean = false;
 
     private lastStateTime: number;
+    public readonly rotOffset: { pitch: number; yaw: number; roll: number } = {
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+    };
 
     /**
      *
@@ -70,7 +75,8 @@ export class Drone extends sdk.Drone {
      */
     constructor(
         { ip, port }: { ip: string; port?: { state: number; video: number } },
-        startingPostition?: { x: number; y: number; z: number }
+        startingPostition?: { x: number; y: number; z: number },
+        startingRotation?: { pitch: number; yaw: number; roll: number }
     ) {
         super(ip, port);
 
@@ -80,6 +86,9 @@ export class Drone extends sdk.Drone {
 
         if (startingPostition) {
             this.state.position = new Vector3(startingPostition);
+        }
+        if (startingRotation) {
+            this.rotOffset = startingRotation;
         }
 
         this.lastStateTime = Date.now();
@@ -95,34 +104,33 @@ export class Drone extends sdk.Drone {
             (now - this.lastStateTime) / 1000; /* Divide by 1000 to get seconds */
         this.lastStateTime = now;
 
-        /* Convert from dm to cm.
-         * Speed forward is negative for some reason */
-        this.state.speedVector.x = -state.speed.x * 10;
-        this.state.speedVector.y = state.speed.y * 10;
+        /* Convert from dm to cm */
+        let speedVector = new Vector3({ x: 0, y: 0, z: 0 });
+        speedVector.x = state.speed.x * 10;
+        speedVector.y = state.speed.y * 10;
 
-        /* Adjust for undershoot of speed */
-        this.state.speedVector = this.state.speedVector.scale(
-            constants.drone.POSITION_CORRECTION_FACTOR
-        );
+        logger.concurrent("deltaTime", `${deltaTime}`);
+        logger.concurrent("speedVector", `${speedVector.toString()}`);
 
-        this.state.position = this.state.position.add(
-            this.state.speedVector.scale(deltaTime)
-        );
-        this.state.position.z = state.tof;
+        /* Adjust for undershoot of speed and initial rotation*/
+        // speedVector = speedVector.scale(constants.drone.POSITION_CORRECTION_FACTOR);
+        speedVector = rotateVectorAroundZAxis(speedVector, this.rotOffset.yaw);
+
+        state.position = this.state.position.add(speedVector.scale(deltaTime));
+
+        state.position.z = state.tof;
+
+        state.rotation = {
+            pitch: state.pitch + this.rotOffset.pitch,
+            roll: state.roll + this.rotOffset.roll,
+            yaw: state.yaw + this.rotOffset.yaw,
+        };
+        state.rotation.pitch = (state.rotation.pitch * Math.PI) / 180;
+        state.rotation.roll = (state.rotation.roll * Math.PI) / 180;
+        state.rotation.yaw = (state.rotation.yaw * Math.PI) / 180;
+        /* Assign state to drone */
+        Object.assign(this.state, state);
         logger.concurrent(`D${this.id} State`, JSON.stringify(this.state, undefined, 2));
-
-        this.state.rotation.pitch = (state.pitch * Math.PI) / 180;
-        this.state.rotation.yaw = (state.yaw * Math.PI) / 180;
-        this.state.rotation.roll = (state.roll * Math.PI) / 180;
-
-        const lastEntryInHistory = this.positionHistory[this.positionHistory.length - 1];
-        const deltaPosition = this.state.position.subtract(lastEntryInHistory);
-        if (
-            !lastEntryInHistory ||
-            deltaPosition.length() > constants.drone.POSITION_HISTORY_RESOLUTION
-        ) {
-            this.positionHistory.push(new Vector3(this.state.position));
-        }
     }
     private onvideo() {
         let isFirst = true;

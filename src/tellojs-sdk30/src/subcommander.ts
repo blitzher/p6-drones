@@ -7,9 +7,12 @@ import logger from "../../log";
 export class Subcommander {
     private commandQueue: Command[] = [];
     private rejectTimeout: NodeJS.Timeout | undefined;
-    private callbackFunction?: (response: string) => any;
+    private callbackFunctions: { [key: string]: any } = {};
     private emitter: EventEmitter = new EventEmitter();
     private busy: boolean = false;
+
+    private next_command_id = 0;
+    private most_recently_dispatched!: Command;
 
     public connected: boolean;
     private commanderRef: Commander;
@@ -36,9 +39,10 @@ export class Subcommander {
     }
 
     public receive(message: string) {
-        if (this.callbackFunction) {
-            this.callbackFunction(message);
-            this.callbackFunction = undefined;
+        const callbackFunction = this.callbackFunctions[this.most_recently_dispatched.id];
+        if (callbackFunction) {
+            callbackFunction(message);
+            delete this.callbackFunctions[this.most_recently_dispatched.id];
         }
         /* Clear the timeout  */
         if (this.expectedResponse != undefined) {
@@ -54,7 +58,13 @@ export class Subcommander {
 
     public async enqueue(command: string, ip: IP, options: CommandOptions) {
         return new Promise<string>(async (resolve, reject) => {
-            const cmd = { argument: command, destination: ip, reject, options };
+            const cmd: Command = {
+                argument: command,
+                destination: ip,
+                reject,
+                options,
+                id: this.next_command_id++,
+            };
 
             if (options.forceReady) this.busy = false;
 
@@ -66,7 +76,7 @@ export class Subcommander {
                 this.commandQueue.push(cmd);
             }
 
-            this.callbackFunction = resolve;
+            this.callbackFunctions[cmd.id] = resolve;
             this.emitter.emit("message", cmd);
         });
     }
@@ -81,6 +91,7 @@ export class Subcommander {
 
         this.busy = true;
         this.expectedResponse = command.options.expectedResponse;
+        this.most_recently_dispatched = command;
         this.commanderRef.dispatch(command);
 
         if (command.options.timeout) {

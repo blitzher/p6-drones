@@ -17,6 +17,7 @@ const fov = 75;
 const aspect = 4 / 3;
 const near = 0.1;
 const far = 1000;
+THREE.Object3D.Default_Up = new THREE.Vector3(0, 0, 1);
 
 const scene = new THREE.Scene();
 const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
@@ -34,10 +35,10 @@ let loadCachedFlag = false;
 
 const droneObjects = {};
 const droneColours = {
-    130: new THREE.Color(0xff, 0, 0),
-    141: new THREE.Color(0, 0xff, 0),
-    174: new THREE.Color(0xff, 0xff, 0),
-    191: new THREE.Color(0xaa, 0, 0xff),
+    130: new THREE.Color(0xff, 0, 0) /* red */,
+    141: new THREE.Color(0, 0xff, 0) /* green */,
+    174: new THREE.Color(0xff, 0xff, 0) /* orange */,
+    191: new THREE.Color(0xaa, 0, 0xff) /* purple */,
 };
 const droneLines = {};
 
@@ -45,7 +46,7 @@ const droneLines = {};
 // loader.load("../../resources/drone.glb", (gltf) => {
 //     /** @type {THREE.Object3D} */
 //     const obj = gltf.scene;
-//     obj.scale.set(10, 10, 10);
+//     obj.scale.set(20, 20, 20);
 //     obj.castShadow = true;
 //     /** @type {THREE.Mesh} */
 //     const mesh = obj.children[0];
@@ -63,7 +64,6 @@ loader.load("../../resources/drone.glb", (gltf) => {
 
 function addDroneOrUpdatePosition(droneId, droneYaw, position) {
     /* If model data is not yet loaded, don't do anything */
-    console.log(droneYaw);
     if (droneModelGeometry == undefined) return;
     if (droneObjects[droneId] == undefined) {
         /** @type {THREE.Object3D} */
@@ -74,21 +74,19 @@ function addDroneOrUpdatePosition(droneId, droneYaw, position) {
 
         new THREE.MeshPhongMaterial();
 
-        obj.translateX(-position.x);
-        obj.translateY(position.z);
-        obj.translateZ(position.y);
+        obj.position.set(position.x, position.z, -position.y);
 
-        obj.setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
+        obj.setRotationFromEuler(new THREE.Euler(0, -droneYaw, 0));
 
         droneObjects[droneId] = obj;
         scene.add(obj);
     } else {
-        droneObjects[droneId].position.set(-position.x, position.z, position.y);
-        droneObjects[droneId].setRotationFromEuler(new THREE.Euler(0, droneYaw, 0));
+        droneObjects[droneId].position.set(position.x, position.z, -position.y);
+        droneObjects[droneId].setRotationFromEuler(new THREE.Euler(0, -droneYaw, 0));
     }
 }
 
-function render3DCube() {
+function initialise() {
     let time = 0;
     const cameraOffset = new THREE.Vector3(0, 100, 70);
     camera.position.x = cameraOffset.x;
@@ -104,7 +102,7 @@ function render3DCube() {
     const amb = new THREE.AmbientLight();
     amb.intensity = 1;
     scene.add(amb);
-    scene.add(new THREE.GridHelper(100, 100));
+    scene.add(new THREE.GridHelper(1000, 100));
 
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -113,20 +111,13 @@ function render3DCube() {
     plane.translateZ(-5);
 
     function mainLoop() {
-        time += 0.01; // convert time to seconds
-        cubes.forEach((cube, ndx) => {
-            const speed = 1 + ndx * 0.1;
-            const rotation = speed * time;
-            cube.rotation.x = rotation;
-            cube.rotation.y = rotation;
-        });
-
         /* Update camera and controls */
         cameraControls(orbitControls);
         orbitControls.update();
 
         renderer.render(scene, camera);
-        requestAnimationFrame(mainLoop);
+        setTimeout(requestAnimationFrame(mainLoop), 1000 / 60)
+
     }
     mainLoop();
 }
@@ -170,7 +161,7 @@ function make3DCubeInstance(size, pos, color) {
     const cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
-    pos = { x: pos.x, y: pos.z, z: pos.y };
+    pos = { x: pos.x, y: pos.z, z: -pos.y };
     cube.position.set(...Object.values(pos));
     return cube;
 }
@@ -199,7 +190,7 @@ function clearCubes() {
 }
 
 export default {
-    render3DCube,
+    initialise,
     clearPathLine,
     clearCubes,
     make3DCubeInstance,

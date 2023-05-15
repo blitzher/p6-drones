@@ -3,7 +3,10 @@
         "address": "192.168.10.1",
         "port": 8889
     },
-    "locals": ["192.168.1.141", "192.168.1.174"],
+    "locals": [
+        "192.168.1.141",
+        "192.168.1.174"
+    ],
     "ports": {
         "state": 9000,
         "video": 10000
@@ -12,5 +15,10 @@
         "rejectTimeout": 10000,
         "retryConnectTimeout": 5000,
         "droneDisconnectTimeout": 5000
+    },
+    "virtual": {
+        "STATES_PER_SECOND": 40,
+        "MS_PER_COMMAND": 2000,
+        "FLIGHT_HEIGHT": 60
     }
 }

@@ -1,6 +1,6 @@
 import { IP, Port, commander } from "./index";
 import * as constants from "./constants.json";
-import { StateInfo, StateStream, VideoStream } from "./commands/streams";
+import { StateInfo, StateStream, VideoStream } from "./streams/streams";
 import logger from "../../log";
 import { SocketState } from "./socket";
 import { CommandOptions } from "./commander";
@@ -18,6 +18,7 @@ export class Drone {
     static _allDrones: Drone[] = [];
 
     public readonly state!: StateInfo;
+    public readonly isVirtual = true;
 
     public get connected() {
         return this._connected;
@@ -65,7 +66,6 @@ export class Drone {
             clearTimeout(this.disconnectTimeout);
             /* Only read ini */
             if (this.state.mid != -1) state.mid = this.state.mid;
-            Object.assign(this.state, state);
             this.disconnectTimeout = setTimeout(() => {
                 this._connected = false;
                 logger.log(`Drone ${this.id} disconnected`);
@@ -122,9 +122,6 @@ export class Drone {
     }
 
     control = {
-        forward: (distance: number, options?: CommandOptions) =>
-            this.send(`forward ${distance}`, options),
-
         takeOff: (options?: CommandOptions) => this.send("takeoff", options),
 
         land: (options?: CommandOptions) => this.send("land", options),
@@ -137,22 +134,22 @@ export class Drone {
             this.send(`flip ${side}`, options),
 
         up: (distance: number, options?: CommandOptions) =>
-            this.send(`up ${distance}`, options),
+            this.send(`up ${Math.round(distance)}`, options),
 
         down: (distance: number, options?: CommandOptions) =>
-            this.send(`down ${distance}`, options),
+            this.send(`down ${Math.round(distance)}`, options),
 
         left: (distance: number, options?: CommandOptions) =>
-            this.send(`left ${distance}`, options),
+            this.send(`left ${Math.round(distance)}`, options),
 
         right: (distance: number, options?: CommandOptions) =>
-            this.send(`right ${distance}`, options),
+            this.send(`right ${Math.round(distance)}`, options),
 
-        front: (distance: number, options?: CommandOptions) =>
-            this.send(`forward ${distance}`, options),
+        forward: (distance: number, options?: CommandOptions) =>
+            this.send(`forward ${Math.round(distance)}`, options),
 
         back: (distance: number, options?: CommandOptions) =>
-            this.send(`back ${distance}`, options),
+            this.send(`back ${Math.round(distance)}`, options),
 
         clockwise: (angle: number, options?: CommandOptions) =>
             this.send(`cw ${angle}`, options),
