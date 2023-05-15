@@ -111,20 +111,12 @@ function initialise() {
     plane.translateZ(-5);
 
     function mainLoop() {
-        time += 0.01; // convert time to seconds
-        cubes.forEach((cube, ndx) => {
-            const speed = 1 + ndx * 0.1;
-            const rotation = speed * time;
-            cube.rotation.x = rotation;
-            cube.rotation.y = rotation;
-        });
-
         /* Update camera and controls */
         cameraControls(orbitControls);
         orbitControls.update();
 
         renderer.render(scene, camera);
-        requestAnimationFrame(mainLoop);
+        requestAnimationFrame(mainLoop, 1000 / 60);
     }
     mainLoop();
 }

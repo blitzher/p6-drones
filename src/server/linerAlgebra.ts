@@ -75,3 +75,9 @@ export const rotateVectorAroundZAxis = (vector: Vector3, phi: number) => {
         z: vector.z,
     });
 };
+
+type hasXYZ = { x: number, y: number, z: number }
+export const dist = (p1: hasXYZ, p2: hasXYZ) => {
+    const squared = (p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2 + (p2.z - p1.z) ** 2
+    return Math.sqrt(squared);
+}

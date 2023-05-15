@@ -18,6 +18,7 @@ export class Drone {
     static _allDrones: Drone[] = [];
 
     public readonly state!: StateInfo;
+    public readonly isVirtual = true;
 
     public get connected() {
         return this._connected;

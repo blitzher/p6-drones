@@ -6,6 +6,7 @@ import logger from "../log";
 import { CommandOptions } from "../tellojs-sdk30/src/commander";
 import { dronePaths } from "./dronePath";
 import * as linAlg from "./linerAlgebra";
+import * as constants from "./constants.json"
 
 type Millimeter = number;
 type UWebSocket = { client: WebSocket; uuid: string };
@@ -109,20 +110,18 @@ function handle(pkg: Package) {
             break;
         case "initSearch":
             for (let drone of Object.values(Drone.allDrones)) {
-                switch (drone.id) {
-                    case "101":
-                        dronePaths.fly(drone);
-                        break;
-                    case "102":
-                        dronePaths.fly(drone);
-                        break;
-                    case "103":
-                        dronePaths.fly(drone);
-                        break;
-                    case "104":
-                        dronePaths.fly(drone);
-                        break;
-                }
+                dronePaths.fly(drone).then(() => {
+                    const targetBox = Object.values(env.environment.objects).filter((o) => o.isTarget)[0];
+                    const { x, y, z } = targetBox;
+                    if (drone.id == targetBox.whoScanned) {
+                        drone.control.go({ x, y, z: z + constants.drone.TARGET_HOVER_HEIGHT }, 50)
+                    }
+                    else {
+                        drone.control.go({ x: 0, y: 0, z: 60 }, 50);
+                        drone.control.land()
+                    }
+                    logger.info(`Virtual:${drone.id} done flight`)
+                });
             }
             break;
         case "command":

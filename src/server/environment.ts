@@ -2,6 +2,7 @@ import { EventEmitter } from "stream";
 import { Drone, DroneId } from "./drone";
 import * as constants from "./constants.json";
 import * as fs from "fs";
+import { dist } from "./linerAlgebra";
 
 export class Object3D {
     x: number;
@@ -9,6 +10,7 @@ export class Object3D {
     z: number;
     radius: number;
     id: number;
+    isTarget: boolean;
     whoScanned?: string;
 
     constructor(
@@ -25,6 +27,7 @@ export class Object3D {
         this.radius = radius;
         this.id = id ?? -1;
         this.whoScanned = whoScanned;
+        this.isTarget = this.id === constants.env.TARGET_ID;
     }
 
     collidesWith(other: Object3D): boolean {
@@ -79,6 +82,11 @@ class Environment extends EventEmitter {
 
     public updateDronePosition(id: string) {
         const drone = this.drones[id];
+
+        if (drone.isVirtual && dist(drone.state.position, constants.env.VIRTUAL_TARGET_POSITION) < 100) {
+            this.addObject({ pos: constants.env.VIRTUAL_TARGET_POSITION }, constants.env.TARGET_ID, drone.id);
+        }
+
         this.emit("drone", {
             droneId: id,
             dronePosition: drone.state.position,
@@ -113,14 +121,14 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                  event: "drone",
-                  listener: (data: {
-                      droneId: DroneId;
-                      dronePosition: Object3D;
-                      droneYaw: number;
-                      dronePositionHistory: Object3D[];
-                  }) => void
-              ]
+                event: "drone",
+                listener: (data: {
+                    droneId: DroneId;
+                    dronePosition: Object3D;
+                    droneYaw: number;
+                    dronePositionHistory: Object3D[];
+                }) => void
+            ]
     ): this {
         return this.on(args[0], args[1]);
     }

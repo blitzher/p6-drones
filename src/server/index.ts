@@ -75,9 +75,10 @@ const server = app.listen(constants.server.HTTP_PORT, async () => {
     env.environment.addObject({ pos: { x: 120, y: -120, z: 60 } }, 2, "102");
     env.environment.addObject({ pos: { x: -120, y: 120, z: 60 } }, 3, "103");
     env.environment.addObject({ pos: { x: -120, y: -120, z: 60 } }, 4, "104");
-    env.environment.addObject({ pos: { x: 75, y: 0, z: 60 } }, 1, "101");
-    env.environment.addObject({ pos: { x: 250, y: 30, z: 60 } }, 2, "101");
-    env.environment.addObject({ pos: { x: 150, y: 55, z: 60 } }, 3, "101");
+    env.environment.addObject({ pos: { x: 75, y: 0, z: 60 } }, 5, "101");
+    env.environment.addObject({ pos: { x: 250, y: 30, z: 60 } }, 6, "101");
+    env.environment.addObject({ pos: { x: -150, y: 55, z: 60 } }, 7, "101");
+
     /* Establish connection to drones */
     connectDrones();
 

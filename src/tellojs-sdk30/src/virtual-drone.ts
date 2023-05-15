@@ -23,6 +23,8 @@ export class VirtualDrone {
     private _connected: boolean = false;
     private ports: SVPorts = { state: 0, video: 0 };
 
+    public readonly isVirtual = true;
+
     private stateStream: StateStream;
     private videoStream: VideoStream;
 
@@ -111,7 +113,7 @@ export class VirtualDrone {
             logger.stat(`Connected to drone ${this.id}@v${sdk}_${bat}%`);
             this._connected = true;
             setInterval(() => {
-                this.virtualState.tof += this.deltaTof;
+                this.virtualState.tof += this.deltaTof / constants.virtual.STATES_PER_SECOND;
                 this.virtualState.yaw += this.deltaRot / constants.virtual.STATES_PER_SECOND;
                 this.stateEmitter.emitter.emit("message", this.virtualState);
                 this.virtualState.time++;
@@ -130,7 +132,7 @@ export class VirtualDrone {
             logger.log(`Sending ${this.id}:${command}`);
             this.resolveNextTimeout = setTimeout(() => {
                 resolve("ok");
-                logger.log(`Virtual resolved (${command})`);
+                logger.log(`Virtual:${this.id} resolved (${command})`);
                 logger.log(`Position: ${this.position.toString()}`);
             }, constants.virtual.MS_PER_COMMAND);
         });
@@ -143,13 +145,30 @@ export class VirtualDrone {
     }
     private resolveNextTimeout: NodeJS.Timeout | undefined;
 
-    private async lerpToPosition(pos: Vector3) {
+    private async lerpToAbsolute(pos: Vector3) {
         this.enqueue(() => {
             return new Promise<void>((resolve) => {
                 const directionToDestination = pos.subtract(this.position);
                 this.virtualState.speed = directionToDestination.scale(1000 / (constants.virtual.MS_PER_COMMAND * 10));
 
-                this.deltaTof = (this.virtualState.speed.z * 10) / constants.virtual.STATES_PER_SECOND;
+                this.deltaTof = (this.virtualState.speed.z) * constants.virtual.STATES_PER_SECOND;
+
+                setTimeout(() => {
+                    this.virtualState.speed = { x: 0, y: 0, z: 0 };
+                    this.deltaTof = 0;
+                    resolve();
+                }, constants.virtual.MS_PER_COMMAND);
+            });
+        });
+    }
+
+    private async lerpToRelative(pos: Vector3) {
+        this.enqueue(() => {
+            return new Promise<void>((resolve) => {
+                const directionToDestination = pos
+                this.virtualState.speed = directionToDestination.scale(1000 / (constants.virtual.MS_PER_COMMAND * 10));
+
+                this.deltaTof = this.virtualState.speed.z * constants.virtual.STATES_PER_SECOND / 2;
 
                 setTimeout(() => {
                     this.virtualState.speed = { x: 0, y: 0, z: 0 };
@@ -221,14 +240,14 @@ export class VirtualDrone {
         takeOff: (options?: CommandOptions) => {
             const f_height = constants.virtual.FLIGHT_HEIGHT;
             let targetPos = new Vector3({ x: 0, y: 0, z: f_height });
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`takeoff`, options);
         },
 
         land: (options?: CommandOptions) => {
             const f_height = constants.virtual.FLIGHT_HEIGHT;
-            let targetPos = new Vector3({ x: 0, y: 0, z: -f_height });
-            this.lerpToPosition(this.position.add(targetPos));
+            let targetPos = new Vector3({ x: 0, y: 0, z: -this.state.tof });
+            this.lerpToRelative(targetPos);
             return this.send(`land`, options);
         },
 
@@ -250,29 +269,27 @@ export class VirtualDrone {
 
         up: (distance: number, options?: CommandOptions) => {
             let targetPos = new Vector3({ x: 0, y: 0, z: distance });
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`up ${Math.round(distance)}`, options);
         },
 
         down: (distance: number, options?: CommandOptions) => {
             let targetPos = new Vector3({ x: 0, y: 0, z: -distance });
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`down ${Math.round(distance)}`, options);
         },
 
         left: (distance: number, options?: CommandOptions) => {
             let targetPos = new Vector3({ x: 0, y: distance, z: 0 });
             targetPos = rotateVectorAroundZAxis(targetPos, this.virtualState.yaw);
-            targetPos.y = -targetPos.y;
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`left ${Math.round(distance)}`, options);
         },
 
         right: (distance: number, options?: CommandOptions) => {
             let targetPos = new Vector3({ x: 0, y: -distance, z: 0 });
             targetPos = rotateVectorAroundZAxis(targetPos, this.virtualState.yaw);
-            targetPos.y = -targetPos.y;
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`right ${Math.round(distance)}`, options);
         },
 
@@ -280,7 +297,7 @@ export class VirtualDrone {
             let targetPos = new Vector3({ x: distance, y: 0, z: 0 });
             targetPos = rotateVectorAroundZAxis(targetPos, this.virtualState.yaw);
             targetPos.y = -targetPos.y;
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`forward ${Math.round(distance)}`, options);
         },
 
@@ -288,7 +305,7 @@ export class VirtualDrone {
             let targetPos = new Vector3({ x: -distance, y: 0, z: 0 });
             targetPos = rotateVectorAroundZAxis(targetPos, this.virtualState.yaw);
             targetPos.y = -targetPos.y;
-            this.lerpToPosition(this.position.add(targetPos));
+            this.lerpToRelative(targetPos);
             return this.send(`back ${Math.round(distance)}`, options);
         },
 
@@ -303,7 +320,7 @@ export class VirtualDrone {
         },
 
         go: ({ x, y, z }: Pos3D, speed: number, mid?: string, options?: CommandOptions) => {
-            this.lerpToPosition(new Vector3({ x, y, z }));
+            this.lerpToAbsolute(new Vector3({ x, y, z }));
             return this.send(`go ${x} ${y} ${z} ${speed} ${mid ?? ""}`, options);
         },
 

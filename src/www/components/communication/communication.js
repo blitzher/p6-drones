@@ -51,7 +51,7 @@ function handle(pkg, ws) {
                 environment3d.make3DCubeInstance(
                     { x: 30, y: 30, z: 30 },
                     { x: marker.x, y: marker.y, z: marker.z },
-                    0x0000ff
+                    marker.isTarget ? 0xff0000 : 0x0000ff
                 );
             }
 
