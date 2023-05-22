@@ -10,8 +10,12 @@ import * as frontendCom from "./frontend-com";
 import logger from "../log";
 import * as constants from "./constants.json";
 
+<<<<<<< Updated upstream
 import * as tellojs from "../tellojs-sdk30/src";
 import { Vector3, rotateVectorAroundZAxis } from "./linerAlgebra";
+=======
+import * as tellojs from "../tellots-sdk30/src";
+>>>>>>> Stashed changes
 
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());

@@ -1,9 +1,9 @@
 import * as env from "./environment";
-import { StateInfo } from "../tellojs-sdk30/src";
+import { StateInfo } from "../tellots-sdk30/src";
 import { Drone, DroneId } from "./drone";
 import { v4 as uuidv4 } from "uuid";
 import logger from "../log";
-import { CommandOptions } from "../tellojs-sdk30/src/commander";
+import { CommandOptions } from "../tellots-sdk30/src/commander";
 import { dronePaths } from "./dronePath";
 import * as linAlg from "./linerAlgebra";
 import * as constants from "./constants.json";
