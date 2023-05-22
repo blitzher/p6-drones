@@ -1,5 +1,5 @@
 import { EventEmitter } from "stream";
-import sdk, { StateInfo as sdkStateInfo } from "../tellojs-sdk30/src";
+import sdk, { StateInfo as sdkStateInfo } from "../tellots-sdk30/src";
 import { H264Segmenter } from "./h264-segmenter";
 import { com } from "./frontend-com";
 import * as env from "./environment";
