@@ -1,5 +1,5 @@
 import { EventEmitter } from "stream";
-import sdk, { StateInfo as sdkStateInfo } from "../tellots-sdk30/src";
+import tellots, { StateInfo as sdkStateInfo } from "../tellots-sdk30/src";
 import { H264Segmenter } from "./h264-segmenter";
 import { com } from "./frontend-com";
 import * as env from "./environment";
@@ -20,7 +20,7 @@ interface StateInfo extends sdkStateInfo {
     speedVector: Vector3;
 }
 
-export class Drone extends sdk.VirtualDrone {
+export class Drone extends tellots.VirtualDrone {
     static allDrones: { [key: string]: Drone } = {};
 
     /* Setup public attributes */
