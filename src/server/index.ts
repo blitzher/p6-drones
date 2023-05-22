@@ -9,13 +9,7 @@ import { Drone } from "./drone";
 import * as frontendCom from "./frontend-com";
 import logger from "../log";
 import * as constants from "./constants.json";
-
-<<<<<<< Updated upstream
-import * as tellojs from "../tellojs-sdk30/src";
-import { Vector3, rotateVectorAroundZAxis } from "./linerAlgebra";
-=======
-import * as tellojs from "../tellots-sdk30/src";
->>>>>>> Stashed changes
+import * as tellots from "../tellots-sdk30/src";
 
 /* Initialise HTTP and websocket server */
 const { app } = expressWs(express());
@@ -92,7 +86,12 @@ const server = app.listen(constants.server.HTTP_PORT, async () => {
     });
     env.environment.listen(
         "drone",
-        (data: { droneId: string; dronePosition: Object3D; droneYaw: number; dronePositionHistory: Object3D[] }) => {
+        (data: {
+            droneId: string;
+            dronePosition: Object3D;
+            droneYaw: number;
+            dronePositionHistory: Object3D[];
+        }) => {
             frontendCom.com.drone(data);
         }
     );
@@ -101,7 +100,7 @@ const server = app.listen(constants.server.HTTP_PORT, async () => {
 const cleanup = () => {
     /* Close sockets and log */
     server.close();
-    tellojs.close();
+    tellots.close();
     frontendCom.close();
     logger.error("Closed server");
 
