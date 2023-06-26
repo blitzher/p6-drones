@@ -39,7 +39,8 @@ export class Subcommander {
     }
 
     public receive(message: string) {
-        const callbackFunction = this.callbackFunctions[this.most_recently_dispatched.id];
+        const callbackFunction =
+            this.callbackFunctions[this.most_recently_dispatched.id];
         if (callbackFunction) {
             callbackFunction(message);
             delete this.callbackFunctions[this.most_recently_dispatched.id];
@@ -101,7 +102,8 @@ export class Subcommander {
                 logger.error(
                     `No response from drone @'${command.destination}' on '${command.argument}'. Returning to ready state`
                 );
-                if (command.options.shouldRetry) this.commandQueue.unshift(command);
+                if (command.options.shouldRetry)
+                    this.commandQueue.unshift(command);
                 this.emitter.emit("ready");
             }, command.options.timeout);
         }

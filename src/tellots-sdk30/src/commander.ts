@@ -45,9 +45,14 @@ export class Commander {
      * @param ip The destination IP address
      * @returns
      */
-    async send(command: string, ip: IP, options?: CommandOptions): Promise<string> {
+    async send(
+        command: string,
+        ip: IP,
+        options?: CommandOptions
+    ): Promise<string> {
         /* Find existing subcommander or create a new one */
-        if (!this.subcommanders[ip]) this.subcommanders[ip] = new Subcommander(this);
+        if (!this.subcommanders[ip])
+            this.subcommanders[ip] = new Subcommander(this);
         const subcommander = this.subcommanders[ip];
         return subcommander.enqueue(command, ip, options || {});
     }
@@ -68,7 +73,9 @@ export class Commander {
 
         /* logger.info(`Dispatching [${command.argument}, ${command.destination}]`); */
         if (this.socket.socketState == SocketState.OPEN) {
-            logger.info(`Dispatching '${command.argument}' to '${command.destination}'`);
+            logger.info(
+                `Dispatching '${command.argument}' to '${command.destination}'`
+            );
             this.socket.send(
                 command.argument,
                 constants.client.port,

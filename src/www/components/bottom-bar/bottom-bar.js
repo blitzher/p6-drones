@@ -5,13 +5,13 @@ function initBB() {
     const switchElem = $("#switch");
 
     /* Add event listener to toggle camera switch */
-    switchElem.addEventListener("click", () => {
-        const newCameraMode = switchElem.checked
-            ? map3d.CAMERA_MODE.DRONE
-            : map3d.CAMERA_MODE.ORBIT;
+    // switchElem.addEventListener("click", () => {
+    //     const newCameraMode = switchElem.checked
+    //         ? map3d.CAMERA_MODE.DRONE
+    //         : map3d.CAMERA_MODE.ORBIT;
 
-        map3d.setCameraMode(newCameraMode);
-    });
+    //     map3d.setCameraMode(newCameraMode);
+    // });
 
     /* Add event listener to command input field */
     $("form").addEventListener("submit", (ev) => {

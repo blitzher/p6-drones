@@ -11,12 +11,6 @@ Command drone <input id="input-command" type="text"></input>
 </div>
 
 <div class="flex-row-centered" style="width:50%; margin-top: 15px;">
-      <div>
-            <p id=toggle-cam>Toggle Camera Mode</p>
-            <input type="checkbox" id="switch"
-                  class="checkbox" />
-            <label for="switch" class="toggle"></label>
-      </div>
       <button id="emergency-button">Emergency Stop</button>
       <button id="init-button">Initiate Search</button>
 </div>

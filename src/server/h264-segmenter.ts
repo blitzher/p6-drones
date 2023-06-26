@@ -25,7 +25,8 @@ export class H264Segmenter {
                 this.estimatingBitrate = false;
 
                 const bitsPerMS =
-                    this.bitrateEstimate / constants.server.BITRATE_TIMESAMPLE_MS;
+                    this.bitrateEstimate /
+                    constants.server.BITRATE_TIMESAMPLE_MS;
                 const bitsPerS = bitsPerMS * 1000;
                 const MbitsPerS = bitsPerS / 10e6;
 

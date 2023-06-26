@@ -32,9 +32,13 @@ export class Object3D {
 
     collidesWith(other: Object3D): boolean {
         const distance = Math.sqrt(
-            (other.x - this.x) ** 2 + (other.y - this.y) ** 2 + (other.z - this.z) ** 2
+            (other.x - this.x) ** 2 +
+                (other.y - this.y) ** 2 +
+                (other.z - this.z) ** 2
         );
-        return distance < (this.radius + other.radius) * constants.env.ERROR_MARGIN;
+        return (
+            distance < (this.radius + other.radius) * constants.env.ERROR_MARGIN
+        );
     }
 }
 
@@ -57,7 +61,10 @@ class Environment extends EventEmitter {
      * @param id The internal `id` of the object.
      */
     public addObject(
-        arg: { pos?: { x: number; y: number; z: number; r?: number }; obj?: Object3D },
+        arg: {
+            pos?: { x: number; y: number; z: number; r?: number };
+            obj?: Object3D;
+        },
         id: number,
         whoScanned: string
     ) {
@@ -74,7 +81,10 @@ class Environment extends EventEmitter {
         else if (arg.obj) {
             obj = arg.obj;
             if (obj.id == -1 && id != -1) obj.id = id;
-        } else throw new Error(`Invalid object passed to environment.addObject: ${arg}`);
+        } else
+            throw new Error(
+                `Invalid object passed to environment.addObject: ${arg}`
+            );
 
         if (this.objects[id] == undefined) this.objects[id] = obj;
         this.emit("objects", this.objects);
@@ -83,8 +93,16 @@ class Environment extends EventEmitter {
     public updateDronePosition(id: string) {
         const drone = this.drones[id];
 
-        if (drone.isVirtual && dist(drone.state.position, constants.env.VIRTUAL_TARGET_POSITION) < 100) {
-            this.addObject({ pos: constants.env.VIRTUAL_TARGET_POSITION }, constants.env.TARGET_ID, drone.id);
+        if (
+            drone.isVirtual &&
+            dist(drone.state.position, constants.env.VIRTUAL_TARGET_POSITION) <
+                100
+        ) {
+            this.addObject(
+                { pos: constants.env.VIRTUAL_TARGET_POSITION },
+                constants.env.TARGET_ID,
+                drone.id
+            );
         }
 
         this.emit("drone", {
@@ -121,14 +139,14 @@ class Environment extends EventEmitter {
         ...args:
             | [event: "objects", listener: (data: Object3D[]) => void]
             | [
-                event: "drone",
-                listener: (data: {
-                    droneId: DroneId;
-                    dronePosition: Object3D;
-                    droneYaw: number;
-                    dronePositionHistory: Object3D[];
-                }) => void
-            ]
+                  event: "drone",
+                  listener: (data: {
+                      droneId: DroneId;
+                      dronePosition: Object3D;
+                      droneYaw: number;
+                      dronePositionHistory: Object3D[];
+                  }) => void
+              ]
     ): this {
         return this.on(args[0], args[1]);
     }

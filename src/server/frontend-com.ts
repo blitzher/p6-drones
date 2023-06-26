@@ -56,7 +56,8 @@ export const com = {
             );
     },
     environment: (data: env.Object3D[]) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "environment", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "environment", data }));
     },
     drone: (data: {
         droneId: string;
@@ -64,7 +65,8 @@ export const com = {
         droneYaw: number;
         dronePositionHistory: env.Object3D[];
     }) => {
-        for (let { client } of clients) client.send(JSON.stringify({ type: "drone", data }));
+        for (let { client } of clients)
+            client.send(JSON.stringify({ type: "drone", data }));
     },
 };
 
@@ -109,10 +111,19 @@ function handle(pkg: Package) {
         case "initSearch":
             for (let drone of Object.values(Drone.allDrones)) {
                 dronePaths.fly(drone).then(() => {
-                    const targetBox = Object.values(env.environment.objects).filter((o) => o.isTarget)[0];
+                    const targetBox = Object.values(
+                        env.environment.objects
+                    ).filter((o) => o.isTarget)[0];
                     const { x, y, z } = targetBox;
                     if (drone.id == targetBox.whoScanned) {
-                        drone.control.go({ x, y, z: z + constants.drone.TARGET_HOVER_HEIGHT }, 50);
+                        drone.control.go(
+                            {
+                                x,
+                                y,
+                                z: z + constants.drone.TARGET_HOVER_HEIGHT,
+                            },
+                            50
+                        );
                     } else {
                         drone.control.up(60);
                         drone.control.go({ x: 0, y: 0, z: 60 }, 50);
@@ -165,7 +176,11 @@ function handle(pkg: Package) {
             let y = Math.round(marker.relative.y / 10 + drone.state.position.y);
             let z = Math.round(marker.relative.z / 10 + drone.state.position.z);
 
-            env.environment.addObject({ pos: { x, y, z } }, marker.id, marker.droneId);
+            env.environment.addObject(
+                { pos: { x, y, z } },
+                marker.id,
+                marker.droneId
+            );
             const o = env.environment.objects[marker.id];
             logger.info(`Object at (${o.x},${o.y},${o.z})`);
             break;

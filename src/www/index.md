@@ -18,10 +18,9 @@
 </head>
 <div>
 
-# Hello there
+# Multi-UAV Search and Rescue 3D Mapping Tool
 
-This is my _very cool_ website, very nice
-
+<br>
 <div>
 <div class="flex-row-centered">
 #mdinclude<components/drone-cam/drone-cam.md>
